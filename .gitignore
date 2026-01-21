@@ -51,6 +51,5 @@ local.properties
 .kdev4/
 .vagrant/
 /test
-/tests
 /.history
 .DS_Store

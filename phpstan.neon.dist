@@ -3,6 +3,7 @@ parameters:
     paths:
         - .
     excludePaths:
+        - tests/benchmark
         - vendor/*
         - .history/*
     tips:
