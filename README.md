@@ -30,7 +30,7 @@ auto-detection, double-encoding repair, and JSON safety.
 Unlike existing libraries, CharsetHelper provides:
 
 - ✅ **Extensible architecture** with Chain of Responsibility pattern
-- ✅ **Multiple fallback strategies** (UConverter ? iconv ? mbstring)
+- ✅ **Multiple fallback strategies** (UConverter → iconv → mbstring)
 - ✅ **Smart auto-detection** with multiple detection methods
 - ✅ **Double-encoding repair** for corrupted legacy data
 - ✅ **Recursive conversion** for arrays AND objects (not just arrays!)
