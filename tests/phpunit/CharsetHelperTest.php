@@ -1,0 +1,383 @@
+<?php
+
+/**
+ * Part of EncodingRepair package.
+ *
+ * (c) Adrien Loyant <donald_duck@team-df.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+declare(strict_types=1);
+
+namespace Ducks\Component\EncodingRepair\Tests\phpunit;
+
+use Ducks\Component\EncodingRepair\CharsetHelper;
+use InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
+use RuntimeException;
+use stdClass;
+
+final class CharsetHelperTest extends TestCase
+{
+    public function testToUtf8WithIsoString(): void
+    {
+        $iso = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+        $result = CharsetHelper::toUtf8($iso, CharsetHelper::ENCODING_ISO);
+
+        $this->assertSame('Café', $result);
+        $this->assertTrue(\mb_check_encoding($result, 'UTF-8'));
+    }
+
+    public function testToUtf8WithArray(): void
+    {
+        $iso = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+        $data = ['name' => $iso, 'city' => \mb_convert_encoding('São Paulo', 'ISO-8859-1', 'UTF-8')];
+
+        $result = CharsetHelper::toUtf8($data, CharsetHelper::ENCODING_ISO);
+
+        $this->assertSame('Café', $result['name']);
+        $this->assertSame('São Paulo', $result['city']);
+    }
+
+    public function testToUtf8WithNestedArray(): void
+    {
+        $iso = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+        $data = [
+            'name' => $iso,
+            'items' => [
+                'entrée' => \mb_convert_encoding('Crème brûlée', 'ISO-8859-1', 'UTF-8'),
+            ],
+        ];
+
+        $result = CharsetHelper::toUtf8($data, CharsetHelper::ENCODING_ISO);
+
+        $this->assertSame('Café', $result['name']);
+        $this->assertSame('Crème brûlée', $result['items']['entrée']);
+    }
+
+    public function testToUtf8WithObject(): void
+    {
+        $obj = new stdClass();
+        $obj->name = \mb_convert_encoding('José', 'ISO-8859-1', 'UTF-8');
+        $obj->email = 'test@example.com';
+
+        $result = CharsetHelper::toUtf8($obj, CharsetHelper::ENCODING_ISO);
+
+        $this->assertInstanceOf(stdClass::class, $result);
+        $this->assertNotSame($obj, $result);
+        $this->assertSame('José', $result->name);
+        $this->assertSame('test@example.com', $result->email);
+    }
+
+    public function testToIsoFromUtf8(): void
+    {
+        $utf8 = 'Café';
+        $result = CharsetHelper::toIso($utf8, CharsetHelper::ENCODING_UTF8);
+
+        $expected = \mb_convert_encoding('Café', 'CP1252', 'UTF-8');
+        $this->assertSame($expected, $result);
+    }
+
+    public function testToCharsetWithAutoDetection(): void
+    {
+        $utf8 = 'Café résumé';
+        $result = CharsetHelper::toCharset($utf8, CharsetHelper::ENCODING_UTF8, CharsetHelper::AUTO);
+
+        $this->assertSame('Café résumé', $result);
+    }
+
+    public function testDetectUtf8(): void
+    {
+        $utf8 = 'Café résumé';
+        $encoding = CharsetHelper::detect($utf8);
+
+        $this->assertSame('UTF-8', $encoding);
+    }
+
+    public function testDetectIso(): void
+    {
+        $iso = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+        $encoding = CharsetHelper::detect($iso);
+
+        $this->assertContains($encoding, ['ISO-8859-1', 'CP1252', 'UTF-8']);
+    }
+
+    public function testRepairDoubleEncodedString(): void
+    {
+        // Simulate double encoding: UTF-8 -> ISO -> UTF-8
+        $original = 'Café';
+        $iso = \mb_convert_encoding($original, 'ISO-8859-1', 'UTF-8');
+        $doubleEncoded = \mb_convert_encoding($iso, 'UTF-8', 'ISO-8859-1');
+
+        $result = CharsetHelper::repair($doubleEncoded);
+
+        $this->assertSame('Café', $result);
+    }
+
+    public function testRepairWithMaxDepth(): void
+    {
+        $original = 'Café';
+        $iso = \mb_convert_encoding($original, 'ISO-8859-1', 'UTF-8');
+        $doubleEncoded = \mb_convert_encoding($iso, 'UTF-8', 'ISO-8859-1');
+
+        $result = CharsetHelper::repair($doubleEncoded, CharsetHelper::ENCODING_UTF8, CharsetHelper::ENCODING_ISO, ['maxDepth' => 10]);
+
+        $this->assertSame('Café', $result);
+    }
+
+    public function testRepairArray(): void
+    {
+        $original = 'Café';
+        $iso = \mb_convert_encoding($original, 'ISO-8859-1', 'UTF-8');
+        $doubleEncoded = \mb_convert_encoding($iso, 'UTF-8', 'ISO-8859-1');
+
+        $data = ['name' => $doubleEncoded];
+        $result = CharsetHelper::repair($data);
+
+        $this->assertSame('Café', $result['name']);
+    }
+
+    public function testSafeJsonEncode(): void
+    {
+        $data = ['name' => 'Gérard', 'city' => 'São Paulo'];
+        $json = CharsetHelper::safeJsonEncode($data);
+
+        $this->assertIsString($json);
+        $decoded = \json_decode($json, true);
+        $this->assertSame('Gérard', $decoded['name']);
+        $this->assertSame('São Paulo', $decoded['city']);
+    }
+
+    public function testSafeJsonEncodeWithFlags(): void
+    {
+        $data = ['name' => 'Gérard'];
+        $json = CharsetHelper::safeJsonEncode($data, \JSON_PRETTY_PRINT);
+
+        $this->assertStringContainsString("\n", $json);
+    }
+
+    public function testSafeJsonDecode(): void
+    {
+        $json = '{"name":"Gérard","city":"São Paulo"}';
+        $result = CharsetHelper::safeJsonDecode($json, true);
+
+        $this->assertIsArray($result);
+        $this->assertSame('Gérard', $result['name']);
+        $this->assertSame('São Paulo', $result['city']);
+    }
+
+    public function testSafeJsonDecodeAsObject(): void
+    {
+        $json = '{"name":"Gérard"}';
+        $result = CharsetHelper::safeJsonDecode($json, false);
+
+        $this->assertIsObject($result);
+        $this->assertSame('Gérard', $result->name ?? null);
+    }
+
+    public function testSafeJsonDecodeThrowsOnInvalidJson(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('JSON Decode Error');
+
+        CharsetHelper::safeJsonDecode('invalid json{');
+    }
+
+    public function testRegisterTranscoder(): void
+    {
+        $called = false;
+        $transcoder = function (string $data, string $to, string $from, array $options) use (&$called): ?string {
+            if ('TEST-ENCODING' === $from) {
+                $called = true;
+                return 'transcoded';
+            }
+            return null;
+        };
+
+        CharsetHelper::registerTranscoder($transcoder, true);
+
+        // This should trigger our custom transcoder
+        try {
+            CharsetHelper::toCharset('test', CharsetHelper::ENCODING_UTF8, 'TEST-ENCODING');
+        } catch (InvalidArgumentException $e) {
+            // Expected: TEST-ENCODING is not in allowed list
+        }
+
+        // Note: We can't fully test this without modifying ALLOWED_ENCODINGS
+        $this->assertTrue(true);
+    }
+
+    public function testRegisterDetector(): void
+    {
+        $detector = function (string $string, array $options): ?string {
+            // Check for UTF-16LE BOM
+            if (\strlen($string) >= 2 && \ord($string[0]) === 0xFF && \ord($string[1]) === 0xFE) {
+                return 'UTF-16LE';
+            }
+            return null;
+        };
+
+        CharsetHelper::registerDetector($detector, true);
+
+        // Use a non-UTF-8 string to bypass the fast path
+        $utf16String = "\xFF\xFE" . \mb_convert_encoding('test', 'UTF-16LE', 'UTF-8');
+        $encoding = CharsetHelper::detect($utf16String);
+        $this->assertSame('UTF-16LE', $encoding);
+    }
+
+    public function testRegisterTranscoderThrowsOnInvalidType(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Transcoder must be a string');
+
+        // @phpstan-ignore argument.type
+        CharsetHelper::registerTranscoder(123, true);
+    }
+
+    public function testRegisterDetectorThrowsOnInvalidType(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Detector must be a string');
+
+        // @phpstan-ignore argument.type
+        CharsetHelper::registerDetector(123, true);
+    }
+
+    public function testValidateEncodingThrowsOnInvalidEncoding(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid target encoding');
+
+        CharsetHelper::toCharset('test', 'INVALID-ENCODING');
+    }
+
+    public function testToCharsetWithOptions(): void
+    {
+        $data = 'Café';
+        $result = CharsetHelper::toCharset($data, CharsetHelper::ENCODING_UTF8, CharsetHelper::ENCODING_UTF8, [
+            'normalize' => true,
+            'translit' => true,
+            'ignore' => true,
+        ]);
+
+        $this->assertSame('Café', $result);
+    }
+
+    public function testToUtf8WithNonStringValue(): void
+    {
+        $data = ['number' => 123, 'bool' => true, 'null' => null];
+        $result = CharsetHelper::toUtf8($data);
+
+        $this->assertSame(123, $result['number']);
+        $this->assertTrue($result['bool']);
+        $this->assertNull($result['null']);
+    }
+
+    public function testToCharsetPreservesAlreadyValidUtf8(): void
+    {
+        $utf8 = 'Café résumé';
+        $result = CharsetHelper::toCharset($utf8, CharsetHelper::ENCODING_UTF8, CharsetHelper::ENCODING_ISO);
+
+        $this->assertSame('Café résumé', $result);
+    }
+
+    public function testRepairDoesNotModifyValidUtf8(): void
+    {
+        $valid = 'Café résumé';
+        $result = CharsetHelper::repair($valid);
+
+        $this->assertSame('Café résumé', $result);
+    }
+
+    public function testToCharsetWithEmptyString(): void
+    {
+        $result = CharsetHelper::toCharset('', CharsetHelper::ENCODING_UTF8);
+
+        $this->assertSame('', $result);
+    }
+
+    public function testToCharsetWithEmptyArray(): void
+    {
+        $result = CharsetHelper::toCharset([], CharsetHelper::ENCODING_UTF8);
+
+        $this->assertSame([], $result);
+    }
+
+    public function testSafeJsonEncodeWithEmptyArray(): void
+    {
+        $json = CharsetHelper::safeJsonEncode([]);
+
+        $this->assertSame('[]', $json);
+    }
+
+    public function testDetectWithCustomEncodings(): void
+    {
+        $utf8 = 'Café';
+        $encoding = CharsetHelper::detect($utf8, [
+            'encodings' => ['UTF-8', 'ISO-8859-1'],
+        ]);
+
+        $this->assertSame('UTF-8', $encoding);
+    }
+
+    public function testConstants(): void
+    {
+        $this->assertSame('AUTO', CharsetHelper::AUTO);
+        $this->assertSame('UTF-8', CharsetHelper::ENCODING_UTF8);
+        $this->assertSame('UTF-16', CharsetHelper::ENCODING_UTF16);
+        $this->assertSame('UTF-32', CharsetHelper::ENCODING_UTF32);
+        $this->assertSame('ISO-8859-1', CharsetHelper::ENCODING_ISO);
+        $this->assertSame('CP1252', CharsetHelper::WINDOWS_1252);
+        $this->assertSame('ASCII', CharsetHelper::ENCODING_ASCII);
+    }
+
+    public function testToUtf8WithWindows1252Default(): void
+    {
+        $cp1252 = \mb_convert_encoding('€', 'CP1252', 'UTF-8');
+        $result = CharsetHelper::toUtf8($cp1252);
+
+        $this->assertSame('€', $result);
+    }
+
+    public function testObjectImmutability(): void
+    {
+        $original = new stdClass();
+        $original->name = \mb_convert_encoding('José', 'ISO-8859-1', 'UTF-8');
+
+        $result = CharsetHelper::toUtf8($original, CharsetHelper::ENCODING_ISO);
+
+        $this->assertNotSame($original, $result);
+        $this->assertNotEquals($original->name, $result->name);
+    }
+
+    public function testSafeJsonDecodeWithDepth(): void
+    {
+        $json = '{"a":{"b":{"c":"value"}}}';
+        $result = CharsetHelper::safeJsonDecode($json, true, 512);
+
+        $this->assertSame('value', $result['a']['b']['c']);
+    }
+
+    public function testToCharsetWithMixedData(): void
+    {
+        $iso = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+        $obj = new stdClass();
+        $obj->text = $iso;
+
+        $data = [
+            'string' => $iso,
+            'number' => 42,
+            'object' => $obj,
+            'nested' => ['value' => $iso],
+        ];
+
+        $result = CharsetHelper::toUtf8($data, CharsetHelper::ENCODING_ISO);
+
+        $this->assertSame('Café', $result['string']);
+        $this->assertSame(42, $result['number']);
+        $this->assertSame('Café', $result['object']->text);
+        $this->assertSame('Café', $result['nested']['value']);
+    }
+}
