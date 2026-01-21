@@ -1,13 +1,29 @@
 # CharsetHelper
 
-[![PHP Version](https://img.shields.io/badge/php-%5E7.4%20%7C%7C%20%5E8.0-blue)](https://www.php.net/)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/web-bequest/charset-helper)
-[![Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)](https://github.com/web-bequest/charset-helper)
+[![Github Action Status](https://github.com/ducks-project/encoding-repair/actions/workflows/ci.yml/badge.svg)](https://github.com/ducks-project/encoding-repair)
+[![Coverage Status](https://coveralls.io/repos/github/ducks-project/encoding-repair/badge.svg)](https://coveralls.io/github/ducks-project/encoding-repair)
+
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/ducks-project/encoding-repair)
+[![Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)](https://github.com/ducks-project/encoding-repair)
 [![codecov](https://codecov.io/gh/ducks-project/encoding-repair/branch/main/graph/badge.svg)](https://codecov.io/gh/ducks-project/encoding-repair)
 
+[![Psalm Type Coverage](https://shepherd.dev/github/ducks-project/encoding-repair/coverage.svg)](https://shepherd.dev/github/ducks-project/encoding-repair)
+[![Psalm Level](https://shepherd.dev/github/ducks-project/encoding-repair/level.svg)](https://shepherd.dev/github/ducks-project/encoding-repair)
+
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Latest Stable Version](https://poser.pugx.org/ducks-project/encoding-repair/v/stable)](https://packagist.org/packages/ducks-project/encoding-repair)
+[![PHP Version Require](https://poser.pugx.org/ducks-project/encoding-repair/require/php)](https://packagist.org/packages/ducks-project/encoding-repair)
+
+[![Total Downloads](https://poser.pugx.org/ducks-project/encoding-repair/downloads)](https://packagist.org/packages/ducks-project/encoding-repair)
+[![Monthly Downloads](https://poser.pugx.org/ducks-project/encoding-repair/d/monthly)](https://packagist.org/packages/ducks-project/encoding-repair)
+[![Daily Downloads](https://poser.pugx.org/ducks-project/encoding-repair/d/daily)](https://packagist.org/packages/ducks-project/encoding-repair)
+
+[![Duck's Validated](https://img.shields.io/badge/duck-validated-lightyellow)](https://opencollective.com/ducks-project)
+[![Packagist online](https://img.shields.io/badge/packagist-online-brightgreen)](https://opencollective.com/ducks-project)
+[![Documentation Status](https://readthedocs.org/projects/encoding-repair/badge/?version=latest)](https://encoding-repair.readthedocs.io/en/latest/?badge=latest)
+
 Advanced charset encoding converter with **Chain of Responsibility** pattern,
- auto-detection, double-encoding repair, and JSON safety.
+auto-detection, double-encoding repair, and JSON safety.
 
 ## 🌟 Why CharsetHelper?
 
@@ -22,7 +38,7 @@ Unlike existing libraries, CharsetHelper provides:
 - ✅ **Modern PHP** with strict typing (PHP 7.4+)
 - ✅ **Zero dependencies** (only optional extensions for better performance)
 
-## 🌟 Features
+## 📖 Features
 
 - **Robust Transcoding:** Implements a Chain of Responsibility pattern
  trying best providers first (`Intl/UConverter` -> `Iconv` -> `MbString`).
@@ -67,7 +83,7 @@ extension=intl
 extension=iconv
 ```
 
-## ?? Quick Start
+## 🚀 Quick Start
 
 ```php
 <?php
@@ -87,7 +103,7 @@ $fixed = CharsetHelper::repair($corruptedString);
 $json = CharsetHelper::safeJsonEncode($data);
 ```
 
-## ?? Features & Usage
+## 🏗️ Usage
 
 ### 1. Basic Conversion
 
