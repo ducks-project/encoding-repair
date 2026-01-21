@@ -277,25 +277,49 @@ $result = CharsetHelper::toCharset($data, 'UTF-8', 'ISO-8859-1', [
 
 ### Registering Custom Transcoders
 
-Extend CharsetHelper with your own conversion strategies:
+Extend CharsetHelper with your own conversion strategies using the TranscoderInterface:
 
 ```php
-// Register a custom transcoder
-CharsetHelper::registerTranscoder(
-    function (string $data, string $to, string $from, array $options): ?string {
-        // Your custom conversion logic
+use Ducks\Component\EncodingRepair\Transcoder\TranscoderInterface;
+
+class MyCustomTranscoder implements TranscoderInterface
+{
+    public function transcode(string $data, string $to, string $from, array $options): ?string
+    {
         if ($from === 'MY-CUSTOM-ENCODING') {
             return myCustomConversion($data, $to);
         }
-
         // Return null to try next transcoder in chain
         return null;
-    },
-    true  // Prepend (higher priority)
-);
+    }
 
-// Now use it
-$result = CharsetHelper::toCharset($data, 'UTF-8', 'MY-CUSTOM-ENCODING');
+    public function getPriority(): int
+    {
+        return 75; // Between iconv (50) and UConverter (100)
+    }
+
+    public function isAvailable(): bool
+    {
+        return extension_loaded('my_extension');
+    }
+}
+
+// Register with default priority
+CharsetHelper::registerTranscoder(new MyCustomTranscoder());
+
+// Register with custom priority
+CharsetHelper::registerTranscoder(new MyCustomTranscoder(), 150);
+
+// Legacy: Register a callable
+CharsetHelper::registerTranscoder(
+    function (string $data, string $to, string $from, array $options): ?string {
+        if ($from === 'MY-CUSTOM-ENCODING') {
+            return myCustomConversion($data, $to);
+        }
+        return null;
+    },
+    150  // Priority
+);
 ```
 
 ### Registering Custom Detectors
@@ -330,9 +354,13 @@ UConverter (intl) → iconv → mbstring
 
 **Transcoder priorities:**
 
-1. **UConverter** (requires `ext-intl`): Best precision, supports many encodings
-2. **iconv**: Good performance, supports transliteration
-3. **mbstring**: Universal fallback, most permissive
+1. **UConverter** (priority: 100, requires `ext-intl`): Best precision,
+supports many encodings
+2. **iconv** (priority: 50): Good performance, supports transliteration
+3. **mbstring** (priority: 10): Universal fallback, most permissive
+
+**Custom transcoders** can be registered with any priority value.
+Higher values execute first.
 
 **Detector priorities:**
 
@@ -471,6 +499,11 @@ composer phpcsfixer-check
 - [Changelog]
 - [How To]
 - [`CharsetHelper`]
+- [`TranscoderInterface`]
+- [`CallableTranscoder`]
+- [`IconvTranscoder`]
+- [`MbStringTranscoder`]
+- [`UConverterTranscoder`]
 
 ## 🤝 Contributing
 
@@ -536,7 +569,12 @@ If this project helped you, please consider giving it a ⭐ on GitHub!
 
 Made with ❤️ by by the Duck project team
 
-[`CharsetHelper`]: /assets/documentation/classes/SplType.md
+[`CharsetHelper`]: /assets/documentation/classes/CharsetHelper.md
+[`TranscoderInterface`]: /assets/documentation/classes/TranscoderInterface.md
+[`CallableTranscoder`]: /assets/documentation/classes/CallableTranscoder.md
+[`IconvTranscoder`]: /assets/documentation/classes/IconvTranscoder.md
+[`MbStringTranscoder`]: /assets/documentation/classes/MbStringTranscoder.md
+[`UconverterTranscoder`]: /assets/documentation/classes/UconverterTranscoder.md
 [How To]: /assets/documentation/HowTo.md
 [Changelog]: CHANGELOG.md
 [MIT license]: LICENSE

@@ -196,7 +196,7 @@ final class CharsetHelperTest extends TestCase
             return null;
         };
 
-        CharsetHelper::registerTranscoder($transcoder, true);
+        CharsetHelper::registerTranscoder($transcoder, 100);
 
         // This should trigger our custom transcoder
         try {
@@ -230,10 +230,10 @@ final class CharsetHelperTest extends TestCase
     public function testRegisterTranscoderThrowsOnInvalidType(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Transcoder must be a string');
+        $this->expectExceptionMessage('Transcoder must be');
 
         // @phpstan-ignore argument.type
-        CharsetHelper::registerTranscoder(123, true);
+        CharsetHelper::registerTranscoder(123, null);
     }
 
     public function testRegisterDetectorThrowsOnInvalidType(): void

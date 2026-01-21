@@ -1,0 +1,103 @@
+<?php
+
+/**
+ * Part of EncodingRepair package.
+ *
+ * (c) Adrien Loyant <donald_duck@team-df.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+declare(strict_types=1);
+
+namespace Ducks\Component\EncodingRepair\Tests\phpunit;
+
+use Ducks\Component\EncodingRepair\Transcoder\CallableTranscoder;
+use InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
+
+final class CallableTranscoderTest extends TestCase
+{
+    public function testConstructorAcceptsValidCallable(): void
+    {
+        // @phpstan-ignore return.unusedType
+        $callable = function (string $data, string $to, string $from, ?array $options = null): ?string {
+            return 'result';
+        };
+
+        $transcoder = new CallableTranscoder($callable, 50);
+
+        $this->assertSame(50, $transcoder->getPriority());
+        $this->assertTrue($transcoder->isAvailable());
+    }
+
+    public function testTranscodeReturnsCallableResult(): void
+    {
+        // @phpstan-ignore return.unusedType
+        $callable = function (string $data, string $to, string $from, ?array $options = null): ?string {
+            return $data . '_transcoded';
+        };
+
+        $transcoder = new CallableTranscoder($callable, 50);
+        $result = $transcoder->transcode('test', 'UTF-8', 'ISO-8859-1', []);
+
+        $this->assertSame('test_transcoded', $result);
+    }
+
+    public function testTranscodeReturnsNull(): void
+    {
+        $callable = function (string $data, string $to, string $from, ?array $options = null): ?string {
+            return null;
+        };
+
+        $transcoder = new CallableTranscoder($callable, 50);
+        $result = $transcoder->transcode('test', 'UTF-8', 'ISO-8859-1', []);
+
+        $this->assertNull($result);
+    }
+
+    public function testTranscodeThrowsOnInvalidReturnType(): void
+    {
+        // @phpstan-ignore return.unusedType
+        $callable = function (string $data, string $to, string $from, ?array $options = null) {
+            return 123;
+        };
+
+        // @phpstan-ignore argument.type
+        $transcoder = new CallableTranscoder($callable, 50);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('must return string|null');
+
+        $transcoder->transcode('test', 'UTF-8', 'ISO-8859-1', []);
+    }
+
+    public function testConstructorThrowsOnInvalidParameterCount(): void
+    {
+        // @phpstan-ignore return.unusedType
+        $callable = function (string $data, string $to): ?string {
+            return 'result';
+        };
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('must accept at least 4 parameters');
+
+        new CallableTranscoder($callable, 50);
+    }
+
+    public function testConstructorAcceptsArrayCallable(): void
+    {
+        $obj = new class {
+            // @phpstan-ignore missingType.iterableValue
+            public function transcode(string $data, string $to, string $from, ?array $options = null): ?string
+            {
+                return 'result';
+            }
+        };
+
+        $transcoder = new CallableTranscoder([$obj, 'transcode'], 50);
+
+        $this->assertSame(50, $transcoder->getPriority());
+    }
+}

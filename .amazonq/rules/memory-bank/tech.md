@@ -151,7 +151,7 @@ composer phpmd             # Mess detection
 
 ### Composer (composer.json)
 
-- **Autoload**: PSR-4 (`Ducks\Component\EncodingRepair\` → `src/`)
+- **Autoload**: PSR-4 (`Ducks\Component\EncodingRepair\` → ``)
 - **Optimize Autoloader**: Enabled for production
 - **Sort Packages**: Enabled for consistency
 

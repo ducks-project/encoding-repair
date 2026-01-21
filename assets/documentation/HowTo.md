@@ -336,18 +336,39 @@ function repairDatabase(PDO $pdo, string $table, array $columns): void
 
 ```php
 use Ducks\Component\EncodingRepair\CharsetHelper;
+use Ducks\Component\EncodingRepair\Transcoder\TranscoderInterface;
 
-// Register custom transcoder for EBCDIC
-CharsetHelper::registerTranscoder(
-    function (string $data, string $to, string $from, array $options): ?string {
-        if ($from === 'EBCDIC') {
-            // Custom conversion logic
-            return convertFromEbcdic($data, $to);
+class EbcdicTranscoder implements TranscoderInterface
+{
+    public function transcode(string $data, string $to, string $from, array $options): ?string
+    {
+        if ('EBCDIC' !== $from) {
+            return null;
         }
-        return null;
-    },
-    true // High priority
-);
+        
+        // Custom EBCDIC conversion
+        $converted = $this->convertFromEbcdic($data);
+        return mb_convert_encoding($converted, $to, 'UTF-8');
+    }
+    
+    public function getPriority(): int
+    {
+        return 75;
+    }
+    
+    public function isAvailable(): bool
+    {
+        return true;
+    }
+    
+    private function convertFromEbcdic(string $data): string
+    {
+        // EBCDIC to ASCII conversion logic
+        return $data;
+    }
+}
+
+CharsetHelper::registerTranscoder(new EbcdicTranscoder());
 
 // Now use it
 $result = CharsetHelper::toCharset($ebcdicData, 'UTF-8', 'EBCDIC');

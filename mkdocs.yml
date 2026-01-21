@@ -27,6 +27,12 @@ nav:
     - Use Cases: guide/use-cases.md
   - API Reference:
     - CharsetHelper: api/CharsetHelper.md
+    - Transcoders:
+      - TranscoderInterface: api/TranscoderInterface.md
+      - UConverterTranscoder: api/UConverterTranscoder.md
+      - IconvTranscoder: api/IconvTranscoder.md
+      - MbStringTranscoder: api/MbStringTranscoder.md
+      - CallableTranscoder: api/CallableTranscoder.md
     - Methods:
       - toCharset: api/methods/CharsetHelper.toCharset.md
       - toUtf8: api/methods/CharsetHelper.toUtf8.md

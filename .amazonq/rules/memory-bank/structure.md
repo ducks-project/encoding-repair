@@ -176,10 +176,8 @@ Ducks\Component\Component\EncodingRepair\
 
 ## Autoloading
 
-- **PSR-4**: `Ducks\Component\EncodingRepair\` → `src/`
+- **PSR-4**: `Ducks\Component\EncodingRepair\` → ``
 - **Dev PSR-4**: `Ducks\Component\EncodingRepair\Tests\` → `tests/`
-- Note: Currently single-file in root, but autoload configured for future `src/`
- structure
 
 ## Dependencies
 

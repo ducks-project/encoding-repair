@@ -13,11 +13,16 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair;
 
+use Ducks\Component\EncodingRepair\Transcoder\TranscoderChain;
+use Ducks\Component\EncodingRepair\Transcoder\TranscoderInterface;
+use Ducks\Component\EncodingRepair\Transcoder\UConverterTranscoder;
+use Ducks\Component\EncodingRepair\Transcoder\IconvTranscoder;
+use Ducks\Component\EncodingRepair\Transcoder\MbStringTranscoder;
+use Ducks\Component\EncodingRepair\Transcoder\CallableTranscoder;
 use finfo;
 use InvalidArgumentException;
 use Normalizer;
 use RuntimeException;
-use UConverter;
 
 /**
  * Helper class for encoding and detect charset.
@@ -62,19 +67,11 @@ final class CharsetHelper
     private const JSON_DEFAULT_DEPTH = 512;
 
     /**
-     * List of internal transcoders (Providers) by priority.
-     * Can be extended in the future.
+     * Transcoder chain instance.
      *
-     * @var list<string|callable(string, string, string, array<string, mixed>): (string|null)>
+     * @var TranscoderChain|null
      */
-    private static $transcoders = [
-        // Priority 1: Best precision (Intl)
-        'transcodeWithUConverter',
-        // Priority 2: Good performance (Sys)
-        'transcodeWithIconv',
-        // Priority 3: Fail-safe (Permissive)
-        'transcodeWithMbString',
-    ];
+    private static $transcoderChain = null;
 
     /**
      * List of internal detectors (Providers) by priority.
@@ -96,12 +93,29 @@ final class CharsetHelper
     }
 
     /**
-     * Allow registering a custom provider/transcoder in the future.
+     * Get or initialize transcoder chain.
+     *
+     * @return TranscoderChain
+     */
+    private static function getTranscoderChain(): TranscoderChain
+    {
+        if (null === self::$transcoderChain) {
+            self::$transcoderChain = new TranscoderChain();
+            self::$transcoderChain->register(new UConverterTranscoder());
+            self::$transcoderChain->register(new IconvTranscoder());
+            self::$transcoderChain->register(new MbStringTranscoder());
+        }
+
+        return self::$transcoderChain;
+    }
+
+    /**
+     * Register a transcoder with optional priority.
      *
      * @phpcs:disable Generic.Files.LineLength.TooLong
      *
-     * @param string|callable(string, string, string, array<string, mixed>): (string|null) $transcoder Method name or callable with signature: fn (string, string, string, array): string|null
-     * @param bool $prepend Priority (Top of the list)
+     * @param TranscoderInterface|callable(string, string, string, null|array<string, mixed>): (string|null) $transcoder Transcoder instance or callable
+     * @param int|null $priority Priority override (null = use transcoder's default)
      *
      * @return void
      *
@@ -111,15 +125,24 @@ final class CharsetHelper
      */
     public static function registerTranscoder(
         $transcoder,
-        bool $prepend = true
+        ?int $priority = null
     ): void {
-        self::validateTranscoder($transcoder);
-
-        if ($prepend) {
-            \array_unshift(self::$transcoders, $transcoder);
-        } else {
-            self::$transcoders[] = $transcoder;
+        /** @var mixed $transcoder */
+        if ($transcoder instanceof TranscoderInterface) {
+            self::getTranscoderChain()->register($transcoder, $priority);
+            return;
         }
+
+        if (\is_callable($transcoder)) {
+            /** @var callable(string, string, string, null|array<string, mixed>): (string|null) $transcoder */
+            $wrapper = new CallableTranscoder($transcoder, $priority ?? 0);
+            self::getTranscoderChain()->register($wrapper, $priority);
+            return;
+        }
+
+        throw new InvalidArgumentException(
+            'Transcoder must be an instance of TranscoderInterface or a callable'
+        );
     }
 
     /**
@@ -505,32 +528,18 @@ final class CharsetHelper
         $targetEncoding = self::resolveEncoding($to, $data, $options);
         $sourceEncoding = self::resolveEncoding($from, $data, $options);
 
-        // Loop over the static providers list (Chain of Responsibility)
-        foreach (self::$transcoders as $transcoder) {
-            try {
-                // Note: In the future, we use external classes,
-                // check if $method is callable or an instance of an interface.
-                // For now, we assume internal static methods.
-                $result = self::invokeProvider(
-                    $transcoder,
-                    $data,
-                    $targetEncoding,
-                    $sourceEncoding,
-                    $options
-                );
-            } catch (\Throwable $th) {
-                continue;
-            }
+        $result = self::getTranscoderChain()->transcode(
+            $data,
+            $targetEncoding,
+            $sourceEncoding,
+            $options
+        );
 
-            if (null !== $result) {
-                if (self::ENCODING_UTF8 === $targetEncoding) {
-                    return self::normalize($result, $targetEncoding, $options);
-                }
-                return $result;
-            }
+        if (null !== $result && self::ENCODING_UTF8 === $targetEncoding) {
+            return self::normalize($result, $targetEncoding, $options);
         }
 
-        return null;
+        return $result;
     }
 
     /**
@@ -693,18 +702,6 @@ final class CharsetHelper
     }
 
     /**
-     * Validates a transcoder before registration.
-     *
-     * @param mixed $transcoder Transcoder to validate
-     *
-     * @throws InvalidArgumentException If invalid
-     */
-    private static function validateTranscoder($transcoder): void
-    {
-        self::validateProvider($transcoder, 'Transcoder');
-    }
-
-    /**
      * Validates a detector before registration.
      *
      * @param mixed $detector Detector to validate
@@ -714,122 +711,6 @@ final class CharsetHelper
     private static function validateDetector($detector): void
     {
         self::validateProvider($detector, 'Detector');
-    }
-
-    /**
-     * Attempts conversion using UConverter extension.
-     *
-     * @param string $data String to convert
-     * @param string $to Target encoding
-     * @param string $from Source encoding,
-     * @param array<string, mixed> $options Options
-     *
-     * @return string|null Converted string or null on failure
-     *
-     * @psalm-api
-     */
-    private static function transcodeWithUConverter(
-        string $data,
-        string $to,
-        string $from,
-        array $options
-    ) {
-        if (!\class_exists(UConverter::class)) {
-            return null;
-        }
-
-        $intlOptions = \array_intersect_key(
-            $options,
-            ['to_subst' => true]
-        ) ?: null;
-
-        /** @var string|false $result */
-        // @phpstan-ignore argument.type
-        $result = UConverter::transcode($data, $to, $from, $intlOptions);
-
-        return false !== $result ? $result : null;
-    }
-
-    /**
-     * Attempts transcode using iconv.
-     *
-     * @param string $data String to convert
-     * @param string $to Target encoding
-     * @param string $from Source encoding
-     * @param array<string, mixed> $options Options
-     *
-     * @return string|null Converted string or null on failure
-     *
-     * @psalm-api
-     */
-    private static function transcodeWithIconv(
-        string $data,
-        string $to,
-        string $from,
-        array $options
-    ) {
-        if (!\function_exists('iconv')) {
-            return null;
-        }
-
-        $suffix = self::buildIconvSuffix($options);
-
-        // Use silence operator (@) instead of
-        // \set_error_handler(static fn (): bool => true);
-        // set_error_handler is too expensive for high-volume loops.
-        $result = @\iconv($from, $to . $suffix, $data);
-
-        return false !== $result ? $result : null;
-    }
-
-    /**
-     * Builds iconv suffix from configuration.
-     *
-     * @param array<string, mixed> $options Configuration array
-     *
-     * @return string Suffix string (e.g., '//TRANSLIT//IGNORE')
-     */
-    private static function buildIconvSuffix(array $options): string
-    {
-        $parts = '';
-
-        if (true === ($options['translit'] ?? true)) {
-            $parts .= '//TRANSLIT';
-        }
-
-        if (true === ($options['ignore'] ?? true)) {
-            $parts .= '//IGNORE';
-        }
-
-        return $parts;
-    }
-
-    /**
-     * Attempts transcode using mb_string.
-     *
-     * @param string $data String to convert
-     * @param string $to Target encoding
-     * @param string $from Source encoding
-     * @param array<string, mixed> $_options Options (unused by mbstring)
-     *
-     * @return string|null Converted string or null on failure
-     *
-     * @psalm-api
-     */
-    private static function transcodeWithMbString(
-        string $data,
-        string $to,
-        string $from,
-        array $_options
-    ) {
-        if (!\function_exists('mb_convert_encoding')) {
-            return null;
-        }
-
-        $result = \mb_convert_encoding($data, $to, $from);
-
-        /** @var string|false $result */
-        return false !== $result ? $result : null;
     }
 
     /**

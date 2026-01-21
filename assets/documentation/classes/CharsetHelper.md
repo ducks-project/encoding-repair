@@ -387,6 +387,11 @@ Benchmarks on 10,000 conversions (PHP 8.2, i7-12700K):
 - [CharsetHelper::safeJsonDecode] — JSON decode with charset conversion
 - [CharsetHelper::registerTranscoder] — Register custom transcoding strategy
 - [CharsetHelper::registerDetector] — Register custom detection strategy
+- [TranscoderInterface] — Interface for custom transcoders
+- [UConverterTranscoder] — UConverter-based transcoder (ext-intl)
+- [IconvTranscoder] — Iconv-based transcoder (ext-iconv)
+- [MbStringTranscoder] — MbString-based transcoder (ext-mbstring)
+- [CallableTranscoder] — Callable wrapper transcoder
 
 ## [See Also](#see-also)
 
@@ -405,6 +410,11 @@ Benchmarks on 10,000 conversions (PHP 8.2, i7-12700K):
 [CharsetHelper::safeJsonDecode]: ./CharsetHelper.safeJsonDecode.md#CharsetHelper::safeJsonDecode
 [CharsetHelper::registerTranscoder]: ./CharsetHelper.registerTranscoder.md#CharsetHelper::registerTranscoder
 [CharsetHelper::registerDetector]: ./CharsetHelper.registerDetector.md#CharsetHelper::registerDetector
+[TranscoderInterface]: ./TranscoderInterface.md
+[UConverterTranscoder]: ./UConverterTranscoder.md
+[IconvTranscoder]: ./IconvTranscoder.md
+[MbStringTranscoder]: ./MbStringTranscoder.md
+[CallableTranscoder]: ./CallableTranscoder.md
 [mb_convert_encoding()]: https://www.php.net/manual/en/function.mb-convert-encoding.php
 [iconv()]: https://www.php.net/manual/en/function.iconv.php
 [mb_detect_encoding()]: https://www.php.net/manual/en/function.mb-detect-encoding.php

@@ -28,21 +28,53 @@ $fixed = CharsetHelper::repair(
 
 ```php
 use Ducks\Component\EncodingRepair\CharsetHelper;
+use Ducks\Component\EncodingRepair\Transcoder\TranscoderInterface;
 
-// Register custom transcoder
+class EbcdicTranscoder implements TranscoderInterface
+{
+    public function transcode(string $data, string $to, string $from, array $options): ?string
+    {
+        if ('EBCDIC' !== $from) {
+            return null;
+        }
+        
+        $converted = $this->convertFromEbcdic($data);
+        return mb_convert_encoding($converted, $to, 'UTF-8');
+    }
+    
+    public function getPriority(): int
+    {
+        return 75; // Between iconv (50) and UConverter (100)
+    }
+    
+    public function isAvailable(): bool
+    {
+        return true;
+    }
+    
+    private function convertFromEbcdic(string $data): string
+    {
+        // EBCDIC conversion logic
+        return $data;
+    }
+}
+
+CharsetHelper::registerTranscoder(new EbcdicTranscoder());
+$result = CharsetHelper::toCharset($data, 'UTF-8', 'EBCDIC');
+```
+
+### Legacy Callable Support
+
+```php
 CharsetHelper::registerTranscoder(
     function (string $data, string $to, string $from, array $options): ?string {
-        if ($from === 'MY-CUSTOM-ENCODING') {
-            return myCustomConversion($data, $to);
+        if ('CUSTOM' === $from) {
+            return customConvert($data, $to);
         }
-        // Return null to try next transcoder in chain
         return null;
     },
-    true  // Prepend (higher priority)
+    150  // Priority
 );
-
-// Now use it
-$result = CharsetHelper::toCharset($data, 'UTF-8', 'MY-CUSTOM-ENCODING');
 ```
 
 ## Custom Detector
@@ -80,9 +112,11 @@ UConverter (intl) → iconv → mbstring
 
 **Transcoder priorities:**
 
-1. **UConverter** (requires `ext-intl`): Best precision, supports many encodings
-2. **iconv**: Good performance, supports transliteration
-3. **mbstring**: Universal fallback, most permissive
+1. **UConverter** (priority: 100, requires `ext-intl`): Best precision, supports many encodings
+2. **iconv** (priority: 50): Good performance, supports transliteration
+3. **mbstring** (priority: 10): Universal fallback, most permissive
+
+**Custom transcoders** can be registered with any priority value. Higher values execute first.
 
 **Detector priorities:**
 
