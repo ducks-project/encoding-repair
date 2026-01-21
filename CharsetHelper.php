@@ -20,12 +20,13 @@ use RuntimeException;
 use UConverter;
 
 /**
- * Helper class for encoding and detect charset
+ * Helper class for encoding and detect charset.
  *
  * Designed to handle legacy ISO-8859-1 <-> UTF-8 interoperability issues.
  * Implements Chain of Responsibility pattern for extensibility.
  *
  * @psalm-api
+ *
  * @psalm-immutable This class has no mutable state
  *
  * @final
@@ -97,8 +98,9 @@ final class CharsetHelper
     /**
      * Allow registering a custom provider/transcoder in the future.
      *
-     * @param string|callable(string, string, string, array<string, mixed>): (string|null) $transcoder
-     *   Method name or callable with signature: fn (string, string, string, array): string|null
+     * @phpcs:ignore Generic.Files.LineLength.TooLong
+     *
+     * @param string|callable(string, string, string, array<string, mixed>): (string|null) $transcoder Method name or callable with signature: fn (string, string, string, array): string|null
      * @param bool $prepend Priority (Top of the list)
      *
      * @return void
@@ -121,8 +123,9 @@ final class CharsetHelper
     /**
      * Register a custom detector provider.
      *
-     * @param string|callable(string, array<string, mixed>): (string|null) $detector
-     *   Method name or callable with signature: fn (string, string, string, array): string|null
+     * @phpcs:ignore Generic.Files.LineLength.TooLong
+     *
+     * @param string|callable(string, array<string, mixed>): (string|null) $detector Method name or callable with signature: fn (string, string, string, array): string|null
      * @param bool $prepend Priority (Top of the list)
      *
      * @return void
@@ -147,7 +150,7 @@ final class CharsetHelper
      *
      * @param string $string String to analyze
      * @param array<string, mixed> $options Conversion options
-     * - 'encodings': array of encodings to test
+     *                                      - 'encodings': array of encodings to test
      *
      * @return string Detected encoding (uppercase)
      */
@@ -182,9 +185,9 @@ final class CharsetHelper
      * @param string $to Target encoding
      * @param string $from Source encoding (use AUTO for detection)
      * @param array<string, mixed> $options Conversion options
-     * - 'normalize': bool (default: true)
-     * - 'translit': bool (default: true)
-     * - 'ignore': bool (default: true)
+     *                                      - 'normalize': bool (default: true)
+     *                                      - 'translit': bool (default: true)
+     *                                      - 'ignore': bool (default: true)
      *
      * @return mixed The data transcoded in the target encoding
      *
@@ -217,9 +220,9 @@ final class CharsetHelper
      * @param mixed $data Data to convert
      * @param string $from Source encoding
      * @param array<string, mixed> $options Conversion options
-     * - 'normalize': bool (default: true)
-     * - 'translit': bool (default: true)
-     * - 'ignore': bool (default: true)
+     *                                      - 'normalize': bool (default: true)
+     *                                      - 'translit': bool (default: true)
+     *                                      - 'ignore': bool (default: true)
      *
      * @return mixed
      *
@@ -244,9 +247,9 @@ final class CharsetHelper
      * @param mixed $data Data to convert
      * @param string $from Source encoding
      * @param array<string, mixed> $options Conversion options
-     * - 'normalize': bool (default: true)
-     * - 'translit': bool (default: true)
-     * - 'ignore': bool (default: true)
+     *                                      - 'normalize': bool (default: true)
+     *                                      - 'translit': bool (default: true)
+     *                                      - 'ignore': bool (default: true)
      *
      * @return mixed
      *
@@ -276,10 +279,10 @@ final class CharsetHelper
      * @param string $to Target encoding (UTF-8, ISO, etc.)
      * @param string $from The "glitch" encoding (usually ISO/Windows-1252) that caused the double encoding.
      * @param array<string,mixed> $options Conversion options
-     * - 'normalize': bool (default: true)
-     * - 'translit': bool (default: true)
-     * - 'ignore': bool (default: true)
-     * - 'maxDepth' : int (default: 5)
+     *                                     - 'normalize': bool (default: true)
+     *                                     - 'translit': bool (default: true)
+     *                                     - 'ignore': bool (default: true)
+     *                                     - 'maxDepth' : int (default: 5)
      *
      * @return mixed
      *
@@ -349,7 +352,7 @@ final class CharsetHelper
      *
      * @return mixed Decoded data
      *
-     * @throws \RuntimeException If decoding fails
+     * @throws RuntimeException If decoding fails
      */
     public static function safeJsonDecode(
         string $json,
@@ -616,9 +619,10 @@ final class CharsetHelper
             : $encoding;
     }
 
-    // phpcs:disable Generic.Files.LineLength.TooLong
     /**
      * Invokes a provider (method name or callable) with given arguments.
+     *
+     * @phpcs:ignore Generic.Files.LineLength.TooLong
      *
      * @param string|callable(string, string, string, array<string, mixed>): (string|null)|callable(string, array<string, mixed>): (string|null) $provider Provider to call (method name or callable)
      * @param array<mixed>|string $args Arguments to pass to the provider
@@ -629,7 +633,6 @@ final class CharsetHelper
      *
      * @psalm-param array<string, mixed>|string $args
      */
-    // phpcs:enable Generic.Files.LineLength.TooLong
     private static function invokeProvider($provider, ...$args)
     {
         /** @var mixed $result */
@@ -855,7 +858,7 @@ final class CharsetHelper
      *
      * @param string $string String to analyze
      * @param array<string, mixed> $options Options usable by mb_string
-     * - encodings : A list of character encodings to try
+     *                                      - encodings : A list of character encodings to try
      *
      * @return string|null Detected encoding or null
      *
