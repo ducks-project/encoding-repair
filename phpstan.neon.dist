@@ -7,5 +7,6 @@ parameters:
         - rector.php
         - vendor/*
         - .history/*
+    reportUnmatchedIgnoredErrors: false
     tips:
         treatPhpDocTypesAsCertain: false
