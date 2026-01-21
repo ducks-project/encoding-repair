@@ -41,9 +41,9 @@ Unlike existing libraries, CharsetHelper provides:
 ## 📖 Features
 
 - **Robust Transcoding:** Implements a Chain of Responsibility pattern
- trying best providers first (`Intl/UConverter` -> `Iconv` -> `MbString`).
+trying best providers first (`Intl/UConverter` -> `Iconv` -> `MbString`).
 - **Double-Encoding Repair:** Automatically detects and fixes strings like `Ã©tÃ©`
- back to `été`.
+back to `été`.
 - **Recursive Processing:** Handles `string`, `array`, and `object` recursively.
 - **Immutable:** Objects are cloned before modification to prevent side effects.
 - **Safe JSON Wrappers:** Prevents `json_encode` from returning `false` on bad charsets.

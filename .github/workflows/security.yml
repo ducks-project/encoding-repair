@@ -25,7 +25,7 @@ jobs:
           tools: composer:v2
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
+        run: composer update --prefer-dist --no-progress --no-interaction --prefer-stable
 
       - name: Check for security vulnerabilities
         run: composer audit

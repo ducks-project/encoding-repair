@@ -98,7 +98,7 @@ final class CharsetHelper
     /**
      * Allow registering a custom provider/transcoder in the future.
      *
-     * @phpcs:ignore Generic.Files.LineLength.TooLong
+     * @phpcs:disable Generic.Files.LineLength.TooLong
      *
      * @param string|callable(string, string, string, array<string, mixed>): (string|null) $transcoder Method name or callable with signature: fn (string, string, string, array): string|null
      * @param bool $prepend Priority (Top of the list)
@@ -106,6 +106,8 @@ final class CharsetHelper
      * @return void
      *
      * @throws InvalidArgumentException If transcoder is invalid
+     *
+     * @phpcs:enable Generic.Files.LineLength.TooLong
      */
     public static function registerTranscoder(
         $transcoder,
@@ -123,7 +125,7 @@ final class CharsetHelper
     /**
      * Register a custom detector provider.
      *
-     * @phpcs:ignore Generic.Files.LineLength.TooLong
+     * @phpcs:disable Generic.Files.LineLength.TooLong
      *
      * @param string|callable(string, array<string, mixed>): (string|null) $detector Method name or callable with signature: fn (string, string, string, array): string|null
      * @param bool $prepend Priority (Top of the list)
@@ -131,6 +133,8 @@ final class CharsetHelper
      * @return void
      *
      * @throws InvalidArgumentException If detector is invalid
+     *
+     * @phpcs:enable Generic.Files.LineLength.TooLong
      */
     public static function registerDetector(
         $detector,
@@ -622,7 +626,7 @@ final class CharsetHelper
     /**
      * Invokes a provider (method name or callable) with given arguments.
      *
-     * @phpcs:ignore Generic.Files.LineLength.TooLong
+     * @phpcs:disable Generic.Files.LineLength.TooLong
      *
      * @param string|callable(string, string, string, array<string, mixed>): (string|null)|callable(string, array<string, mixed>): (string|null) $provider Provider to call (method name or callable)
      * @param array<mixed>|string $args Arguments to pass to the provider
@@ -632,6 +636,8 @@ final class CharsetHelper
      * @throws InvalidArgumentException when provider is not callable.
      *
      * @psalm-param array<string, mixed>|string $args
+     *
+     * @phpcs:enable Generic.Files.LineLength.TooLong
      */
     private static function invokeProvider($provider, ...$args)
     {
