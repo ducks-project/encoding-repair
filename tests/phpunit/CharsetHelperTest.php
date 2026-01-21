@@ -101,7 +101,7 @@ final class CharsetHelperTest extends TestCase
         $iso = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
         $encoding = CharsetHelper::detect($iso ?: '');
 
-        $this->assertContains($encoding, ['ISO-8859-1', 'CP1252', 'UTF-8']);
+        $this->assertContains($encoding, ['ISO-8859-1', 'CP1252', 'Windows-1252', 'UTF-8']);
     }
 
     public function testRepairDoubleEncodedString(): void
