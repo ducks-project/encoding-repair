@@ -4,6 +4,7 @@ parameters:
         - .
     excludePaths:
         - tests/benchmark
+        - rector.php
         - vendor/*
         - .history/*
     tips:

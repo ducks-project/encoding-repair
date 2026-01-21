@@ -99,7 +99,7 @@ final class CharsetHelperTest extends TestCase
     public function testDetectIso(): void
     {
         $iso = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
-        $encoding = CharsetHelper::detect($iso);
+        $encoding = CharsetHelper::detect($iso ?: '');
 
         $this->assertContains($encoding, ['ISO-8859-1', 'CP1252', 'UTF-8']);
     }
@@ -109,9 +109,9 @@ final class CharsetHelperTest extends TestCase
         // Simulate double encoding: UTF-8 -> ISO -> UTF-8
         $original = 'Café';
         $iso = \mb_convert_encoding($original, 'ISO-8859-1', 'UTF-8');
-        $doubleEncoded = \mb_convert_encoding($iso, 'UTF-8', 'ISO-8859-1');
+        $doubleEncoded = \mb_convert_encoding($iso ?: '', 'UTF-8', 'ISO-8859-1');
 
-        $result = CharsetHelper::repair($doubleEncoded);
+        $result = CharsetHelper::repair($doubleEncoded ?: '');
 
         $this->assertSame('Café', $result);
     }
@@ -120,9 +120,9 @@ final class CharsetHelperTest extends TestCase
     {
         $original = 'Café';
         $iso = \mb_convert_encoding($original, 'ISO-8859-1', 'UTF-8');
-        $doubleEncoded = \mb_convert_encoding($iso, 'UTF-8', 'ISO-8859-1');
+        $doubleEncoded = \mb_convert_encoding($iso ?: '', 'UTF-8', 'ISO-8859-1');
 
-        $result = CharsetHelper::repair($doubleEncoded, CharsetHelper::ENCODING_UTF8, CharsetHelper::ENCODING_ISO, ['maxDepth' => 10]);
+        $result = CharsetHelper::repair($doubleEncoded ?: '', CharsetHelper::ENCODING_UTF8, CharsetHelper::ENCODING_ISO, ['maxDepth' => 10]);
 
         $this->assertSame('Café', $result);
     }
@@ -131,7 +131,7 @@ final class CharsetHelperTest extends TestCase
     {
         $original = 'Café';
         $iso = \mb_convert_encoding($original, 'ISO-8859-1', 'UTF-8');
-        $doubleEncoded = \mb_convert_encoding($iso, 'UTF-8', 'ISO-8859-1');
+        $doubleEncoded = \mb_convert_encoding($iso ?: '', 'UTF-8', 'ISO-8859-1');
 
         $data = ['name' => $doubleEncoded];
         $result = CharsetHelper::repair($data);
@@ -213,7 +213,7 @@ final class CharsetHelperTest extends TestCase
     {
         $detector = function (string $string, array $options): ?string {
             // Check for UTF-16LE BOM
-            if (\strlen($string) >= 2 && \ord($string[0]) === 0xFF && \ord($string[1]) === 0xFE) {
+            if (2 <= \strlen($string) && 0xFF === \ord($string[0]) && 0xFE === \ord($string[1])) {
                 return 'UTF-16LE';
             }
             return null;

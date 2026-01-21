@@ -1,8 +1,8 @@
 {
     "name": "ducks-project/encoding-repair",
     "description": "A robust, immutable, and extensible PHP library to handle charset conversion, detection, and repair (Double Encoding) with safe JSON wrappers. Optimized for Legacy ISO-8859-1 to UTF-8 migrations.",
-    "type": "library",
     "license": "MIT",
+    "type": "library",
     "keywords": [
         "charset",
         "encoding",
@@ -32,22 +32,27 @@
     },
     "require": {
         "php": ">=7.4",
-        "ext-mbstring": "*",
-        "ext-json": "*"
+        "ext-json": "*",
+        "ext-mbstring": "*"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.5 || ^10.0",
+        "ergebnis/composer-normalize": "^2.48",
+        "friendsofphp/php-cs-fixer": "^3.0",
         "phpbench/phpbench": "^1.2",
+        "phpmd/phpmd": "^1.5",
         "phpstan/phpstan": "^1.10",
         "phpstan/phpstan-phpunit": "^1.4",
-        "vimeo/psalm": "^4.30 || ^5.0",
-        "friendsofphp/php-cs-fixer": "^3.0"
+        "phpunit/phpunit": "^9.5 || ^10.0",
+        "squizlabs/php_codesniffer": "^3.10",
+        "vimeo/psalm": "^4.30 || ^5.0"
     },
     "suggest": {
-        "ext-intl": "For UConverter support (best performance and precision [30% faster])",
+        "ext-fileinfo": "For advanced encoding detection",
         "ext-iconv": "For iconv conversion with transliteration support",
-        "ext-fileinfo": "For advanced encoding detection"
+        "ext-intl": "For UConverter support (best performance and precision [30% faster])"
     },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
     "autoload": {
         "psr-4": {
             "Ducks\\Component\\EncodingRepair\\": ""
@@ -62,11 +67,12 @@
         }
     },
     "config": {
-        "sort-packages": true,
-        "optimize-autoloader": true,
         "allow-plugins": {
-            "composer/package-versions-deprecated": true
-        }
+            "composer/package-versions-deprecated": true,
+            "ergebnis/composer-normalize": true
+        },
+        "sort-packages": true,
+        "optimize-autoloader": true
     },
     "extra": {
         "duck": {
@@ -89,7 +95,5 @@
     },
     "scripts-descriptions": {
         "test": "Run all tests!"
-    },
-    "minimum-stability": "stable",
-    "prefer-stable": true
+    }
 }

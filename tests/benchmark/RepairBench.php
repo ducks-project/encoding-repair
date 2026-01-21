@@ -17,8 +17,11 @@ use Ducks\Component\EncodingRepair\CharsetHelper;
 
 /**
  * @Groups({"repair"})
+ *
  * @Revs(1000)
+ *
  * @Iterations(5)
+ *
  * @Warmup(2)
  */
 final class RepairBench

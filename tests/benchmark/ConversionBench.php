@@ -18,8 +18,11 @@ use stdClass;
 
 /**
  * @Groups({"conversion"})
+ *
  * @Revs(1000)
+ *
  * @Iterations(5)
+ *
  * @Warmup(2)
  */
 final class ConversionBench

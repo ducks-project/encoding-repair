@@ -30,6 +30,6 @@ return RectorConfig::configure()
         true
     )
     ->withSets([
-        SetList::PHP_74
+        SetList::PHP_74,
     ])
     ->withTypeCoverageLevel(0);

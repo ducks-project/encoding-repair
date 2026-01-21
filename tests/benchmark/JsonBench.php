@@ -17,8 +17,11 @@ use Ducks\Component\EncodingRepair\CharsetHelper;
 
 /**
  * @Groups({"json"})
+ *
  * @Revs(1000)
+ *
  * @Iterations(5)
+ *
  * @Warmup(2)
  */
 final class JsonBench

@@ -25,7 +25,9 @@ use UConverter;
  * Designed to handle legacy ISO-8859-1 <-> UTF-8 interoperability issues.
  * Implements Chain of Responsibility pattern for extensibility.
  *
+ * @psalm-api
  * @psalm-immutable This class has no mutable state
+ *
  * @final
  */
 final class CharsetHelper
@@ -85,6 +87,8 @@ final class CharsetHelper
 
     /**
      * Private constructor to prevent instantiation of static utility class.
+     *
+     * @psalm-api
      */
     private function __construct()
     {
@@ -94,12 +98,12 @@ final class CharsetHelper
      * Allow registering a custom provider/transcoder in the future.
      *
      * @param string|callable(string, string, string, array<string, mixed>): (string|null) $transcoder
-     *   Method name or callable with signature: fn(string, string, string, array): string|null
+     *   Method name or callable with signature: fn (string, string, string, array): string|null
      * @param bool $prepend Priority (Top of the list)
      *
      * @return void
      *
-     * @throws \InvalidArgumentException If transcoder is invalid
+     * @throws InvalidArgumentException If transcoder is invalid
      */
     public static function registerTranscoder(
         $transcoder,
@@ -118,12 +122,12 @@ final class CharsetHelper
      * Register a custom detector provider.
      *
      * @param string|callable(string, array<string, mixed>): (string|null) $detector
-     *   Method name or callable with signature: fn(string, string, string, array): string|null
+     *   Method name or callable with signature: fn (string, string, string, array): string|null
      * @param bool $prepend Priority (Top of the list)
      *
      * @return void
      *
-     * @throws \InvalidArgumentException If detector is invalid
+     * @throws InvalidArgumentException If detector is invalid
      */
     public static function registerDetector(
         $detector,
@@ -202,7 +206,7 @@ final class CharsetHelper
          * @psalm-suppress MissingClosureParamType
          * @psalm-suppress MissingClosureReturnType
          */
-        $callback = static fn($value) => self::convertValue($value, $to, $from, $options);
+        $callback = static fn ($value) => self::convertValue($value, $to, $from, $options);
 
         return self::applyRecursive($data, $callback);
     }
@@ -296,7 +300,7 @@ final class CharsetHelper
          * @psalm-suppress MissingClosureParamType
          * @psalm-suppress MissingClosureReturnType
          */
-        $callback = static fn($value) => self::repairValue($value, $to, $from, $options);
+        $callback = static fn ($value) => self::repairValue($value, $to, $from, $options);
 
         return self::applyRecursive($data, $callback);
     }
@@ -386,7 +390,7 @@ final class CharsetHelper
                  * @psalm-suppress MissingClosureReturnType
                  * @psalm-suppress MissingClosureParamType
                  */
-                static fn($item) => self::applyRecursive($item, $callback),
+                static fn ($item) => self::applyRecursive($item, $callback),
                 $data
             );
         }
@@ -617,11 +621,13 @@ final class CharsetHelper
      * Invokes a provider (method name or callable) with given arguments.
      *
      * @param string|callable(string, string, string, array<string, mixed>): (string|null)|callable(string, array<string, mixed>): (string|null) $provider Provider to call (method name or callable)
-     * @param list<mixed> $args Arguments to pass to the provider
+     * @param array<mixed>|string $args Arguments to pass to the provider
      *
      * @return string|null Result of the provider call
      *
      * @throws InvalidArgumentException when provider is not callable.
+     *
+     * @psalm-param array<string, mixed>|string $args
      */
     // phpcs:enable Generic.Files.LineLength.TooLong
     private static function invokeProvider($provider, ...$args)
@@ -682,7 +688,7 @@ final class CharsetHelper
      *
      * @param mixed $transcoder Transcoder to validate
      *
-     * @throws \InvalidArgumentException If invalid
+     * @throws InvalidArgumentException If invalid
      */
     private static function validateTranscoder($transcoder): void
     {
@@ -694,7 +700,7 @@ final class CharsetHelper
      *
      * @param mixed $detector Detector to validate
      *
-     * @throws \InvalidArgumentException If invalid
+     * @throws InvalidArgumentException If invalid
      */
     private static function validateDetector($detector): void
     {
@@ -710,6 +716,8 @@ final class CharsetHelper
      * @param array<string, mixed> $options Options
      *
      * @return string|null Converted string or null on failure
+     *
+     * @psalm-api
      */
     private static function transcodeWithUConverter(
         string $data,
@@ -742,6 +750,8 @@ final class CharsetHelper
      * @param array<string, mixed> $options Options
      *
      * @return string|null Converted string or null on failure
+     *
+     * @psalm-api
      */
     private static function transcodeWithIconv(
         string $data,
@@ -756,7 +766,7 @@ final class CharsetHelper
         $suffix = self::buildIconvSuffix($options);
 
         // Use silence operator (@) instead of
-        // \set_error_handler(static fn(): bool => true);
+        // \set_error_handler(static fn (): bool => true);
         // set_error_handler is too expensive for high-volume loops.
         $result = @\iconv($from, $to . $suffix, $data);
 
@@ -794,6 +804,8 @@ final class CharsetHelper
      * @param array<string, mixed> $_options Options (unused by mbstring)
      *
      * @return string|null Converted string or null on failure
+     *
+     * @psalm-api
      */
     private static function transcodeWithMbString(
         string $data,
@@ -846,6 +858,8 @@ final class CharsetHelper
      * - encodings : A list of character encodings to try
      *
      * @return string|null Detected encoding or null
+     *
+     * @psalm-api
      */
     private static function detectWithMbString(string $string, array $options = []): ?string
     {
@@ -868,6 +882,8 @@ final class CharsetHelper
      * @param array<string, mixed> $options Options usable by finfo
      *
      * @return string|null Detected encoding or null
+     *
+     * @psalm-api
      */
     private static function detectWithFileInfo(string $string, array $options = []): ?string
     {
@@ -923,7 +939,7 @@ final class CharsetHelper
      * Validates encoding name against whitelist.
      *
      * @param string $encoding Encoding to validate
-     * @param string $type     Type for error message (e.g., 'source', 'target')
+     * @param string $type Type for error message (e.g., 'source', 'target')
      *
      * @throws InvalidArgumentException If encoding is not allowed
      */
