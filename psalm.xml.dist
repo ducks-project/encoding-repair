@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<psalm
+  errorLevel="1"
+  resolveFromConfigFile="true"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="https://getpsalm.org/schema/config"
+  xsi:schemaLocation="https://getpsalm.org/schema/config https://psalm.dev/schema/config"
+  findUnusedBaselineEntry="true"
+  findUnusedCode="true"
+>
+  <projectFiles>
+    <directory name="." />
+    <ignoreFiles allowMissingFiles="true">
+      <file name=".php-cs-fixer.dist.php" />
+      <file name="bootstrap.php" />
+      <file name="rector.php" />
+      <directory name="Resources/stubs" />
+      <directory name="Tests" />
+      <directory name="vendor" />
+      <directory name=".history" />
+    </ignoreFiles>
+  </projectFiles>
+</psalm>

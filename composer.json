@@ -1,0 +1,95 @@
+{
+    "name": "ducks-project/encoding-repair",
+    "description": "A robust, immutable, and extensible PHP library to handle charset conversion, detection, and repair (Double Encoding) with safe JSON wrappers. Optimized for Legacy ISO-8859-1 to UTF-8 migrations.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "charset",
+        "encoding",
+        "utf8",
+        "iso-8859-1",
+        "cp1252",
+        "windows-1252",
+        "conversion",
+        "unicode",
+        "repair",
+        "json",
+        "chain-of-responsibility",
+        "legacy",
+        "transcode"
+    ],
+    "authors": [
+        {
+            "name": "Adrien Loyant",
+            "email": "donald_duck@team-df.org",
+            "homepage": "http://adrien.loyant.net",
+            "role": "Owner"
+        }
+    ],
+    "homepage": "https://github.com/ducks-project/encoding-repair/",
+    "support": {
+        "email": "adrien.loyant@gmail.com"
+    },
+    "require": {
+        "php": ">=7.4",
+        "ext-mbstring": "*",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5 || ^10.0",
+        "phpbench/phpbench": "^1.2",
+        "phpstan/phpstan": "^1.10",
+        "phpstan/phpstan-phpunit": "^1.4",
+        "vimeo/psalm": "^4.30 || ^5.0",
+        "friendsofphp/php-cs-fixer": "^3.0"
+    },
+    "suggest": {
+        "ext-intl": "For UConverter support (best performance and precision [30% faster])",
+        "ext-iconv": "For iconv conversion with transliteration support",
+        "ext-fileinfo": "For advanced encoding detection"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ducks\\Component\\EncodingRepair\\": "src/"
+        },
+        "exclude-from-classmap": [
+            "/tests/"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Ducks\\Component\\EncodingRepair\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true,
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true
+        }
+    },
+    "extra": {
+        "duck": {
+            "status": "validated"
+        }
+    },
+    "scripts": {
+        "bench": "./vendor/bin/phpbench run Tests/benchmark/ --report=aggregate --retry-threshold=5",
+        "phpcs": "./vendor/bin/phpcs --standard=phpcs.xml.dist .",
+        "phpcsfixer-check": "./vendor/bin/php-cs-fixer fix --dry-run --diff",
+        "phpmd": "./vendor/bin/phpmd . github phpmd.xml.dist --exclude 'Tests/*,vendor/*,.history/*'",
+        "phpstan": "./vendor/bin/phpstan analyse --configuration phpstan.neon.dist",
+        "psalm": "./vendor/bin/psalm --config=psalm.xml.dist --no-cache --no-file-cache --shepherd",
+        "rector": "./vendor/bin/rector process . --dry-run",
+        "test": [
+            "@unittest",
+            "@bench"
+        ],
+        "unittest": "XDEBUG_MODE=coverage ./vendor/bin/phpunit Tests/phpunit --process-isolation -c phpunit.xml.dist"
+    },
+    "scripts-descriptions": {
+        "test": "Run all tests!"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

@@ -1,0 +1,16 @@
+build:
+  nodes:
+    tests:
+      environment:
+        php:
+          version: 7.4
+          ini:
+            'date.timezone': 'Europe/Paris'
+
+filter:
+  excluded_paths:
+    - Resources/stubs/
+    - tests/
+
+tools:
+  external_code_coverage: true
