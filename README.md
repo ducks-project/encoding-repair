@@ -4,6 +4,7 @@
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/web-bequest/charset-helper)
 [![Coverage](https://img.shields.io/badge/coverage-95%25-brightgreen)](https://github.com/web-bequest/charset-helper)
+[![codecov](https://codecov.io/gh/ducks-project/encoding-repair/branch/main/graph/badge.svg)](https://codecov.io/gh/ducks-project/encoding-repair)
 
 Advanced charset encoding converter with **Chain of Responsibility** pattern,
  auto-detection, double-encoding repair, and JSON safety.
@@ -35,7 +36,7 @@ Unlike existing libraries, CharsetHelper provides:
  the core.
 - **Modern Standards:** PSR-12 compliant, strictly typed, SOLID architecture.
 
-## ?? Requirements
+## 📋 Requirements
 
 - **PHP**: 7.4, 8.0, 8.1, 8.2, or 8.3
 - **Extensions** (required):
@@ -44,7 +45,7 @@ Unlike existing libraries, CharsetHelper provides:
 - **Extensions** (recommended):
   - `ext-intl`
 
-## ?? Installation
+## 📦 Installation
 
 ```bash
 composer require ducks-project/charset-helper
@@ -449,105 +450,11 @@ composer phpstan
 composer phpcsfixer-check
 ```
 
-## 📚 API Reference
+## 📚 Glossary
 
-### Main Methods
-
-#### `toCharset($data, string $to, string $from, array $options = [])`
-
-Convert data to target encoding.
-
-**Parameters:**
-
-- `$data` (string|array|object): Data to convert
-- `$to` (string): Target encoding
-- `$from` (string): Source encoding (use `AUTO` for detection)
-- `$options` (array): Conversion options
-
-**Returns:** Converted data (same type as input)
-
-**Throws:** `InvalidArgumentException` if encoding is invalid
-
----
-
-#### `toUtf8($data, string $from = 'CP1252', array $options = [])`
-
-Convert data to UTF-8 (convenience method).
-
----
-
-#### `toIso($data, string $from = 'UTF-8', array $options = [])`
-
-Convert data to ISO-8859-1/Windows-1252 (convenience method).
-
----
-
-#### `repair($data, string $to = 'UTF-8', string $from = 'ISO-8859-1', array $options = [])`
-
-Repair double-encoded strings.
-
-**Options:**
-
-- `maxDepth` (int): Maximum encoding layers to peel (default: 5)
-
----
-
-#### `detect(string $string, array $options = []): string`
-
-Detect charset encoding.
-
-**Returns:** Detected encoding (uppercase)
-
----
-
-#### `safeJsonEncode($data, int $flags = 0, int $depth = 512, string $from = 'CP1252'): string`
-
-JSON encode with automatic encoding repair.
-
-**Throws:** `RuntimeException` on encoding failure
-
----
-
-#### `safeJsonDecode(string $json, ?bool $associative = null, int $depth = 512, int $flags = 0, string $to = 'UTF-8', string $from = 'CP1252')`
-
-JSON decode with charset conversion.
-
-**Throws:** `RuntimeException` on decoding failure
-
----
-
-#### `registerTranscoder($transcoder, bool $prepend = true): void`
-
-Register custom transcoding strategy.
-
-**Parameters:**
-
-- `$transcoder` (string|callable): Method name or callable with signature:
-  `fn(string $data, string $to, string $from, array $options): ?string`
-- `$prepend` (bool): Add at beginning (higher priority)
-
----
-
-#### `registerDetector($detector, bool $prepend = true): void`
-
-Register custom detection strategy.
-
-**Parameters:**
-
-- `$detector` (string|callable): Method name or callable with signature:
-  `fn(string $string, array $options): ?string`
-
-### Constants
-
-```php
-CharsetHelper::AUTO           // 'AUTO' - Auto-detect encoding
-CharsetHelper::ENCODING_UTF8  // 'UTF-8'
-CharsetHelper::ENCODING_UTF16 // 'UTF-16'
-CharsetHelper::ENCODING_UTF32 // 'UTF-32'
-CharsetHelper::ENCODING_ISO   // 'ISO-8859-1'
-CharsetHelper::WINDOWS_1252   // 'CP1252'
-CharsetHelper::ENCODING_ASCII // 'ASCII'
-```
+- [Changelog]
+- [How To]
+- [`CharsetHelper`]
 
 ## 🤝 Contributing
 
@@ -566,8 +473,8 @@ Contributions are welcome! Please:
 ### Development Setup
 
 ```bash
-git clone https://github.com/web-bequest/charset-helper.git
-cd charset-helper
+git clone https://github.com/ducks-project/encoding-repair.git
+cd encoding-repair
 composer install
 
 # Run full CI checks locally
@@ -583,7 +490,8 @@ composer ci
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the [MIT license]
+see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Credits
 
@@ -593,16 +501,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Links
 
-- **Documentation**: https://github.com/web-bequest/charset-helper/wiki
-- **Issue Tracker**: https://github.com/web-bequest/charset-helper/issues
+- **Documentation**: <https://github.com/ducks-project/encoding-repair/wiki>
+- **Issue Tracker**: <https://github.com/ducks-project/encoding-repair/issues>
 - **Changelog**: [CHANGELOG.md](CHANGELOG.md)
-- **Packagist**: https://packagist.org/packages/web-bequest/charset-helper
+- **Packagist**: <https://packagist.org/packages/ducks-project/encoding-repair>
 
 ## 💬 Support
 
-- 📧 Email: support@web-bequest.com
-- 💬 Discussions: https://github.com/web-bequest/charset-helper/discussions
-- 🐛 Issues: https://github.com/web-bequest/charset-helper/issues
+- 📧 Email: <adrien.loyant@gmail.com>
+- 💬 Discussions: <https://github.com/ducks-project/encoding-repair/discussions>
+- 🐛 Issues: <https://github.com/ducks-project/encoding-repair/issues>
 
 ## ⭐ Star History
 
@@ -611,3 +519,8 @@ If this project helped you, please consider giving it a ⭐ on GitHub!
 ---
 
 Made with ❤️ by by the Duck project team
+
+[`CharsetHelper`]: /assets/documentation/classes/SplType.md
+[How To]: /assets/documentation/HowTo.md
+[Changelog]: CHANGELOG.md
+[MIT license]: LICENSE
