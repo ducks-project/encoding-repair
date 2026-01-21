@@ -25,8 +25,17 @@ use stdClass;
 final class ConversionBench
 {
     private string $utf8String = 'Café résumé avec des accents éèêë';
+
+    /**
+     * @var array<string, string>
+     */
     private array $smallArray;
+
+    /**
+     * @var array<string, string>
+     */
     private array $largeArray;
+
     private object $object;
 
     public function __construct()
@@ -36,12 +45,12 @@ final class ConversionBench
             'city' => 'São Paulo',
             'country' => 'Brésil',
         ];
-        
+
         $this->largeArray = [];
         for ($i = 0; $i < 100; $i++) {
             $this->largeArray["field_{$i}"] = "Café résumé {$i}";
         }
-        
+
         $this->object = new stdClass();
         $this->object->name = 'José García';
         $this->object->email = 'test@example.com';
