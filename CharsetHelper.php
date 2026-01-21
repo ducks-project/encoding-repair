@@ -891,8 +891,19 @@ final class CharsetHelper
             return null;
         }
 
+        // use an array in order to pass args througt functions
+        // in order to ensure several php compatibility.
         $args = [];
-        $finfo = new finfo(FILEINFO_MIME_ENCODING, $options['finfo_magic'] ?? null);
+
+        /** @var mixed|string|null $magic */
+        $magic = $options['finfo_magic'] ?? null;
+        if (\is_string($magic)) {
+            $args[] = $magic;
+        }
+
+        $finfo = new finfo(FILEINFO_MIME_ENCODING, ...$args);
+
+        $args = [];
 
         /** @var mixed|int */
         $flags = $options['finfo_flags'] ?? \FILEINFO_NONE;
