@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Part of SplTypes package.
+ * Part of EncodingRepair package.
  *
  * (c) Adrien Loyant <donald_duck@team-df.org>
  *
@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Ducks\Component\Component\EncodingRepair;
+namespace Ducks\Component\EncodingRepair;
 
 use finfo;
 use InvalidArgumentException;

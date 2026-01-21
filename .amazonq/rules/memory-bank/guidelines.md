@@ -22,7 +22,7 @@ Every file MUST include a standardized header block:
 
 ```php
 /**
- * Part of SplTypes package.
+ * Part of EncodingRepair package.
  *
  * (c) Adrien Loyant <donald_duck@team-df.org>
  *

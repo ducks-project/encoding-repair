@@ -15,7 +15,7 @@
       <file name="bootstrap.php" />
       <file name="rector.php" />
       <directory name="Resources/stubs" />
-      <directory name="Tests" />
+      <directory name="tests" />
       <directory name="vendor" />
       <directory name=".history" />
     </ignoreFiles>

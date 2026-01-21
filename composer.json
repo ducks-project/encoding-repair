@@ -50,7 +50,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Ducks\\Component\\EncodingRepair\\": "src/"
+            "Ducks\\Component\\EncodingRepair\\": ""
         },
         "exclude-from-classmap": [
             "/tests/"
@@ -74,10 +74,10 @@
         }
     },
     "scripts": {
-        "bench": "./vendor/bin/phpbench run Tests/benchmark/ --report=aggregate --retry-threshold=5",
+        "bench": "./vendor/bin/phpbench run tests/benchmark/ --report=aggregate --retry-threshold=5",
         "phpcs": "./vendor/bin/phpcs --standard=phpcs.xml.dist .",
         "phpcsfixer-check": "./vendor/bin/php-cs-fixer fix --dry-run --diff",
-        "phpmd": "./vendor/bin/phpmd . github phpmd.xml.dist --exclude 'Tests/*,vendor/*,.history/*'",
+        "phpmd": "./vendor/bin/phpmd . github phpmd.xml.dist --exclude 'tests/*,vendor/*,.history/*'",
         "phpstan": "./vendor/bin/phpstan analyse --configuration phpstan.neon.dist",
         "psalm": "./vendor/bin/psalm --config=psalm.xml.dist --no-cache --no-file-cache --shepherd",
         "rector": "./vendor/bin/rector process . --dry-run",
@@ -85,7 +85,7 @@
             "@unittest",
             "@bench"
         ],
-        "unittest": "XDEBUG_MODE=coverage ./vendor/bin/phpunit Tests/phpunit --process-isolation -c phpunit.xml.dist"
+        "unittest": "XDEBUG_MODE=coverage ./vendor/bin/phpunit tests/phpunit --process-isolation -c phpunit.xml.dist"
     },
     "scripts-descriptions": {
         "test": "Run all tests!"

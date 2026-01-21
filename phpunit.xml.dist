@@ -6,7 +6,7 @@
     </include>
     <exclude>
       <directory>./Resources</directory>
-      <directory>./Tests</directory>
+      <directory>./tests</directory>
       <directory>./vendor</directory>
       <directory>./.history</directory>
       <file>./.php-cs-fixer.dist.php</file>
@@ -22,8 +22,8 @@
   </php>
   <logging/>
   <testsuites>
-    <testsuite name="Spl Types Test Suite">
-      <directory>./Tests/</directory>
+    <testsuite name="Library Test Suite">
+      <directory>./tests/</directory>
     </testsuite>
   </testsuites>
 </phpunit>
