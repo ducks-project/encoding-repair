@@ -91,7 +91,7 @@
             "@unittest",
             "@bench"
         ],
-        "unittest": "XDEBUG_MODE=coverage ./vendor/bin/phpunit tests/phpunit --process-isolation -c phpunit.xml.dist"
+        "unittest": "@php -d xdebug.mode=coverage ./vendor/bin/phpunit tests/phpunit --process-isolation -c phpunit.xml.dist"
     },
     "scripts-descriptions": {
         "test": "Run all tests!"
