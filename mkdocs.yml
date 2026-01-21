@@ -1,0 +1,54 @@
+site_name: CharsetHelper Documentation
+site_description: Advanced charset encoding converter with Chain of Responsibility pattern
+site_author: Adrien Loyant
+site_url: https://encoding-repair.readthedocs.io
+
+repo_name: ducks-project/encoding-repair
+repo_url: https://github.com/ducks-project/encoding-repair
+edit_uri: edit/main/docs/
+
+theme:
+  name: readthedocs
+  locale: en
+  highlightjs: true
+  hljs_languages:
+    - php
+    - bash
+    - json
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quick-start.md
+  - User Guide:
+    - Basic Usage: guide/basic-usage.md
+    - Advanced Usage: guide/advanced-usage.md
+    - Use Cases: guide/use-cases.md
+  - API Reference:
+    - CharsetHelper: api/CharsetHelper.md
+    - Methods:
+      - toCharset: api/methods/CharsetHelper.toCharset.md
+      - toUtf8: api/methods/CharsetHelper.toUtf8.md
+      - toIso: api/methods/CharsetHelper.toIso.md
+      - detect: api/methods/CharsetHelper.detect.md
+      - repair: api/methods/CharsetHelper.repair.md
+      - safeJsonEncode: api/methods/CharsetHelper.safeJsonEncode.md
+      - safeJsonDecode: api/methods/CharsetHelper.safeJsonDecode.md
+      - registerTranscoder: api/methods/CharsetHelper.registerTranscoder.md
+      - registerDetector: api/methods/CharsetHelper.registerDetector.md
+  - Contributing:
+    - Development: contributing/development.md
+    - Code Quality: contributing/code-quality.md
+  - About:
+    - Changelog: about/changelog.md
+    - License: about/license.md
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - toc:
+      permalink: true
+
+extra:
+  version: 1.0.0

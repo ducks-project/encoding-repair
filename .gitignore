@@ -19,6 +19,9 @@
 /composer.phar
 #/composer.lock
 
+# MkDocs
+site/
+
 # Sublime project
 *.tmplanguage.cache
 *.tmpPreferences.cache
