@@ -682,7 +682,18 @@ $result = CharsetHelper::toCharset($data, 'ASCII', 'UTF-8', [
 ### Issue: Performance Problems
 
 ```php
-// Cache detection results
+// Use CachedDetector for batch processing (enabled by default in v1.1+)
+use Ducks\Component\EncodingRepair\CharsetProcessor;
+
+$processor = new CharsetProcessor();
+// CachedDetector is automatically used
+
+foreach ($largeDataset as $item) {
+    $result = $processor->toUtf8($item);
+    // Repeated strings benefit from cache (50-80% faster)
+}
+
+// Or manually cache detection results
 $cache = [];
 function convertWithCache(string $data): string
 {

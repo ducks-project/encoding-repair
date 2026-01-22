@@ -222,7 +222,7 @@ final class CharsetHelperTest extends TestCase
             return null;
         };
 
-        CharsetHelper::registerDetector($detector, 200);
+        CharsetHelper::registerDetector($detector, 250);
 
         // Use a non-UTF-8 string to bypass the fast path
         $utf16String = "\xFF\xFE" . \mb_convert_encoding('test', 'UTF-16LE', 'UTF-8');

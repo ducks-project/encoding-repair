@@ -626,6 +626,7 @@ composer phpcsfixer-check
 - [`FileInfoDetector`]
 - [`CallableAdapterTrait`]
 - [`ChainOfResponsibilityTrait`]
+- [`CachedDetector`]
 
 ## 🤝 Contributing
 
@@ -705,6 +706,7 @@ Made with ❤️ by the Duck Project Team
 [`FileInfoDetector`]: /assets/documentation/classes/FileInfoDetector.md
 [`CallableAdapterTrait`]: /assets/documentation/classes/CallableAdapterTrait.md
 [`ChainOfResponsibilityTrait`]: /assets/documentation/classes/ChainOfResponsibilityTrait.md
+[`CachedDetector`]: /assets/documentation/classes/CachedDetector.md
 [How To]: /assets/documentation/HowTo.md
 [Changelog]: CHANGELOG.md
 [MIT license]: LICENSE

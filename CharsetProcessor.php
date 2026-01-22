@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair;
 
+use Ducks\Component\EncodingRepair\Detector\CachedDetector;
 use Ducks\Component\EncodingRepair\Detector\DetectorChain;
 use Ducks\Component\EncodingRepair\Detector\DetectorInterface;
 use Ducks\Component\EncodingRepair\Detector\FileInfoDetector;
@@ -159,7 +160,9 @@ final class CharsetProcessor implements CharsetProcessorInterface
     public function resetDetectors(): self
     {
         $this->detectorChain = new DetectorChain();
-        $this->detectorChain->register(new MbStringDetector());
+        $mbDetector = new MbStringDetector();
+        $cachedDetector = new CachedDetector($mbDetector);
+        $this->detectorChain->register($cachedDetector);
         $this->detectorChain->register(new FileInfoDetector());
 
         return $this;
