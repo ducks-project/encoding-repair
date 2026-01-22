@@ -110,5 +110,5 @@ Detectors are called in priority order:
 - [CharsetHelper::registerTranscoder] — Register custom transcoder
 - [CharsetHelper::detect] — Detect encoding with registered detectors
 
-[CharsetHelper::registerTranscoder]: ./CharsetHelper.registerTranscoder.md#CharsetHelper::registerTranscoder
-[CharsetHelper::detect]: ./CharsetHelper.detect.md#CharsetHelper::detect
+[CharsetHelper::registerTranscoder]: ./CharsetHelper.registerTranscoder.md#charsethelper__registertranscoder
+[CharsetHelper::detect]: ./CharsetHelper.detect.md#charsethelper__detect

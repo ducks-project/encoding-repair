@@ -95,6 +95,6 @@ $result = CharsetHelper::toCharset($data, 'UTF-8', 'ISO-8859-1', [
 - [CharsetHelper::toIso] — Convert data to ISO-8859-1
 - [CharsetHelper::detect] — Detect charset encoding
 
-[CharsetHelper::toUtf8]: ./CharsetHelper.toUtf8.md#CharsetHelper::toUtf8
-[CharsetHelper::toIso]: ./CharsetHelper.toIso.md#CharsetHelper::toIso
-[CharsetHelper::detect]: ./CharsetHelper.detect.md#CharsetHelper::detect
+[CharsetHelper::toUtf8]: ./CharsetHelper.toUtf8.md#charsethelper__toutf8
+[CharsetHelper::toIso]: ./CharsetHelper.toIso.md#charsethelper__toiso
+[CharsetHelper::detect]: ./CharsetHelper.detect.md#charsethelper__detect

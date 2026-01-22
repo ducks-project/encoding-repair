@@ -101,5 +101,5 @@ The repair process:
 - [CharsetHelper::toCharset] — Convert data between encodings
 - [CharsetHelper::detect] — Detect encoding
 
-[CharsetHelper::toCharset]: ./CharsetHelper.toCharset.md#CharsetHelper::toCharset
-[CharsetHelper::detect]: ./CharsetHelper.detect.md#CharsetHelper::detect
+[CharsetHelper::toCharset]: ./CharsetHelper.toCharset.md#charsethelper__tocharset
+[CharsetHelper::detect]: ./CharsetHelper.detect.md#charsethelper__detect

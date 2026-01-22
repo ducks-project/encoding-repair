@@ -401,15 +401,15 @@ Benchmarks on 10,000 conversions (PHP 8.2, i7-12700K):
 - [json_encode()] — Returns the JSON representation of a value
 - [Normalizer::normalize()] — Normalizes the input provided
 
-[CharsetHelper::toCharset]: ./CharsetHelper.toCharset.md#CharsetHelper::toCharset
-[CharsetHelper::toUtf8]: ./CharsetHelper.toUtf8.md#CharsetHelper::toUtf8
-[CharsetHelper::toIso]: ./CharsetHelper.toIso.md#CharsetHelper::toIso
-[CharsetHelper::detect]: ./CharsetHelper.detect.md#CharsetHelper::detect
-[CharsetHelper::repair]: ./CharsetHelper.repair.md#CharsetHelper::repair
-[CharsetHelper::safeJsonEncode]: ./CharsetHelper.safeJsonEncode.md#CharsetHelper::safeJsonEncode
-[CharsetHelper::safeJsonDecode]: ./CharsetHelper.safeJsonDecode.md#CharsetHelper::safeJsonDecode
-[CharsetHelper::registerTranscoder]: ./CharsetHelper.registerTranscoder.md#CharsetHelper::registerTranscoder
-[CharsetHelper::registerDetector]: ./CharsetHelper.registerDetector.md#CharsetHelper::registerDetector
+[CharsetHelper::toCharset]: ./CharsetHelper.toCharset.md#charsethelper__tocharset
+[CharsetHelper::toUtf8]: ./CharsetHelper.toUtf8.md#charsethelper__toutf8
+[CharsetHelper::toIso]: ./CharsetHelper.toIso.md#charsethelper__toiso
+[CharsetHelper::detect]: ./CharsetHelper.detect.md#charsethelper__detect
+[CharsetHelper::repair]: ./CharsetHelper.repair.md#charsethelper__repair
+[CharsetHelper::safeJsonEncode]: ./CharsetHelper.safeJsonEncode.md#charsethelper__safejsonencode
+[CharsetHelper::safeJsonDecode]: ./CharsetHelper.safeJsonDecode.md#charsethelper__safejsondecode
+[CharsetHelper::registerTranscoder]: ./CharsetHelper.registerTranscoder.md#charsethelper__registertranscoder
+[CharsetHelper::registerDetector]: ./CharsetHelper.registerDetector.md#charsethelper__registerdetector
 [TranscoderInterface]: ./TranscoderInterface.md
 [UConverterTranscoder]: ./UConverterTranscoder.md
 [IconvTranscoder]: ./IconvTranscoder.md

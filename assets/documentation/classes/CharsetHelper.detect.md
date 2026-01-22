@@ -59,5 +59,5 @@ $encoding = CharsetHelper::detect($string, [
 - [CharsetHelper::toCharset] — Convert with auto-detection
 - [mb_detect_encoding()] — PHP native detection function
 
-[CharsetHelper::toCharset]: ./CharsetHelper.toCharset.md#CharsetHelper::toCharset
+[CharsetHelper::toCharset]: ./CharsetHelper.toCharset.md#charsethelper__tocharset
 [mb_detect_encoding()]: https://www.php.net/manual/en/function.mb-detect-encoding.php

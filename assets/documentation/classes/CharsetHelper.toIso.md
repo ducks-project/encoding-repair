@@ -53,5 +53,5 @@ echo bin2hex($iso); // Shows Windows-1252 bytes
 - [CharsetHelper::toUtf8] — Convert data to UTF-8
 - [CharsetHelper::toCharset] — Convert data to any encoding
 
-[CharsetHelper::toUtf8]: ./CharsetHelper.toUtf8.md#CharsetHelper::toUtf8
-[CharsetHelper::toCharset]: ./CharsetHelper.toCharset.md#CharsetHelper::toCharset
+[CharsetHelper::toUtf8]: ./CharsetHelper.toUtf8.md#charsethelper__toutf8
+[CharsetHelper::toCharset]: ./CharsetHelper.toCharset.md#charsethelper__tocharset

@@ -67,5 +67,5 @@ foreach ($users as $user) {
 - [CharsetHelper::toCharset] — Convert data to any encoding
 - [CharsetHelper::toIso] — Convert data to ISO-8859-1
 
-[CharsetHelper::toCharset]: ./CharsetHelper.toCharset.md#CharsetHelper::toCharset
-[CharsetHelper::toIso]: ./CharsetHelper.toIso.md#CharsetHelper::toIso
+[CharsetHelper::toCharset]: ./CharsetHelper.toCharset.md#charsethelper__tocharset
+[CharsetHelper::toIso]: ./CharsetHelper.toIso.md#charsethelper__toiso

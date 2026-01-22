@@ -94,6 +94,6 @@ try {
 - [CharsetHelper::repair] — Repair encoding issues
 - [json_encode()] — PHP native JSON encoding
 
-[CharsetHelper::safeJsonDecode]: ./CharsetHelper.safeJsonDecode.md#CharsetHelper::safeJsonDecode
-[CharsetHelper::repair]: ./CharsetHelper.repair.md#CharsetHelper::repair
+[CharsetHelper::safeJsonDecode]: ./CharsetHelper.safeJsonDecode.md#charsethelper__safejsondecode
+[CharsetHelper::repair]: ./CharsetHelper.repair.md#charsethelper__repair
 [json_encode()]: https://www.php.net/manual/en/function.json-encode.php

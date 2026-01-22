@@ -105,6 +105,6 @@ try {
 - [CharsetHelper::repair] — Repair encoding issues
 - [json_decode()] — PHP native JSON decoding
 
-[CharsetHelper::safeJsonEncode]: ./CharsetHelper.safeJsonEncode.md#CharsetHelper::safeJsonEncode
-[CharsetHelper::repair]: ./CharsetHelper.repair.md#CharsetHelper::repair
+[CharsetHelper::safeJsonEncode]: ./CharsetHelper.safeJsonEncode.md#charsethelper__safejsonencode
+[CharsetHelper::repair]: ./CharsetHelper.repair.md#charsethelper__repair
 [json_decode()]: https://www.php.net/manual/en/function.json-decode.php

@@ -98,5 +98,5 @@ Transcoders are called in priority order:
 - [CharsetHelper::registerDetector] — Register custom detector
 - [CharsetHelper::toCharset] — Convert with registered transcoders
 
-[CharsetHelper::registerDetector]: ./CharsetHelper.registerDetector.md#CharsetHelper::registerDetector
-[CharsetHelper::toCharset]: ./CharsetHelper.toCharset.md#CharsetHelper::toCharset
+[CharsetHelper::registerDetector]: ./CharsetHelper.registerDetector.md#charsethelper__registerdetector
+[CharsetHelper::toCharset]: ./CharsetHelper.toCharset.md#charsethelper__tocharset
