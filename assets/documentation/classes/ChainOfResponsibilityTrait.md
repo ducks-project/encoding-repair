@@ -1,15 +1,23 @@
-# ChainOfResponsibilityTrait
+# [The ChainOfResponsibilityTrait trait](#the-chainofresponsibilitytrait-trait)
 
 (PHP 7 >= 7.4.0, PHP 8)
 
-## Introduction
+## [Introduction](#introduction)
 
-ChainOfResponsibilityTrait provides common functionality for Chain of Responsibility pattern implementations.
-It manages priority queues and handler registration for both TranscoderChain and DetectorChain.
+ChainOfResponsibilityTrait provides common functionality for implementing
+the Chain of Responsibility pattern with priority-based handler execution.
+It manages handler registration, priority queue maintenance, and provides a consistent interface for chain implementations.
 
-**Namespace:** `Ducks\Component\EncodingRepair\Traits`
+This trait is used by [TranscoderChain](TranscoderChain.md) and [DetectorChain](DetectorChain.md)
+to avoid code duplication while maintaining type safety through generics.
 
-## Trait Synopsis
+**Design Pattern**: Chain of Responsibility with priority queue
+
+**Type Safety**: Uses PHP template annotations (@template T) for generic handler types
+
+**Namespace**: `Ducks\Component\EncodingRepair\Traits`
+
+## [Trait synopsis](#trait-synopsis)
 
 ```php
 /**
@@ -17,23 +25,27 @@ It manages priority queues and handler registration for both TranscoderChain and
  */
 trait ChainOfResponsibilityTrait {
     /* Properties */
-    private ?SplPriorityQueue $queue;
-    private array $registered;
+    private ?SplPriorityQueue $queue = null;
+    private array $registered = [];
 
     /* Methods */
+    public register($handler, ?int $priority = null): void
+    private unregister($handler): void
     private rebuildQueue(): void
     private getSplPriorityQueue(): SplPriorityQueue
 }
 ```
 
-## Features
+## [Features](#features)
 
-- Generic priority queue management using PHP templates
-- Automatic queue rebuilding for iteration
-- Lazy initialization of SplPriorityQueue
-- Reduces code duplication across chain classes
+- **Generic Type Support**: Template-based type safety for handlers
+- **Priority Management**: Automatic priority-based ordering
+- **Lazy Initialization**: Queue created only when needed
+- **Dynamic Registration**: Add/remove handlers at runtime
+- **Queue Rebuilding**: Automatic queue reconstruction after modifications
+- **Code Reusability**: Shared logic for all chain implementations
 
-## Properties
+## [Properties](#properties)
 
 ### $queue
 
@@ -41,10 +53,10 @@ trait ChainOfResponsibilityTrait {
 /**
  * @var null|SplPriorityQueue<int, T>
  */
-private ?SplPriorityQueue $queue;
+private ?SplPriorityQueue $queue = null;
 ```
 
-Priority queue for handlers, lazily initialized.
+Priority queue for handlers, lazily initialized. Set to null after unregister() to force rebuild.
 
 ### $registered
 
@@ -52,41 +64,140 @@ Priority queue for handlers, lazily initialized.
 /**
  * @var list<array{handler: T, priority: int}>
  */
-private array $registered;
+private array $registered = [];
 ```
 
-List of registered handlers with their priorities.
+List of registered handlers with their priorities. Used to rebuild the queue when needed.
 
-## Methods
+## [Methods](#methods)
+
+### register
+
+Register a handler with optional priority override into the chain.
+
+```php
+public function register($handler, ?int $priority = null): void
+```
+
+**Parameters:**
+
+- **handler** (T): Handler to register (TranscoderInterface or DetectorInterface)
+- **priority** (int|null): Priority override (null = use handler's getPriority())
+
+**Return Values:**
+
+No value is returned.
+
+**Notes:**
+
+- If priority is null, calls $handler->getPriority() to get default priority
+- Stores handler in $registered array for queue rebuilding
+- Inserts handler into priority queue immediately
+- Higher priority values execute first
+
+**Example:**
+
+```php
+<?php
+
+use Ducks\Component\EncodingRepair\Traits\ChainOfResponsibilityTrait;
+
+class MyChain
+{
+    use ChainOfResponsibilityTrait;
+
+    public function addHandler($handler, ?int $priority = null): void
+    {
+        $this->register($handler, $priority);
+    }
+}
+```
+
+### unregister
+
+Unregister a handler from the chain.
+
+```php
+private function unregister($handler): void
+```
+
+**Parameters:**
+
+- **handler** (T): Handler to remove
+
+**Return Values:**
+
+No value is returned.
+
+**Notes:**
+
+- Removes handler from $registered array using strict comparison (===)
+- Sets $queue to null to force rebuild on next iteration
+- Re-indexes array with array_values() to maintain list structure
+- Does nothing if handler is not found
+
+**Example:**
+
+```php
+<?php
+
+$chain = new TranscoderChain();
+$transcoder = new IconvTranscoder();
+
+$chain->register($transcoder);
+// Later...
+$chain->unregister($transcoder);
+```
 
 ### rebuildQueue
 
+Rebuild queue from registered handlers.
+
 ```php
-private rebuildQueue(): void
+private function rebuildQueue(): void
 ```
 
-Rebuilds the priority queue from registered handlers.
-Called before each chain execution to ensure proper ordering.
+**Return Values:**
+
+No value is returned.
+
+**Notes:**
+
+- Creates new SplPriorityQueue instance
+- Iterates through $registered array
+- Inserts each handler with its priority
+- Called before each chain execution to ensure proper ordering
+- Necessary because SplPriorityQueue is not rewindable after iteration
+
+**Performance:**
+
+- Time complexity: O(n log n) where n is number of handlers
+- Called once per transcode()/detect() operation
 
 ### getSplPriorityQueue
+
+Return the queue, initializing if necessary.
 
 ```php
 /**
  * @return SplPriorityQueue<int, T>
  */
-private getSplPriorityQueue(): SplPriorityQueue
+private function getSplPriorityQueue(): SplPriorityQueue
 ```
 
-Returns the priority queue, initializing it if necessary.
+**Return Values:**
 
-**Returns:** SplPriorityQueue instance
+Returns the SplPriorityQueue instance.
 
-## Used By
+**Notes:**
 
-- [TranscoderChain](./TranscoderChain.md)
-- [DetectorChain](./DetectorChain.md)
+- Lazy initialization: creates queue only when first accessed
+- Returns existing queue if already initialized
+- Used internally by register() and chain execution methods
 
-## Example
+## [Usage Pattern](#usage-pattern)
+
+### In TranscoderChain
 
 ```php
 <?php
@@ -100,18 +211,19 @@ final class TranscoderChain
     /**
      * @use ChainOfResponsibilityTrait<TranscoderInterface>
      */
-    use ChainOfResponsibilityTrait;
+    use ChainOfResponsibilityTrait {
+        ChainOfResponsibilityTrait::register as chainRegister;
+        ChainOfResponsibilityTrait::unregister as chainUnregister;
+    }
 
     public function register(TranscoderInterface $transcoder, ?int $priority = null): void
     {
-        $finalPriority = $priority ?? $transcoder->getPriority();
+        $this->chainRegister($transcoder, $priority);
+    }
 
-        $this->registered[] = [
-            'handler' => $transcoder,
-            'priority' => $finalPriority,
-        ];
-
-        $this->getSplPriorityQueue()->insert($transcoder, $finalPriority);
+    public function unregister(TranscoderInterface $transcoder): void
+    {
+        $this->chainUnregister($transcoder);
     }
 
     public function transcode(string $data, string $to, string $from, array $options): ?string
@@ -119,7 +231,12 @@ final class TranscoderChain
         $this->rebuildQueue();
 
         foreach ($this->getSplPriorityQueue() as $transcoder) {
+            if (!$transcoder->isAvailable()) {
+                continue;
+            }
+
             $result = $transcoder->transcode($data, $to, $from, $options);
+
             if (null !== $result) {
                 return $result;
             }
@@ -130,31 +247,133 @@ final class TranscoderChain
 }
 ```
 
-## Design Pattern
+### In DetectorChain
 
-This trait implements the **Chain of Responsibility** pattern with priority-based ordering:
+```php
+<?php
 
-1. Handlers are registered with priorities
-2. Queue is rebuilt before execution
-3. Handlers execute in priority order (highest first)
-4. First successful handler returns result
-5. Chain returns null if all handlers fail
+namespace Ducks\Component\EncodingRepair\Detector;
 
-## Type Safety
+use Ducks\Component\EncodingRepair\Traits\ChainOfResponsibilityTrait;
+
+final class DetectorChain
+{
+    /**
+     * @use ChainOfResponsibilityTrait<DetectorInterface>
+     */
+    use ChainOfResponsibilityTrait {
+        ChainOfResponsibilityTrait::register as chainRegister;
+        ChainOfResponsibilityTrait::unregister as chainUnregister;
+    }
+
+    public function register(DetectorInterface $detector, ?int $priority = null): void
+    {
+        $this->chainRegister($detector, $priority);
+    }
+
+    public function unregister(DetectorInterface $detector): void
+    {
+        $this->chainUnregister($detector);
+    }
+
+    public function detect(string $string, array $options): ?string
+    {
+        $this->rebuildQueue();
+
+        foreach ($this->getSplPriorityQueue() as $detector) {
+            if (!$detector->isAvailable()) {
+                continue;
+            }
+
+            $result = $detector->detect($string, $options);
+
+            if (null !== $result) {
+                return $result;
+            }
+        }
+
+        return null;
+    }
+}
+```
+
+## [Design Pattern Details](#design-pattern-details)
+
+### Chain of Responsibility
+
+The trait implements the Chain of Responsibility pattern:
+
+1. **Handler Registration**: Handlers are registered with priorities
+2. **Queue Building**: Priority queue orders handlers by priority
+3. **Sequential Execution**: Handlers execute in order until one succeeds
+4. **Early Return**: First successful handler returns result
+5. **Fallback**: Returns null if all handlers fail
+
+### Priority Queue Behavior
+
+```text
+Priority: 200 → Handler A
+Priority: 100 → Handler B
+Priority: 100 → Handler C (same priority as B)
+Priority: 50  → Handler D
+
+Execution order: A → B → C → D
+```
+
+**Note**: Handlers with same priority execute in insertion order.
+
+## [Type Safety with Generics](#type-safety-with-generics)
 
 The trait uses PHP template annotations for type safety:
 
 ```php
 /**
  * @template T
- * @use ChainOfResponsibilityTrait<TranscoderInterface>
  */
+trait ChainOfResponsibilityTrait { }
 ```
 
-This ensures the queue only contains handlers of the correct type.
+When used in a class:
 
-## See Also
+```php
+/**
+ * @use ChainOfResponsibilityTrait<TranscoderInterface>
+ */
+use ChainOfResponsibilityTrait;
+```
 
-- [TranscoderChain](./TranscoderChain.md)
-- [DetectorChain](./DetectorChain.md)
-- [CallableAdapterTrait](./CallableAdapterTrait.md)
+This ensures:
+
+- $registered array only contains TranscoderInterface instances
+- $queue only contains TranscoderInterface instances
+- Static analysis tools (PHPStan, Psalm) can verify type correctness
+
+## [Performance Considerations](#performance-considerations)
+
+- **Registration**: O(log n) per handler (SplPriorityQueue insertion)
+- **Unregistration**: O(n) to filter array + O(1) to invalidate queue
+- **Queue Rebuild**: O(n log n) where n is number of handlers
+- **Iteration**: O(n) worst case (all handlers tried)
+- **Memory**: O(n) for registered array + O(n) for queue
+
+**Optimization tips:**
+
+- Minimize unregister() calls (expensive due to rebuild)
+- Register handlers once during initialization
+- Use appropriate priorities to favor faster handlers
+
+## [Thread Safety](#thread-safety)
+
+ChainOfResponsibilityTrait is **not thread-safe**.
+Classes using this trait should not be shared between threads without external synchronization.
+
+## [See Also](#see-also)
+
+- [TranscoderChain](TranscoderChain.md) — Transcoder chain implementation
+- [DetectorChain](DetectorChain.md) — Detector chain implementation
+- [TranscoderInterface](TranscoderInterface.md) — Transcoder contract
+- [DetectorInterface](DetectorInterface.md) — Detector contract
+- [CallableAdapterTrait](CallableAdapterTrait.md) — Callable wrapper trait
+- [SplPriorityQueue] — PHP priority queue class
+
+[SplPriorityQueue]: https://www.php.net/manual/en/class.splpriorityqueue.php
