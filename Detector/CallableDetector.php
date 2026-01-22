@@ -99,11 +99,11 @@ final class CallableDetector implements DetectorInterface
             $reflection = self::getReflection($callable);
 
             return $reflection->getNumberOfParameters() >= 1;
-        } catch (ReflectionException $e) {
             // @codeCoverageIgnoreStart
+        } catch (ReflectionException $e) {
             return true;
-            // @codeCoverageIgnoreEnd
         }
+        // @codeCoverageIgnoreEnd
     }
 
     /**

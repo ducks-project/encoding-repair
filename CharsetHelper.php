@@ -664,6 +664,8 @@ final class CharsetHelper
      * @param array<string, mixed> $options Configuration
      *
      * @return string Normalized or original string
+     *
+     * @codeCoverageIgnore
      */
     private static function normalize(
         string $value,
@@ -674,11 +676,9 @@ final class CharsetHelper
             return $value;
         }
 
-        // @codeCoverageIgnoreStart
         if (!\class_exists(Normalizer::class)) {
             return $value;
         }
-        // @codeCoverageIgnoreEnd
 
         $normalized = Normalizer::normalize($value);
 

@@ -471,4 +471,15 @@ final class CharsetHelperTest extends TestCase
 
         $this->assertSame('test', $result);
     }
+
+    public function testSafeJsonEncodeThrowsOnInvalidData(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('JSON Encode Error');
+
+        /** @var resource $resource */
+        $resource = fopen('php://memory', 'r');
+        CharsetHelper::safeJsonEncode(['resource' => $resource]);
+        \fclose($resource);
+    }
 }

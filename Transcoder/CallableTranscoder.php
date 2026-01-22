@@ -100,10 +100,10 @@ final class CallableTranscoder implements TranscoderInterface
             $reflection = self::getReflection($callable);
 
             return 3 <= $reflection->getNumberOfParameters();
+            // @codeCoverageIgnoreStart
         } catch (ReflectionException $e) {
             // Because of PHP 7.4 we need to validate the callable
             // if ReflectionException occured.
-            // @codeCoverageIgnoreStart
             return true;
             // @codeCoverageIgnoreEnd
         }

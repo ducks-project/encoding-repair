@@ -603,7 +603,7 @@ If this project helped you, please consider giving it a ⭐ on GitHub!
 
 ---
 
-Made with ❤️ by by the Duck project team
+Made with ❤️ by the Duck Project Team
 
 [`CharsetHelper`]: /assets/documentation/classes/CharsetHelper.md
 [`TranscoderInterface`]: /assets/documentation/classes/TranscoderInterface.md
