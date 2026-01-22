@@ -1,101 +1,147 @@
 # Technology Stack
 
-## Programming Language
+## Programming Languages
 
-- **PHP**: 7.4, 8.0, 8.1, 8.2, 8.3
-- **Type System**: Strict typing enabled (`declare(strict_types=1)`)
-- **Coding Standard**: PSR-12 / PER (PHP Evolving Recommendation)
+### PHP
 
-## Required PHP Extensions
+- **Versions Supported**: 7.4, 8.0, 8.1, 8.2, 8.3
+- **Language Features Used**:
+  - Strict types (`declare(strict_types=1)`)
+  - Type hints (scalar, return types, nullable types)
+  - Arrow functions (short closures)
+  - Null coalescing operator (`??`)
+  - Spread operator for arrays
+  - Static analysis annotations (Psalm, PHPStan)
 
-- **ext-mbstring**: Multi-byte string functions (core dependency)
-- **ext-json**: JSON encoding/decoding (core dependency)
+## Required Extensions
 
-## Optional PHP Extensions
+### Core Requirements
+
+- **ext-json**: JSON encoding/decoding operations
+- **ext-mbstring**: Multi-byte string operations, encoding detection
+
+### Optional Extensions (Recommended)
 
 - **ext-intl**: UConverter support (30% performance improvement)
-- **ext-iconv**: Transliteration support (//TRANSLIT, //IGNORE)
-- **ext-fileinfo**: Advanced encoding detection fallback
+- **ext-iconv**: Transliteration support, alternative conversion method
+- **ext-fileinfo**: Advanced encoding detection via finfo
+
+## Dependencies
+
+### Production Dependencies
+
+**None** - Zero runtime dependencies for maximum portability
+
+### Development Dependencies
+
+#### Testing
+
+- **phpunit/phpunit**: ^9.5 || ^10.0
+  - Unit testing framework
+  - Code coverage reporting
+  - Process isolation support
+
+#### Static Analysis
+
+- **phpstan/phpstan**: ^1.10
+  - Level 8 static analysis
+  - Type inference and validation
+- **phpstan/phpstan-phpunit**: ^1.4
+  - PHPUnit-specific rules
+- **vimeo/psalm**: ^4.30 || ^5.0
+  - Type coverage analysis
+  - Security analysis
+
+#### Code Quality
+
+- **friendsofphp/php-cs-fixer**: ^3.0
+  - PSR-12/PER code style enforcement
+  - Automatic code formatting
+- **squizlabs/php_codesniffer**: ^3.10
+  - Additional code style checks
+- **phpmd/phpmd**: ^1.5
+  - Mess detection (complexity, unused code)
+
+#### Performance
+
+- **phpbench/phpbench**: ^1.2
+  - Performance benchmarking
+  - Regression detection
+
+#### Utilities
+
+- **ergebnis/composer-normalize**: ^2.48
+  - Composer.json normalization
 
 ## Build System
 
-- **Composer**: Dependency management and autoloading
-- **Package Name**: ducks-project/encoding-repair
-- **License**: MIT
-- **Minimum Stability**: stable
-
-## Development Tools
-
-### Testing
-
-- **PHPUnit**: ^9.5 || ^10.0 - Unit testing framework
-- **PHPBench**: ^1.2 - Performance benchmarking
-
-### Static Analysis
-
-- **PHPStan**: ^1.10 (Level 8) - Static analysis
-- **PHPStan PHPUnit**: ^1.4 - PHPUnit-specific rules
-- **Psalm**: ^4.30 || ^5.0 - Type checking and immutability verification
-
-### Code Quality
-
-- **PHP CS Fixer**: ^3.0 - PSR-12/PER code style enforcement
-- **PHP CodeSniffer**: Code style checking
-- **PHP Mess Detector**: Code quality analysis
-
-### Refactoring
-
-- **Rector**: Automated refactoring and PHP version upgrades
-
-## Composer Scripts
-
-### Testing
+### Composer Scripts
 
 ```bash
-composer test              # Run all tests (unit + benchmarks)
-composer unittest          # Run PHPUnit tests with coverage
-composer bench             # Run performance benchmarks
+# Testing
+composer unittest              # Run PHPUnit tests with coverage
+composer test                  # Run all tests (unit + benchmarks)
+composer bench                 # Run performance benchmarks
+
+# Static Analysis
+composer phpstan               # PHPStan level 8 analysis
+composer psalm                 # Psalm type coverage
+composer phpmd                 # PHP Mess Detector
+
+# Code Quality
+composer phpcs                 # Check code style (CodeSniffer)
+composer phpcsfixer-check      # Check code style (PHP-CS-Fixer)
+
+# Utilities
+composer rector                # Rector refactoring (dry-run)
 ```
 
-### Code Quality
+### Configuration Files
 
-```bash
-composer phpstan           # Run PHPStan static analysis (level 8)
-composer psalm             # Run Psalm type checking
-composer phpcs             # Run PHP CodeSniffer
-composer phpcsfixer-check  # Check code style (dry-run)
-composer phpmd             # Run PHP Mess Detector
+#### phpunit.xml.dist
+
+```xml
+- Process isolation enabled
+- Coverage: HTML, Clover, XML formats
+- Test suites: phpunit directory
+- Bootstrap: vendor/autoload.php
 ```
 
-### Refactoring
+#### phpstan.neon.dist
 
-```bash
-composer rector            # Run Rector (dry-run)
+```yaml
+- Level: 8 (maximum strictness)
+- Paths: root directory, Transcoder/, Detector/
+- Excludes: tests/, vendor/, .history/
+- PHPUnit extension enabled
 ```
 
-### Full CI Pipeline
+#### psalm.xml.dist
 
-```bash
-composer ci                # Run all CI checks locally
+```xml
+- Error level: 1
+- Total issues: 0 target
+- Report mixed issues
+- Shepherd integration
+```
+
+#### .php-cs-fixer.dist.php
+
+```php
+- Rules: PSR-12, PER coding style
+- PHP 7.4+ syntax
+- Strict types declaration
+- Ordered imports
 ```
 
 ## Development Commands
 
-### Installation
+### Setup
 
 ```bash
-# Clone repository
 git clone https://github.com/ducks-project/encoding-repair.git
 cd encoding-repair
-
-# Install dependencies
 composer install
-
-# Install optional extensions (Ubuntu/Debian)
-sudo apt-get install php-intl php-iconv
-
-# Install optional extensions (macOS)
-brew install php@8.2  # Extensions included by default
 ```
 
 ### Testing Workflow
@@ -104,11 +150,11 @@ brew install php@8.2  # Extensions included by default
 # Run unit tests
 composer unittest
 
-# Run tests with coverage report
+# Run with coverage report
 composer unittest -- --coverage-html coverage
 
 # Run specific test
-./vendor/bin/phpunit tests/phpunit/SpecificTest.php
+./vendor/bin/phpunit tests/phpunit/CharsetHelperTest.php
 
 # Run benchmarks
 composer bench
@@ -117,140 +163,207 @@ composer bench
 ### Code Quality Workflow
 
 ```bash
-# Check code style
-composer phpcsfixer-check
-
-# Fix code style automatically
-./vendor/bin/php-cs-fixer fix
-
-# Run static analysis
+# Check all quality tools
 composer phpstan
-
-# Run type checking
 composer psalm
+composer phpcs
+composer phpcsfixer-check
+composer phpmd
 
-# Run all quality checks
-composer phpstan && composer psalm && composer phpcsfixer-check
+# Auto-fix code style
+./vendor/bin/php-cs-fixer fix
 ```
 
-### CI/CD Integration
+### CI/CD Pipeline
 
 ```bash
-# Full CI pipeline (local)
-composer ci
-
-# Individual CI steps
-composer unittest          # Tests with coverage
-composer phpstan           # Static analysis
-composer psalm             # Type checking
-composer phpcsfixer-check  # Style check
-composer phpmd             # Mess detection
+# Full CI check (mimics GitHub Actions)
+composer phpstan && \
+composer psalm && \
+composer phpcs && \
+composer unittest && \
+composer bench
 ```
 
-## Configuration Files
+## Documentation Tools
 
-### Composer (composer.json)
+### MkDocs
 
-- **Autoload**: PSR-4 (`Ducks\Component\EncodingRepair\` → ``)
-- **Optimize Autoloader**: Enabled for production
-- **Sort Packages**: Enabled for consistency
+- **Version**: Latest
+- **Theme**: Material for MkDocs
+- **Configuration**: mkdocs.yml
+- **Build Command**: `mkdocs build`
+- **Serve Command**: `mkdocs serve`
 
-### PHPUnit (phpunit.xml.dist)
+### ReadTheDocs
 
-- **Process Isolation**: Enabled for test independence
-- **Coverage**: XDEBUG_MODE=coverage required
-- **Test Directory**: `tests/phpunit/`
-
-### PHPStan (phpstan.neon.dist)
-
-- **Level**: 8 (maximum strictness)
-- **Paths**: Analyze all PHP files
-- **PHPUnit Extension**: Enabled
-
-### Psalm (psalm.xml.dist)
-
-- **Error Level**: Strict
-- **Check Immutability**: Enabled
-- **Shepherd**: Enabled for public metrics
-
-### PHP CS Fixer (.php-cs-fixer.dist.php)
-
-- **Rules**: PSR-12 / PER
-- **Risky Rules**: Enabled
-- **Caching**: Enabled for performance
-
-### PHPBench (phpbench.json.dist)
-
-- **Retry Threshold**: 5 iterations
-- **Report**: Aggregate statistics
-- **Benchmark Directory**: `tests/benchmark/`
-
-### Rector (rector.php)
-
-- **PHP Version**: Target latest stable
-- **Sets**: PHP 8.0, 8.1, 8.2 features
-- **Type Coverage**: Level 0 (strict)
+- **Configuration**: .readthedocs.yml
+- **Python Requirements**: docs/requirements.txt
+- **Build**: Automatic on push to main branch
 
 ## Version Control
 
-- **Git**: Version control system
-- **.gitignore**: Excludes vendor/, coverage/, .history/
-- **.editorconfig**: Consistent editor settings
+### Git
 
-## CI/CD Platforms
+- **Repository**: <https://github.com/ducks-project/encoding-repair>
+- **Branching**: main branch for stable releases
+- **History**: .history/ directory (local development history)
 
-- **Scrutinizer**: Code quality monitoring
-- **StyleCI**: Automated style fixes
-- **AppVeyor**: Windows CI pipeline
-- **ReadTheDocs**: Documentation hosting
+### GitHub Actions
+
+#### ci.yml
+
+- Runs on: push, pull_request
+- PHP versions: 7.4, 8.0, 8.1, 8.2, 8.3
+- Steps: install, phpstan, psalm, phpunit, coverage upload
+
+#### release.yml
+
+- Runs on: tag push (v*.*.*)
+- Creates GitHub release
+- Publishes to Packagist
+
+#### security.yml
+
+- Runs on: schedule (weekly)
+- Security vulnerability scanning
+- Dependency auditing
 
 ## Package Distribution
 
-- **Packagist**: <https://packagist.org/packages/ducks-project/encoding-repair>
-- **GitHub**: <https://github.com/ducks-project/encoding-repair>
-- **Composer Install**: `composer require ducks-project/encoding-repair`
+### Packagist
+
+- **Package**: ducks-project/encoding-repair
+- **Type**: library
+- **License**: MIT
+- **Auto-update**: Via GitHub webhook
+
+### Installation Methods
+
+```bash
+# Composer (recommended)
+composer require ducks-project/encoding-repair
+
+# Specific version
+composer require ducks-project/encoding-repair:^1.0
+
+# Development version
+composer require ducks-project/encoding-repair:dev-main
+```
+
+## IDE Support
+
+### PHPStorm/IntelliJ
+
+- Full type inference support
+- Psalm/PHPStan annotations recognized
+- Composer scripts integration
+
+### VS Code
+
+- PHP Intelephense extension recommended
+- Psalm/PHPStan extensions available
+- PHP CS Fixer extension for auto-formatting
 
 ## Performance Optimization
 
-- **Optimized Autoloader**: Enabled in production
-- **Extension Priority**: UConverter (fastest) → iconv → mbstring
-- **Caching**: Detection results should be cached by consumers
-- **Benchmarking**: PHPBench for performance regression testing
-
-## Environment Requirements
-
-- **OS**: Linux, macOS, Windows (cross-platform)
-- **PHP Memory**: Minimum 128MB recommended
-- **PHP Extensions**: See required/optional sections above
-
-## Development Environment Setup
+### Autoloader Optimization
 
 ```bash
-# 1. Clone and install
-git clone https://github.com/ducks-project/encoding-repair.git
-cd encoding-repair
-composer install
-
-# 2. Verify installation
-php -v                     # Check PHP version (>= 7.4)
-php -m | grep mbstring     # Verify mbstring
-php -m | grep json         # Verify json
-php -m | grep intl         # Check intl (optional)
-
-# 3. Run tests
-composer test
-
-# 4. Run quality checks
-composer phpstan
-composer psalm
-composer phpcsfixer-check
-
-# 5. Ready to develop!
+composer dump-autoload --optimize
 ```
 
-## IDE Integration
+### Extension Priority
 
-- **EditorConfig**: `.editorconfig` for consistent formatting
-- **PHPStan**: IDE plugins available for real-time analysis
-- **PHP CS Fixer**: IDE plugins for automatic formatting
-- **Amazon Q**: Memory bank in `.amazonq/rules/memory-bank/`
+1. **ext-intl** (UConverter): Fastest, 30% improvement
+2. **ext-iconv**: Good performance, transliteration
+3. **ext-mbstring**: Baseline, always available
+
+### Benchmarking
+
+```bash
+# Run benchmarks with retry threshold
+composer bench
+
+# Specific benchmark
+./vendor/bin/phpbench run tests/benchmark/ConversionBench.php --report=aggregate
+```
+
+## Code Coverage
+
+### Tools
+
+- **PHPUnit**: Code coverage collection
+- **Xdebug**: Coverage driver (xdebug.mode=coverage)
+- **Coveralls**: Coverage reporting service
+- **Codecov**: Alternative coverage service
+
+### Targets
+
+- **Line Coverage**: 95%+ target
+- **Branch Coverage**: Tracked
+- **Method Coverage**: 100% target
+
+### Reports
+
+```bash
+# Generate HTML coverage report
+composer unittest -- --coverage-html coverage
+
+# View report
+open coverage/index.html
+```
+
+## Static Analysis
+
+### PHPStan
+
+- **Level**: 8 (maximum)
+- **Rules**: Strict types, no mixed types
+- **Extensions**: phpstan-phpunit
+
+### Psalm
+
+- **Level**: 1 (strictest)
+- **Features**: Type coverage, security analysis
+- **Annotations**: @psalm-api, @psalm-immutable, @psalm-suppress
+
+### Type Coverage
+
+- **Target**: 100% type coverage
+- **Tracked**: All public methods fully typed
+- **Verified**: Psalm type coverage badge
+
+## Security
+
+### Tools
+
+- **Psalm**: Security analysis
+- **GitHub Dependabot**: Dependency updates
+- **GitHub Security Scanning**: Vulnerability detection
+
+### Practices
+
+- Whitelisted encodings (prevent injection)
+- Strict type checking
+- No eval or dynamic code execution
+- Input validation on all public methods
+
+## Compatibility
+
+### PHP Version Matrix
+
+| PHP Version | Status | CI Tested |
+| ------------- | -------- | ----------- |
+| 7.4 | ✅ Supported | ✅ Yes |
+| 8.0 | ✅ Supported | ✅ Yes |
+| 8.1 | ✅ Supported | ✅ Yes |
+| 8.2 | ✅ Supported | ✅ Yes |
+| 8.3 | ✅ Supported | ✅ Yes |
+
+### Platform Requirements
+
+- **OS**: Linux, macOS, Windows
+- **Architecture**: x86_64, ARM64
+- **Web Servers**: Apache, Nginx, PHP built-in server
+- **Databases**: Any (library is database-agnostic)

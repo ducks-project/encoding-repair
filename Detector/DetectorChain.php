@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair\Detector;
 
-use SplPriorityQueue;
+use Ducks\Component\EncodingRepair\Traits\ChainOfResponsibilityTrait;
 
 /**
  * Chain of Responsibility for detectors with priority management.
@@ -23,19 +23,9 @@ use SplPriorityQueue;
 final class DetectorChain
 {
     /**
-     * @var null|SplPriorityQueue<int, DetectorInterface>
+     * @use ChainOfResponsibilityTrait<DetectorInterface>
      */
-    private ?SplPriorityQueue $queue;
-
-    /**
-     * @var list<array{detector: DetectorInterface, priority: int}>
-     */
-    private $registered = [];
-
-    public function __construct()
-    {
-        $this->queue = null;
-    }
+    use ChainOfResponsibilityTrait;
 
     /**
      * Register a detector with optional priority override.
@@ -50,7 +40,7 @@ final class DetectorChain
         $finalPriority = $priority ?? $detector->getPriority();
 
         $this->registered[] = [
-            'detector' => $detector,
+            'handler' => $detector,
             'priority' => $finalPriority,
         ];
 
@@ -86,38 +76,5 @@ final class DetectorChain
         // @codeCoverageIgnoreStart
         return null;
         // @codeCoverageIgnoreEnd
-    }
-
-    /**
-     * Rebuild queue from registered detectors.
-     *
-     * @return void
-     */
-    private function rebuildQueue(): void
-    {
-        /** @var SplPriorityQueue<int, DetectorInterface> $queue */
-        $queue = new SplPriorityQueue();
-
-        foreach ($this->registered as $item) {
-            $queue->insert($item['detector'], $item['priority']);
-        }
-
-        $this->queue = $queue;
-    }
-
-    /**
-     * Return the queue.
-     *
-     * @return SplPriorityQueue<int, DetectorInterface>
-     */
-    private function getSplPriorityQueue(): SplPriorityQueue
-    {
-        if (!$this->queue instanceof SplPriorityQueue) {
-            /** @var SplPriorityQueue<int, DetectorInterface> $queue */
-            $queue = new SplPriorityQueue();
-            $this->queue = $queue;
-        }
-
-        return $this->queue;
     }
 }

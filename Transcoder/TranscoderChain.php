@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair\Transcoder;
 
-use SplPriorityQueue;
+use Ducks\Component\EncodingRepair\Traits\ChainOfResponsibilityTrait;
 
 /**
  * Chain of Responsibility for transcoders with priority management.
@@ -23,19 +23,9 @@ use SplPriorityQueue;
 final class TranscoderChain
 {
     /**
-     * @var null|SplPriorityQueue<int, TranscoderInterface>
+     * @use ChainOfResponsibilityTrait<TranscoderInterface>
      */
-    private ?SplPriorityQueue $queue;
-
-    /**
-     * @var list<array{transcoder: TranscoderInterface, priority: int}>
-     */
-    private $registered = [];
-
-    public function __construct()
-    {
-        $this->queue = null;
-    }
+    use ChainOfResponsibilityTrait;
 
     /**
      * Register a transcoder with optional priority override.
@@ -50,7 +40,7 @@ final class TranscoderChain
         $finalPriority = $priority ?? $transcoder->getPriority();
 
         $this->registered[] = [
-            'transcoder' => $transcoder,
+            'handler' => $transcoder,
             'priority' => $finalPriority,
         ];
 
@@ -88,38 +78,5 @@ final class TranscoderChain
         // @codeCoverageIgnoreStart
         return null;
         // @codeCoverageIgnoreEnd
-    }
-
-    /**
-     * Rebuild queue from registered transcoders.
-     *
-     * @return void
-     */
-    private function rebuildQueue(): void
-    {
-        /** @var SplPriorityQueue<int, TranscoderInterface> $queue */
-        $queue = new SplPriorityQueue();
-
-        foreach ($this->registered as $item) {
-            $queue->insert($item['transcoder'], $item['priority']);
-        }
-
-        $this->queue = $queue;
-    }
-
-    /**
-     * Return the queue.
-     *
-     * @return SplPriorityQueue<int, TranscoderInterface>
-     */
-    private function getSplPriorityQueue(): SplPriorityQueue
-    {
-        if (!$this->queue instanceof SplPriorityQueue) {
-            /** @var SplPriorityQueue<int, TranscoderInterface> $queue */
-            $queue = new SplPriorityQueue();
-            $this->queue = $queue;
-        }
-
-        return $this->queue;
     }
 }

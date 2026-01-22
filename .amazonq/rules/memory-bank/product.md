@@ -1,103 +1,141 @@
 # Product Overview
 
-## Project Identity
+## Project Purpose
 
-**CharsetHelper** (ducks-project/encoding-repair) - A robust, immutable,
- and extensible PHP library for charset conversion, detection,
- and repair with safe JSON wrappers.
+CharsetHelper (encoding-repair) is a robust PHP library designed to handle charset encoding conversion,
+detection, and repair with a focus on legacy database migrations.
+It solves the common problem of corrupted character encodings when migrating
+from ISO-8859-1/Windows-1252 to UTF-8, particularly addressing double-encoding
+issues that plague legacy systems.
 
-## Purpose
+## Value Proposition
 
-Designed to solve legacy ISO-8859-1 to UTF-8 interoperability issues
- and handle corrupted double-encoded data commonly found in legacy databases
- and systems.
- Provides a production-ready solution for charset conversion with multiple
- fallback strategies.
+Unlike existing charset libraries, CharsetHelper provides:
 
-## Core Value Proposition
-
-Unlike existing libraries (ForceUTF8, Symfony String, Portable UTF-8),
- CharsetHelper provides:
-
-- **Extensible architecture** using Chain of Responsibility pattern
-- **Multiple fallback strategies** (UConverter → iconv → mbstring)
-- **Smart auto-detection** with multiple detection methods
-- **Double-encoding repair** for corrupted legacy data (e.g., "CafÃ©" → "Café")
-- **Recursive conversion** for arrays AND objects (not just arrays)
-- **Safe JSON encoding/decoding** with automatic charset handling
-- **Zero dependencies** (only optional extensions for better performance)
+- **Extensible Architecture**: Implements Chain of Responsibility pattern allowing custom transcoders and detectors
+- **Multiple Fallback Strategies**: Automatically tries UConverter → iconv → mbstring for maximum compatibility
+- **Smart Auto-Detection**: Multiple detection methods with configurable encoding lists
+- **Double-Encoding Repair**: Automatically detects and fixes strings like "Café" → "CafÃ©" back to "Café"
+- **Recursive Conversion**: Handles strings, arrays, AND objects (not just arrays like competitors)
+- **Safe JSON Operations**: Prevents json_encode failures with automatic charset handling
+- **Zero Dependencies**: Only requires ext-json and ext-mbstring (optional extensions for performance)
+- **Modern PHP Standards**: Strict typing, PSR-12 compliant, PHP 7.4+ support
 
 ## Key Features
 
-### 1. Robust Transcoding
+### Core Capabilities
 
-- Chain of Responsibility pattern with prioritized providers
-- Automatic fallback: UConverter (best) → iconv (good) → mbstring (universal)
-- Support for 7+ encodings: UTF-8, UTF-16, UTF-32, ISO-8859-1, Windows-1252, ASCII
-- Configurable options: normalization, transliteration, ignore invalid sequences
+1. **Robust Transcoding**
+   - Chain of Responsibility pattern with prioritized providers
+   - UConverter (ext-intl) for best performance (30% faster)
+   - iconv for transliteration support
+   - mbstring as universal fallback
 
-### 2. Double-Encoding Repair
+2. **Encoding Detection**
+   - Automatic encoding detection with AUTO constant
+   - Multiple detection strategies (mbstring, fileinfo)
+   - Customizable encoding candidate lists
+   - Fast-path for valid UTF-8 strings
 
-- Automatically detects and fixes strings encoded multiple times
-- Peels encoding layers up to configurable depth (default: 5)
-- Common use case: UTF-8 data misinterpreted as ISO-8859-1 and re-encoded
+3. **Double-Encoding Repair**
+   - Detects and reverses multiple encoding layers
+   - Configurable max depth (default: 5 layers)
+   - Handles legacy database corruption scenarios
+   - Preserves data integrity during repair
 
-### 3. Recursive Processing
+4. **Recursive Processing**
+   - Converts strings, arrays, and objects recursively
+   - Immutable operations (objects are cloned)
+   - Preserves data structure and types
+   - Handles deeply nested structures
 
-- Handles strings, arrays, and objects recursively
-- Immutable: objects are cloned before modification
-- Preserves data structure while converting all string values
+5. **Safe JSON Wrappers**
+   - safeJsonEncode: Auto-repairs before encoding
+   - safeJsonDecode: Converts after decoding
+   - Throws clear RuntimeException on errors
+   - Prevents silent failures
 
-### 4. Smart Detection
-
-- Multiple detection strategies with fallback
-- Fast path for valid UTF-8 strings
-- Configurable encoding list for detection
-
-### 5. Safe JSON Operations
-
-- Prevents json_encode from returning false on bad charsets
-- Automatic repair before encoding
-- Clear error messages with RuntimeException on failure
-
-### 6. Extensibility
-
-- Register custom transcoders without modifying core
-- Register custom detectors for specialized encodings
-- Priority control (prepend/append to chain)
+6. **Security Features**
+   - Whitelisted encodings to prevent injection
+   - Strict type checking throughout
+   - Immutable design prevents side effects
+   - Validates all encoding parameters
 
 ## Target Users
 
-### Primary Users
+### Primary Audience
 
-- **Backend developers** migrating legacy databases (Latin1 → UTF-8)
-- **Integration engineers** working with legacy systems
-- **Web scrapers** handling unknown encodings
-- **API developers** ensuring UTF-8 compliance
+1. **Legacy System Maintainers**
+   - Migrating old databases from Latin1 to UTF-8
+   - Fixing double-encoded data from multiple migrations
+   - Integrating with systems using mixed encodings
 
-### Use Cases
+2. **Web Developers**
+   - Processing CSV imports with unknown encodings
+   - Sanitizing API responses for UTF-8 compliance
+   - Web scraping with mixed charset sources
+   - Handling user-uploaded files
 
-1. **Database Migration**: Convert legacy ISO-8859-1 tables to UTF-8
-2. **CSV Import**: Auto-detect and convert files with unknown encoding
-3. **API Sanitization**: Ensure all responses are valid UTF-8
-4. **Web Scraping**: Handle mixed encodings from external sources
-5. **Legacy Integration**: Fix double-encoded data from old systems
+3. **Data Engineers**
+   - ETL pipelines with encoding conversions
+   - Data cleaning and normalization
+   - Cross-system data integration
+   - Database migration projects
 
-## Technical Requirements
+### Secondary Audience
 
-- **PHP**: 7.4, 8.0, 8.1, 8.2, or 8.3
-- **Required Extensions**: ext-mbstring, ext-json
-- **Recommended Extensions**: ext-intl (30% faster), ext-iconv, ext-fileinfo
+- PHP library developers needing extensible charset handling
+- DevOps teams automating legacy system migrations
+- QA engineers testing internationalization features
+
+## Use Cases
+
+### 1. Database Migration (Latin1 → UTF-8)
+
+Migrate entire database tables from ISO-8859-1 to UTF-8 with automatic detection and conversion.
+
+### 2. CSV Import with Unknown Encoding
+
+Auto-detect and convert CSV files to UTF-8 before parsing, handling various source encodings.
+
+### 3. API Response Sanitization
+
+Ensure all API responses are valid UTF-8, preventing json_encode failures and client-side errors.
+
+### 4. Web Scraping
+
+Convert scraped HTML content from various encodings to UTF-8 for consistent processing.
+
+### 5. Legacy System Integration
+
+Fix double-encoded data from old systems that have been migrated multiple times incorrectly.
+
+### 6. Multi-Language Content Management
+
+Handle content in multiple languages with different encoding requirements.
+
+## Competitive Advantages
+
+| Feature | CharsetHelper | ForceUTF8 | Symfony String | Portable UTF-8 |
+| --------- | --------------- | ----------- | ---------------- | ---------------- |
+| Multiple fallback strategies | ✅ | ❌ | ❌ | ❌ |
+| Extensible (CoR pattern) | ✅ | ❌ | ❌ | ❌ |
+| Object recursion | ✅ | ❌ | ❌ | ❌ |
+| Double-encoding repair | ✅ | ✅ | ❌ | ⚠️ |
+| Safe JSON helpers | ✅ | ❌ | ❌ | ❌ |
+| Multi-encoding support | ✅ (7+) | ⚠️ (2) | ⚠️ | ⚠️ (3) |
+| Modern PHP (7.4+, strict types) | ✅ | ❌ | ✅ | ⚠️ |
+| Zero dependencies | ✅ | ✅ | ❌ | ❌ |
 
 ## Performance Characteristics
 
-Benchmarks on 10,000 conversions (PHP 8.2, i7-12700K):
+- **Simple UTF-8 conversion**: 45ms for 10,000 operations
+- **Array conversion (100 items)**: 180ms for 10,000 operations
+- **Auto-detection + conversion**: 92ms for 10,000 operations
+- **Double-encoding repair**: 125ms for 10,000 operations
+- **Safe JSON encode**: 67ms for 10,000 operations
 
-- Simple UTF-8 conversion: 45ms, 2MB
-- Array (100 items): 180ms, 5MB
-- Auto-detection + conversion: 92ms, 3MB
-- Double-encoding repair: 125ms, 4MB
-- Safe JSON encode: 67ms, 3MB
+Performance improves by 30% with ext-intl (UConverter) installed.
 
 ## Quality Standards
 
@@ -107,3 +145,7 @@ Benchmarks on 10,000 conversions (PHP 8.2, i7-12700K):
 - Minimum 90% code coverage
 - Strict typing (declare(strict_types=1))
 - Immutable design patterns
+- Chain of Responsibility for extensibility
+- yoda style
+- OOP SOLID philosophy
+- DRY (Don't Repeat Yourself) principes

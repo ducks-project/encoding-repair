@@ -13,12 +13,9 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair\Transcoder;
 
-use Closure;
+use Ducks\Component\EncodingRepair\Traits\CallableAdapterTrait;
 use InvalidArgumentException;
 use ReflectionException;
-use ReflectionFunctionAbstract;
-use ReflectionFunction;
-use ReflectionMethod;
 
 /**
  * Adapter for legacy callable transcoders.
@@ -27,15 +24,12 @@ use ReflectionMethod;
  */
 final class CallableTranscoder implements TranscoderInterface
 {
+    use CallableAdapterTrait;
+
     /**
      * @var callable(string, string, string, null|array<string, mixed>): (string|null)
      */
     private $callable;
-
-    /**
-     * @var int
-     */
-    private $priority;
 
     /**
      * @param callable(string, string, string, null|array<string, mixed>): (string|null) $callable Transcoding function
@@ -71,21 +65,7 @@ final class CallableTranscoder implements TranscoderInterface
         return $result;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getPriority(): int
-    {
-        return $this->priority;
-    }
 
-    /**
-     * @inheritDoc
-     */
-    public function isAvailable(): bool
-    {
-        return true;
-    }
 
     /**
      * Return true if callable is a valid callable transcoder.
@@ -120,34 +100,9 @@ final class CallableTranscoder implements TranscoderInterface
     {
         if (!self::isValidCallable($callable)) {
             throw new InvalidArgumentException(
-                'Callable transcoder must accept at least 4 parameters: (string, string, string, array)'
+                'Callable transcoder must accept at least 3 parameters: (string, string, string)'
             );
         }
     }
 
-    /**
-     * Get reflection for callable.
-     *
-     * @param callable $callable Callable to reflect
-     *
-     * @return ReflectionFunctionAbstract
-     *
-     * @throws ReflectionException
-     *
-     * @codeCoverageIgnore
-     */
-    private static function getReflection(callable $callable): ReflectionFunctionAbstract
-    {
-        if (\is_array($callable)) {
-            return new ReflectionMethod($callable[0], $callable[1]);
-        }
-
-        if (\is_object($callable) && !$callable instanceof Closure) {
-            return new ReflectionMethod($callable, '__invoke');
-        }
-
-        $closure = Closure::fromCallable($callable);
-
-        return new ReflectionFunction($closure);
-    }
 }

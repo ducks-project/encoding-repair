@@ -2,23 +2,23 @@
 
 ## Code Quality Standards
 
-### Strict Typing
+### Strict Type Declarations
 
-- **ALWAYS** use `declare(strict_types=1);` at the top of every PHP file
-- Enable strict type checking for all function parameters and return types
-- Example from CharsetHelper.php:
+**Frequency: 100% of PHP files**:
+
+Every PHP file MUST start with strict type declaration:
 
 ```php
-<?php
-
 declare(strict_types=1);
-
-namespace Ducks\Component\Component\EncodingRepair;
 ```
 
-### File Header Documentation
+This enforces type safety throughout the codebase and prevents type coercion bugs.
 
-Every file MUST include a standardized header block:
+### File Headers
+
+**Frequency: 100% of PHP files**:
+
+All PHP files include a standardized header:
 
 ```php
 /**
@@ -31,619 +31,708 @@ Every file MUST include a standardized header block:
  */
 ```
 
-### Type Declarations
+### Namespace Structure
 
-- **ALWAYS** declare parameter types and return types for all methods
-- Use nullable types (`?string`) when appropriate
-- Example:
+**Frequency: 100% of PHP files**:
+
+All classes use the base namespace:
 
 ```php
-public static function toCharset(
-    $data,
-    string $to = self::ENCODING_UTF8,
-    string $from = self::ENCODING_ISO,
-    array $options = []
-) {
-    // Implementation
-}
+namespace Ducks\Component\EncodingRepair;
 ```
 
-### PHPDoc Standards
+Subnamespaces for organization:
 
-- **ALWAYS** include PHPDoc blocks for all public methods
-- Include `@param` tags with full type information including array shapes
-- Include `@return` tags with precise return types
-- Include `@throws` tags for all exceptions
-- Use `@psalm-immutable` for immutable classes
-- Use `@final` annotation for classes that shouldn't be extended
-- Example:
+- `Ducks\Component\EncodingRepair\Transcoder\` - Encoding conversion strategies
+- `Ducks\Component\EncodingRepair\Detector\` - Encoding detection strategies
+- `Ducks\Component\EncodingRepair\Tests\phpunit\` - Unit tests
+
+### Class Finality
+
+**Frequency: 90%+ of classes**:
+
+Classes are marked as `final` to prevent inheritance and encourage composition:
+
+```php
+final class CharsetHelper { }
+final class TranscoderChain { }
+final class IconvTranscoder implements TranscoderInterface { }
+```
+
+Only interfaces are not final. This enforces SOLID principles and prevents fragile base class problems.
+
+### Visibility Modifiers
+
+**Frequency: 100% of methods and properties**:
+
+All methods and properties MUST have explicit visibility:
+
+```php
+public function transcode(): ?string { }
+private function buildSuffix(): string { }
+private ?SplPriorityQueue $queue;
+```
+
+Never omit visibility modifiers (no implicit public).
+
+## Type System Standards
+
+### Return Type Declarations
+
+**Frequency: 100% of methods**:
+
+All methods MUST declare return types:
+
+```php
+public function detect(string $string, ?array $options = null): ?string
+public function getPriority(): int
+public function isAvailable(): bool
+private function buildSuffix(array $options): string
+```
+
+Use nullable types (`?string`, `?int`) when methods can return null.
+
+### Parameter Type Hints
+
+**Frequency: 100% of parameters**:
+
+All parameters MUST have type hints:
+
+```php
+public function transcode(string $data, string $to, string $from, ?array $options = null): ?string
+public function register(TranscoderInterface $transcoder, ?int $priority = null): void
+```
+
+### PHPDoc Type Annotations
+
+**Frequency: 100% of complex types**:
+
+Use PHPDoc for array shapes, generics, and complex types:
 
 ```php
 /**
- * Convert $data string from one encoding to another.
- *
- * @param string|array|object $data Data to convert
- * @param string $to Target encoding
- * @param string $from Source encoding (use AUTO for detection)
+ * @var null|SplPriorityQueue<int, TranscoderInterface>
+ */
+private ?SplPriorityQueue $queue;
+
+/**
+ * @var list<array{transcoder: TranscoderInterface, priority: int}>
+ */
+private $registered = [];
+
+/**
  * @param array<string, mixed> $options Conversion options
- * - 'normalize': bool (default: true)
- * - 'translit': bool (default: true)
- * - 'ignore': bool (default: true)
- *
- * @return string|array|object The data transcoded in the target encoding
- *
- * @throws InvalidArgumentException If encoding is invalid
+ * @return list{0: int, 1?: resource}
  */
+private function resolveOptions(array $options): array
 ```
 
-### Array Type Annotations
+### Psalm/PHPStan Annotations
 
-- Use precise array type annotations: `array<string, mixed>`, `list<string>`
-- Document array structure in PHPDoc when complex
-- Example:
+**Frequency: As needed for static analysis**:
+
+Use static analysis annotations:
 
 ```php
 /**
- * @var list<string|callable(string, string, string, array<string, mixed>): (string|null)>
+ * @psalm-api - Marks public API methods
+ * @psalm-immutable - Marks immutable classes
+ * @psalm-suppress MissingClosureParamType - Suppresses specific issues
+ * @codeCoverageIgnore - Excludes code from coverage
+ * @codeCoverageIgnoreStart / @codeCoverageIgnoreEnd - Excludes blocks
  */
-private static $transcoders = [
-    'transcodeWithUConverter',
-    'transcodeWithIconv',
-    'transcodeWithMbString',
-];
 ```
 
-## Coding Style (PSR-12 / PER)
+## Coding Conventions
 
-### PHP CS Fixer Configuration
+It must follow PSR-12 / PER Coding Style.
 
-The project uses PHP CS Fixer with these key rules:
+### Naming Conventions
 
-#### Spacing and Formatting
-
-- **Binary operators**: Single space around operators
-- **Cast spaces**: Single space after cast `(string) $value`
-- **Concat space**: Single space around concatenation operator `. $var .`
-- **Function typehint space**: Space after closing parenthesis before colon
-- **No extra blank lines**: Remove unnecessary blank lines
-- **Single space after construct**: `if (`, `foreach (`, etc.
-
-#### Naming Conventions
-
-- **Magic constant casing**: `__DIR__`, `__FILE__` (uppercase)
-- **Magic method casing**: `__construct`, `__toString` (lowercase)
-- **Native function casing**: Lowercase for built-in functions `\array_map`, `\is_string`
-
-#### Code Organization
-
-- **No unused imports**: Remove unused `use` statements
-- **No unneeded curly braces**: Remove unnecessary braces
-- **No unneeded import alias**: Don't alias imports unnecessarily
-- **Linebreak after opening tag**: Always add newline after `<?php`
-
-#### PHPDoc Standards
-
-- **Align left**: PHPDoc tags aligned to left (not vertical alignment)
-- **No access tags**: Don't use `@access` tags
-- **No package tags**: Don't use `@package` tags
-- **Trim consecutive blank lines**: Remove extra blank lines in PHPDoc
-- **Summary required**: First line must be a summary
-
-#### Yoda Style
-
-- **Enabled**: Use Yoda conditions for comparisons
-- Example: `if (null !== $result)` instead of `if ($result !== null)`
-- Example: `if (false === $detected)` instead of `if ($detected === false)`
-
-### Code Style Examples
-
-#### Correct Yoda Style
+**Classes**: PascalCase
 
 ```php
-if (null !== $detected) {
-    return $detected;
-}
-
-if (false !== $result) {
-    return $result;
-}
-
-if (self::ENCODING_UTF8 === $targetEncoding) {
-    return self::normalize($result, $targetEncoding, $options);
-}
+CharsetHelper, TranscoderChain, IconvTranscoder
 ```
 
-#### Correct Spacing
+**Methods**: camelCase
 
 ```php
-// Binary operators
-$result = $a + $b;
-$isValid = $x === $y;
-
-// Concatenation
-$message = 'Error: ' . $errorMsg . ' occurred';
-
-// Cast
-$string = (string) $value;
-
-// Function calls
-$result = \array_map(static fn($item) => $item, $data);
+toUtf8(), registerTranscoder(), isAvailable()
 ```
 
-#### Correct PHPDoc
+**Constants**: UPPER_SNAKE_CASE
 
 ```php
-/**
- * Detects the charset encoding of a string.
- *
- * @param string $string String to analyze
- * @param array<string, mixed> $options Conversion options
- * - 'encodings': array of encodings to test
- *
- * @return string Detected encoding (uppercase)
- */
-public static function detect(string $string, array $options = []): string
+const ENCODING_UTF8 = 'UTF-8';
+const MAX_REPAIR_DEPTH = 5;
+```
+
+**Variables**: camelCase
+
+```php
+$transcoderChain, $detectorChain, $finalPriority
+```
+
+**Private methods**: camelCase with descriptive names
+
+```php
+private function buildSuffix(): string
+private function rebuildQueue(): void
+private function getSplPriorityQueue(): SplPriorityQueue
+```
+
+### Method Organization
+
+Methods are organized by visibility and purpose:
+
+1. Constructor
+2. Public methods (API)
+3. Private methods (implementation details)
+
+Example from TranscoderChain:
+
+```php
+public function __construct() { }
+public function register() { }
+public function transcode() { }
+private function rebuildQueue() { }
+private function getSplPriorityQueue() { }
+```
+
+### Return Early Pattern
+
+**Frequency: 80%+ of methods**:
+
+Use early returns for guard clauses:
+
+```php
+public function detect(string $string, ?array $options = null): ?string
 {
-    // Implementation
+    if (!$this->isAvailable()) {
+        return null;
+    }
+
+    // Main logic here
 }
 ```
 
-## Architectural Patterns
+### Null Coalescing Operator
 
-### Static Utility Class Pattern
+**Frequency: Very common**:
 
-- Use `final class` to prevent inheritance
-- Make constructor `private` to prevent instantiation
-- All methods should be `public static`
-- No instance properties (stateless)
-- Example:
+Use `??` for default values:
+
+```php
+$finalPriority = $priority ?? $transcoder->getPriority();
+$flags = $options['finfo_flags'] ?? \FILEINFO_NONE;
+$maxDepth = $options['maxDepth'] ?? self::MAX_REPAIR_DEPTH;
+```
+
+### Ternary Operator for Simple Conditions
+
+**Frequency: Common**:
+
+Use ternary for simple conditional assignments:
+
+```php
+return false !== $result ? $result : null;
+$suffix = true === ($options['translit'] ?? true) ? '//TRANSLIT' : '';
+```
+
+## Error Handling Patterns
+
+### Silence Operator for Performance
+
+**Frequency: Specific use cases**:
+
+Use `@` operator instead of error handlers in performance-critical code:
+
+```php
+// Use silence operator (@) instead of
+// \set_error_handler(static fn (): bool => true);
+// set_error_handler is too expensive for high-volume loops.
+$result = @\iconv($from, $to . $suffix, $data);
+```
+
+Document why silence operator is used.
+
+### Null Returns for Chain of Responsibility
+
+**Frequency: 100% of chain handlers**:
+
+Return `null` to pass control to next handler:
+
+```php
+public function transcode(string $data, string $to, string $from, ?array $options = null): ?string
+{
+    if (!$this->isAvailable()) {
+        return null; // Try next transcoder
+    }
+
+    $result = @\iconv($from, $to . $suffix, $data);
+    return false !== $result ? $result : null;
+}
+```
+
+### Exception Throwing
+
+**Frequency: For invalid input only**:
+
+Throw exceptions for invalid input, not for expected failures:
+
+```php
+throw new InvalidArgumentException(
+    'Transcoder must be an instance of TranscoderInterface or a callable'
+);
+
+throw new RuntimeException(
+    'JSON Encode Error: ' . \json_last_error_msg()
+);
+```
+
+## Testing Standards
+
+### Test Class Naming
+
+**Frequency: 100% of test files**:
+
+Test classes follow pattern: `{ClassName}Test`
+
+```php
+final class CharsetHelperTest extends TestCase
+final class IconvTranscoderTest extends TestCase
+```
+
+### Test Method Naming
+
+**Frequency: 100% of test methods**:
+
+Test methods use descriptive names with `test` prefix:
+
+```php
+public function testToUtf8WithIsoString(): void
+public function testRegisterTranscoderThrowsOnInvalidType(): void
+public function testSafeJsonEncodeWithFlags(): void
+```
+
+### Test Method Structure
+
+**Frequency: 100% of tests**:
+
+Follow Arrange-Act-Assert pattern:
+
+```php
+public function testToUtf8WithIsoString(): void
+{
+    // Arrange
+    $iso = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+
+    // Act
+    $result = CharsetHelper::toUtf8($iso, CharsetHelper::ENCODING_ISO);
+
+    // Assert
+    $this->assertSame('Café', $result);
+    $this->assertTrue(\mb_check_encoding($result, 'UTF-8'));
+}
+```
+
+### Void Return Type for Tests
+
+**Frequency: 100% of test methods**:
+
+All test methods return `void`:
+
+```php
+public function testToUtf8WithArray(): void
+```
+
+### Exception Testing
+
+**Frequency: All exception scenarios**:
+
+Use expectException methods:
+
+```php
+public function testSafeJsonDecodeThrowsOnInvalidJson(): void
+{
+    $this->expectException(RuntimeException::class);
+    $this->expectExceptionMessage('JSON Decode Error');
+
+    CharsetHelper::safeJsonDecode('invalid json{');
+}
+```
+
+## Documentation Standards
+
+### Class-Level Documentation
+
+**Frequency: 100% of classes**:
+
+All classes have PHPDoc blocks:
 
 ```php
 /**
+ * Helper class for encoding and detect charset.
+ *
+ * Designed to handle legacy ISO-8859-1 <-> UTF-8 interoperability issues.
+ * Implements Chain of Responsibility pattern for extensibility.
+ *
+ * @psalm-api
  * @psalm-immutable This class has no mutable state
  * @final
  */
 final class CharsetHelper
-{
-    /**
-     * Private constructor to prevent instantiation of static utility class.
-     */
-    private function __construct() {}
-
-    public static function toUtf8(
-        $data,
-        string $from = self::WINDOWS_1252,
-        array $options = []
-    ) {
-        // Implementation
-    }
-}
 ```
 
-### Chain of Responsibility Pattern
+### Method Documentation
 
-- Use static arrays to hold provider chains
-- Providers return `null` to pass to next in chain
-- Loop through providers until one succeeds
-- Example:
+**Frequency: 100% of public methods**:
+
+Public methods have complete PHPDoc:
 
 ```php
 /**
- * @var list<string|callable(string, string, string, array<string, mixed>): (string|null)>
+ * Register a transcoder with optional priority override.
+ *
+ * @param TranscoderInterface $transcoder Transcoder instance
+ * @param int|null $priority Priority override (null = use transcoder's default)
+ *
+ * @return void
  */
-private static $transcoders = [
-    'transcodeWithUConverter',  // Priority 1
-    'transcodeWithIconv',       // Priority 2
-    'transcodeWithMbString',    // Priority 3
-];
-
-// Usage
-foreach (self::$transcoders as $transcoder) {
-    $result = self::invokeProvider($transcoder, $data, $to, $from, $options);
-
-    if (null !== $result) {
-        return $result;
-    }
-}
+public function register(TranscoderInterface $transcoder, ?int $priority = null): void
 ```
 
-### Immutable Operations
+### Inline Comments for Complex Logic
 
-- **ALWAYS** clone objects before modification
-- Never mutate input parameters
-- Return new instances instead of modifying existing ones
-- Example:
+**Frequency: As needed**:
 
-```php
-private static function applyToObject(object $data, callable $callback): object
-{
-    $copy = clone $data;
-
-    $properties = \get_object_vars($copy);
-    foreach ($properties as $key => $value) {
-        $copy->$key = self::applyRecursive($value, $callback);
-    }
-
-    return $copy;
-}
-```
-
-### Recursive Processing Pattern
-
-- Use callback-based transformation
-- Handle arrays, objects, and scalars uniformly
-- Preserve data structure
-- Example:
-
-```php
-private static function applyRecursive($data, callable $callback)
-{
-    if (\is_array($data)) {
-        return \array_map(
-            static fn($item) => self::applyRecursive($item, $callback),
-            $data
-        );
-    }
-
-    if (\is_object($data)) {
-        return self::applyToObject($data, $callback);
-    }
-
-    return $callback($data);
-}
-```
-
-### Fail-Safe Fallback Pattern
-
-- Try multiple strategies in priority order
-- Return original data if all strategies fail
-- Use null coalescing for graceful degradation
-- Example:
-
-```php
-private static function convertString(
-    string $data,
-    string $to,
-    string $from,
-    array $options
-): string {
-    // Return original if everything failed
-    return self::transcodeString($data, $to, $from, $options) ?? $data;
-}
-```
-
-## Error Handling
-
-### Validation
-
-- **ALWAYS** validate input parameters early
-- Throw `InvalidArgumentException` for invalid inputs
-- Use descriptive error messages with context
-- Example:
-
-```php
-private static function validateEncoding(string $encoding, string $type): void
-{
-    $normalized = \strtoupper($encoding);
-
-    if (
-        !\\in_array($encoding, self::ALLOWED_ENCODINGS, true)
-        && !\\in_array($normalized, self::ALLOWED_ENCODINGS, true)
-    ) {
-        throw new InvalidArgumentException(
-            \\sprintf(
-                'Invalid %s encoding: "%s". Allowed: %s',
-                $type,
-                $encoding,
-                \\implode(', ', self::ALLOWED_ENCODINGS)
-            )
-        );
-    }
-}
-```
-
-### Exception Handling
-
-- Use `RuntimeException` for runtime errors (e.g., JSON encoding failures)
-- Include error context in exception messages
-- Use `json_last_error_msg()` for JSON errors
-- Example:
-
-```php
-$json = \\json_encode($data, $flags, $depth);
-
-if (false === $json) {
-    throw new RuntimeException(
-        'JSON Encode Error: ' . \\json_last_error_msg()
-    );
-}
-```
-
-### Silent Error Suppression
-
-- Use `@` operator sparingly, only for known false positives
-- Document why error suppression is needed
-- Example:
+Use inline comments to explain non-obvious logic:
 
 ```php
 // Use silence operator (@) instead of set_error_handler
 // set_error_handler is too expensive for high-volume loops.
-$result = @\\iconv($from, $to . $suffix, $data);
+$result = @\iconv($from, $to . $suffix, $data);
 ```
 
-## Performance Optimization
+### @inheritDoc Usage
 
-### Fast Path Optimization
+**Frequency: 100% of interface implementations**:
 
-- Check common cases first before expensive operations
-- Example:
+Use `@inheritDoc` for interface method implementations:
+
+```php
+/**
+ * @inheritDoc
+ */
+public function detect(string $string, ?array $options = null): ?string
+```
+
+## Design Patterns
+
+### Chain of Responsibility
+
+**Frequency: Core pattern**:
+
+Used for Transcoder and Detector systems:
+
+```php
+// Handler interface
+interface TranscoderInterface {
+    public function transcode(string $data, string $to, string $from, ?array $options = null): ?string;
+}
+
+// Chain coordinator
+final class TranscoderChain {
+    public function transcode(string $data, string $to, string $from, array $options): ?string {
+        foreach ($this->queue as $transcoder) {
+            $result = $transcoder->transcode($data, $to, $from, $options);
+            if (null !== $result) {
+                return $result; // First successful handler wins
+            }
+        }
+        return null;
+    }
+}
+```
+
+### Strategy Pattern
+
+**Frequency: All transcoder/detector implementations**:
+
+Each transcoder/detector is an interchangeable strategy:
+
+```php
+final class IconvTranscoder implements TranscoderInterface { }
+final class MbStringTranscoder implements TranscoderInterface { }
+final class UConverterTranscoder implements TranscoderInterface { }
+```
+
+### Facade Pattern
+
+**Frequency: Main API**:
+
+CharsetHelper provides simplified facade:
+
+```php
+// Simple API hides complex chain management
+CharsetHelper::toUtf8($data);
+CharsetHelper::repair($data);
+CharsetHelper::safeJsonEncode($data);
+```
+
+### Immutable Object Pattern
+
+**Frequency: Object processing**:
+
+Objects are cloned before modification:
+
+```php
+private static function applyToObject(object $data, callable $callback): object
+{
+    $copy = clone $data; // Always clone
+    // ... modify $copy
+    return $copy;
+}
+```
+
+## Performance Optimizations
+
+### Fast-Path Optimization
+
+**Frequency: Critical paths**:
+
+Check common cases first:
 
 ```php
 public static function detect(string $string, array $options = []): string
 {
-    // Fast common return.
+    // Fast common return
     if (self::isValidUtf8($string)) {
         return self::ENCODING_UTF8;
     }
 
-    // Expensive detection logic...
+    // Slower detection logic
+    $detected = self::getDetectorChain()->detect($string, $options);
+    return $detected ?? self::ENCODING_ISO;
 }
 ```
 
-### Avoid Expensive Operations
+### Lazy Initialization
 
-- Prefer `@` operator over `set_error_handler` in loops
-- Cache detection results when possible
-- Use early returns to avoid unnecessary processing
+**Frequency: Singleton-like instances**:
 
-### Extension Priority
-
-- Prioritize faster extensions: UConverter > iconv > mbstring
-- Check extension availability before use
-- Example:
+Initialize expensive objects only when needed:
 
 ```php
-if (!\\class_exists(UConverter::class)) {
-    return null;
+private static function getTranscoderChain(): TranscoderChain
+{
+    if (null === self::$transcoderChain) {
+        self::$transcoderChain = new TranscoderChain();
+        // ... register transcoders
+    }
+    return self::$transcoderChain;
 }
 ```
+
+### Priority Queue for Ordering
+
+**Frequency: Chain implementations**:
+
+Use SplPriorityQueue for efficient priority-based ordering:
+
+```php
+private ?SplPriorityQueue $queue;
+
+public function register(TranscoderInterface $transcoder, ?int $priority = null): void
+{
+    $finalPriority = $priority ?? $transcoder->getPriority();
+    $this->getSplPriorityQueue()->insert($transcoder, $finalPriority);
+}
+```
+
+## Code Coverage Annotations
+
+### Ignoring Unreachable Code
+
+**Frequency: Defensive programming**:
+
+Use coverage annotations for defensive code:
+
+```php
+if (!$this->isAvailable()) {
+    // @codeCoverageIgnoreStart
+    return null;
+    // @codeCoverageIgnoreEnd
+}
+```
+
+### Ignoring Fallback Paths
+
+**Frequency: Chain of Responsibility**:
+
+Ignore fallback returns that are never reached in tests:
+
+```php
+foreach ($this->queue as $transcoder) {
+    $result = $transcoder->transcode($data, $to, $from, $options);
+    if (null !== $result) {
+        return $result;
+    }
+}
+
+// @codeCoverageIgnoreStart
+return null; // Never reached in tests (always has fallback)
+// @codeCoverageIgnoreEnd
+```
+
+## Static Analysis Compliance
+
+### PHPStan Level 8
+
+**Frequency: 100% compliance**:
+
+Code must pass PHPStan level 8 (maximum strictness):
+
+- No mixed types without documentation
+- No undefined variables
+- No dead code
+- Strict comparison operators
+
+### Psalm Type Coverage
+
+**Frequency: 100% target**:
+
+All public methods fully typed:
+
+- Parameter types
+- Return types
+- Property types
+- Array shapes documented
+
+### PHPDoc for Static Analysis
+
+**Frequency: Complex types**:
+
+Use PHPDoc to help static analyzers:
+
+```php
+/** @var mixed $magic */
+$magic = $options['finfo_magic'] ?? null;
+if (\is_string($magic)) {
+    $args[] = $magic;
+}
+```
+
+## Functional Programming Patterns
+
+### Arrow Functions
+
+**Frequency: Common for callbacks**:
+
+Use arrow functions for simple callbacks:
+
+```php
+$callback = static fn ($value) => self::convertValue($value, $to, $from, $options);
+
+return \array_map(
+    static fn ($item) => self::applyRecursive($item, $callback),
+    $data
+);
+```
+
+### Static Closures
+
+**Frequency: 100% of closures**:
+
+Always use `static` keyword for closures:
+
+```php
+static fn ($value) => self::convertValue($value, $to, $from, $options)
+```
+
+This prevents accidental `$this` binding and improves performance.
 
 ## Constants and Configuration
 
-### Class Constants
+### Public Constants for API
 
-- Use `public const` for API constants
-- Use `private const` for internal configuration
-- Group related constants together
-- Use SCREAMING_SNAKE_CASE
-- Example:
+**Frequency: All encoding names**:
+
+Define constants for user-facing values:
 
 ```php
 public const AUTO = 'AUTO';
 public const ENCODING_UTF8 = 'UTF-8';
 public const ENCODING_ISO = 'ISO-8859-1';
-
-private const MAX_REPAIR_DEPTH = 5;
-private const JSON_DEFAULT_DEPTH = 512;
+public const WINDOWS_1252 = 'CP1252';
 ```
 
-### Default Values
+### Private Constants for Defaults
 
-- Use const arrays for default configurations
-- Document array structure
-- Example:
+**Frequency: Internal configuration**:
+
+Use private constants for internal defaults:
 
 ```php
+private const MAX_REPAIR_DEPTH = 5;
+private const JSON_DEFAULT_DEPTH = 512;
 private const DEFAULT_ENCODINGS = [
     self::ENCODING_UTF8,
     self::WINDOWS_1252,
     self::ENCODING_ISO,
-    self::ENCODING_ASCII,
 ];
 ```
 
-## Options Pattern
+## Array Handling
 
-### Configuration Merging
+### Array Type Hints
 
-- Use `array_replace` for merging options with defaults
-- Support multiple override layers
-- Document all available options in PHPDoc
-- Example:
+**Frequency: 100% of array parameters**:
 
-```php
-/**
- * @param array<string, mixed> $options User-provided options
- * @param array<string, mixed> ...$replacements Additional override layers
- *
- * @return array<string, mixed> Merged configuration
- */
-private static function configureOptions(
-    array $options,
-    array ...$replacements
-): array {
-    $replacements[] = $options;
-
-    return \\array_replace(
-        [
-            'normalize' => true,
-            'translit' => true,
-            'ignore' => true,
-            'encodings' => self::DEFAULT_ENCODINGS,
-        ],
-        ...$replacements
-    );
-}
-```
-
-## Naming Conventions
-
-### Method Names
-
-- Use descriptive verb-noun combinations
-- Prefix with `transcode`, `detect`, `validate`, `configure`, etc.
-- Private methods should describe implementation: `transcodeWithUConverter`
-- Public methods should describe intent: `toUtf8`, `repair`, `detect`
-
-### Variable Names
-
-- Use descriptive names: `$sourceEncoding`, `$targetEncoding`
-- Avoid abbreviations except for common ones: `$to`, `$from`
-- Use `$data` for generic input, `$value` for single items
-
-### Boolean Variables
-
-- Prefix with `is`, `has`, `should`: `$isValid`, `$hasResult`
-
-## Testing Standards
-
-### Test Organization
-
-- Place unit tests in `tests/phpunit/`
-- Place benchmarks in `tests/benchmark/`
-- Use PHPUnit ^9.5 || ^10.0
-
-### Coverage Requirements
-
-- Minimum 90% code coverage
-- 100% type coverage (PHPStan level 8)
-
-### Test Execution
-
-```bash
-# Run with coverage
-XDEBUG_MODE=coverage ./vendor/bin/phpunit Tests/phpunit --process-isolation -c phpunit.xml.dist
-
-# Run benchmarks
-./vendor/bin/phpbench run Tests/benchmark/ --report=aggregate --retry-threshold=5
-```
-
-## Static Analysis
-
-### PHPStan Configuration
-
-- Level 8 (maximum strictness)
-- PHPUnit extension enabled
-- 100% type coverage required
-
-### Psalm Configuration
-
-- Strict error level
-- Immutability checking enabled
-- Use `@psalm-immutable` annotation for immutable classes
-
-## Rector Rules
-
-### Enabled Sets
-
-- PHP 7.4 features
-- Dead code removal
-- Code quality improvements
-
-### Skipped Rules
-
-- `RemoveUselessParamTagRector` - Keep param tags for documentation
-- `RemoveUselessReturnTagRector` - Keep return tags for documentation
-- `RemoveUnusedConstructorParamRector` - May have false positives
-
-### Type Coverage
-
-- Level 0 (strictest) - All types must be declared
-
-## Git Workflow
-
-### Commit Messages
-
-- Use conventional commits format
-- Examples: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`
-
-### Branch Strategy
-
-- `main` branch for stable releases
-- Feature branches: `feature/amazing-feature`
-- Bug fix branches: `fix/issue-description`
-
-## Documentation Standards
-
-### README Structure
-
-- Comprehensive feature documentation
-- Code examples for all public methods
-- Performance benchmarks
-- Comparison with alternatives
-- Use cases and real-world examples
-
-### Inline Comments
-
-- Explain WHY, not WHAT
-- Document performance considerations
-- Document edge cases and gotchas
-- Example:
-
-```php
-// Loop while it looks like valid UTF-8
-while ($iterations < $maxDepth && self::isValidUtf8($fixed)) {
-    // Attempt to reverse convert (UTF-8 -> $from)
-    $test = self::transcodeString($fixed, $from, self::ENCODING_UTF8, $options);
-
-    if (null === $test || $test === $fixed || !self::isValidUtf8($test)) {
-        break;
-    }
-
-    // If conversion worked AND result is still valid UTF-8 AND result is different
-    $fixed = $test;
-    $iterations++;
-}
-```
-
-## Security Considerations
-
-### Input Validation
-
-- Whitelist allowed encodings to prevent injection
-- Validate all user inputs early
-- Use strict comparison (`===`) for security checks
-
-### Safe Defaults
-
-- Enable transliteration and ignore flags by default
-- Use Windows-1252 instead of strict ISO-8859-1 (more characters)
-- Normalize UTF-8 output by default
-
-## Extensibility Guidelines
-
-### Provider Registration
-
-- Support both method names (string) and callables
-- Validate providers before registration
-- Support priority control (prepend/append)
-- Example:
-
-```php
-public static function registerTranscoder(
-    $transcoder,
-    bool $prepend = true
-): void {
-    self::validateTranscoder($transcoder);
-
-    if ($prepend) {
-        \\array_unshift(self::$transcoders, $transcoder);
-    } else {
-        self::$transcoders[] = $transcoder;
-    }
-}
-```
-
-### Provider Interface
-
-- Providers must return `null` to pass to next in chain
-- Providers must match expected signature
-- Document signature in PHPDoc
-- Example:
+Always specify array types in PHPDoc:
 
 ```php
 /**
- * @param string|callable $transcoder Method name or callable with signature:
- * fn(string, string, string, array): string|false
+ * @param array<string, mixed> $options
+ * @return list<array{transcoder: TranscoderInterface, priority: int}>
  */
 ```
+
+### Array Spread Operator
+
+**Frequency: Variable arguments**:
+
+Use spread operator for variable arguments:
+
+```php
+$finfo = new finfo(FILEINFO_MIME_ENCODING, ...$args);
+$detected = $finfo->buffer($string, ...$this->resolveOptions($options ?? []));
+```
+
+### Array Functions
+
+**Frequency: Common**:
+
+Prefer array functions over loops:
+
+```php
+return \array_map(
+    static fn ($item) => self::applyRecursive($item, $callback),
+    $data
+);
+```
+
+## Summary
+
+This codebase follows strict modern PHP standards with:
+
+- 100% strict typing
+- 100% type coverage
+- Final classes by default
+- Chain of Responsibility for extensibility
+- Immutable object handling
+- Comprehensive testing
+- PHPStan level 8 compliance
+- Performance-conscious design
+- Clear documentation

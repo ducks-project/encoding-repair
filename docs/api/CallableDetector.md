@@ -2,6 +2,8 @@
 
 Adapter for legacy callable detectors.
 
+Uses [CallableAdapterTrait](CallableAdapterTrait.md) for common adapter functionality.
+
 ## Synopsis
 
 ```php
@@ -9,10 +11,12 @@ namespace Ducks\Component\EncodingRepair\Detector;
 
 final class CallableDetector implements DetectorInterface
 {
+    use CallableAdapterTrait;
+
     public function __construct(callable $callable, int $priority);
     public function detect(string $string, array $options): ?string;
-    public function getPriority(): int;
-    public function isAvailable(): bool;
+    public function getPriority(): int;  // From CallableAdapterTrait
+    public function isAvailable(): bool;  // From CallableAdapterTrait
 }
 ```
 
@@ -20,7 +24,7 @@ final class CallableDetector implements DetectorInterface
 
 Wraps a callable to implement DetectorInterface, enabling legacy callables to work with the detector chain.
 
-**Validation**: Ensures callable accepts at least 2 parameters and returns string|null
+**Validation**: Ensures callable accepts at least 1 parameter and returns string|null
 
 ## Constructor
 
@@ -92,5 +96,6 @@ public function isAvailable(): bool
 ## See Also
 
 - [DetectorInterface](DetectorInterface.md)
+- [CallableAdapterTrait](CallableAdapterTrait.md)
 - [DetectorChain](DetectorChain.md)
 - [CallableTranscoder](CallableTranscoder.md)

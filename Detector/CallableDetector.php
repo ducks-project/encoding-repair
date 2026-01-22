@@ -13,12 +13,9 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair\Detector;
 
-use Closure;
+use Ducks\Component\EncodingRepair\Traits\CallableAdapterTrait;
 use InvalidArgumentException;
 use ReflectionException;
-use ReflectionFunctionAbstract;
-use ReflectionFunction;
-use ReflectionMethod;
 
 /**
  * Adapter for legacy callable detectors.
@@ -27,15 +24,12 @@ use ReflectionMethod;
  */
 final class CallableDetector implements DetectorInterface
 {
+    use CallableAdapterTrait;
+
     /**
      * @var callable(string, null|array<string, mixed>): (string|null)
      */
     private $callable;
-
-    /**
-     * @var int
-     */
-    private $priority;
 
     /**
      * @param callable(string, null|array<string, mixed>): (string|null) $callable Detection function
@@ -70,21 +64,7 @@ final class CallableDetector implements DetectorInterface
         return $result;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getPriority(): int
-    {
-        return $this->priority;
-    }
 
-    /**
-     * @inheritDoc
-     */
-    public function isAvailable(): bool
-    {
-        return true;
-    }
 
     /**
      * Return true if callable is a valid callable detector.
@@ -122,29 +102,4 @@ final class CallableDetector implements DetectorInterface
         }
     }
 
-    /**
-     * Get reflection for callable.
-     *
-     * @param callable $callable Callable to reflect
-     *
-     * @return ReflectionFunctionAbstract
-     *
-     * @throws ReflectionException
-     *
-     * @codeCoverageIgnore
-     */
-    private static function getReflection(callable $callable): ReflectionFunctionAbstract
-    {
-        if (\is_array($callable)) {
-            return new ReflectionMethod($callable[0], $callable[1]);
-        }
-
-        if (\is_object($callable) && !$callable instanceof Closure) {
-            return new ReflectionMethod($callable, '__invoke');
-        }
-
-        $closure = Closure::fromCallable($callable);
-
-        return new ReflectionFunction($closure);
-    }
 }

@@ -39,6 +39,9 @@ nav:
       - FileInfoDetector: api/FileInfoDetector.md
       - CallableDetector: api/CallableDetector.md
       - DetectorChain: api/DetectorChain.md
+    - Traits:
+      - CallableAdapterTrait: api/CallableAdapterTrait.md
+      - ChainOfResponsibilityTrait: api/ChainOfResponsibilityTrait.md
     - Methods:
       - toCharset: api/methods/CharsetHelper.toCharset.md
       - toUtf8: api/methods/CharsetHelper.toUtf8.md

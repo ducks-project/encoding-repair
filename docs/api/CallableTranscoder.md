@@ -6,6 +6,8 @@
 
 CallableTranscoder is an adapter that wraps legacy callable functions into the TranscoderInterface. It provides backward compatibility for custom transcoders defined as closures or functions.
 
+Uses [CallableAdapterTrait](CallableAdapterTrait.md) for common adapter functionality.
+
 **Priority:** User-defined  
 **Requires:** None
 
@@ -13,11 +15,13 @@ CallableTranscoder is an adapter that wraps legacy callable functions into the T
 
 ```php
 final class CallableTranscoder implements TranscoderInterface {
+    use CallableAdapterTrait;
+
     /* Methods */
     public __construct(callable $callable, int $priority)
     public transcode(string $data, string $to, string $from, array $options): ?string
-    public getPriority(): int
-    public isAvailable(): bool
+    public getPriority(): int  // From CallableAdapterTrait
+    public isAvailable(): bool  // From CallableAdapterTrait
 }
 ```
 
@@ -104,7 +108,7 @@ CharsetHelper::registerTranscoder(
 
 CallableTranscoder validates:
 
-1. **Signature:** Must accept at least 4 parameters
+1. **Signature:** Must accept at least 3 parameters
 2. **Return type:** Must return `string|null`
 
 ```php
@@ -123,5 +127,6 @@ $invalid = new CallableTranscoder(
 
 ## See Also
 
-- [TranscoderInterface](./TranscoderInterface.md)
-- [CharsetHelper::registerTranscoder](../CharsetHelper.registerTranscoder.md)
+- [TranscoderInterface](TranscoderInterface.md)
+- [CallableAdapterTrait](CallableAdapterTrait.md)
+- [CharsetHelper](CharsetHelper.md)

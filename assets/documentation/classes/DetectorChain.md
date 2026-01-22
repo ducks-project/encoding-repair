@@ -1,6 +1,7 @@
 # DetectorChain
 
 Chain of Responsibility for detectors with priority management.
+Uses [ChainOfResponsibilityTrait](./ChainOfResponsibilityTrait.md) for queue management.
 
 ## Synopsis
 
@@ -9,7 +10,8 @@ namespace Ducks\Component\EncodingRepair\Detector;
 
 final class DetectorChain
 {
-    public function __construct();
+    use ChainOfResponsibilityTrait;
+
     public function register(DetectorInterface $detector, ?int $priority = null): void;
     public function detect(string $string, array $options): ?string;
 }
@@ -17,7 +19,7 @@ final class DetectorChain
 
 ## Description
 
-Manages a priority queue of detectors using `SplPriorityQueue`. Executes detectors in priority order until one succeeds.
+Manages a priority queue of detectors using `SplPriorityQueue` via [ChainOfResponsibilityTrait](./ChainOfResponsibilityTrait.md). Executes detectors in priority order until one succeeds.
 
 **Default Detectors:**
 1. MbStringDetector (priority: 100)
@@ -84,6 +86,7 @@ Higher priority values execute first:
 ## See Also
 
 - [DetectorInterface](DetectorInterface.md)
+- [ChainOfResponsibilityTrait](./ChainOfResponsibilityTrait.md)
 - [MbStringDetector](MbStringDetector.md)
 - [FileInfoDetector](FileInfoDetector.md)
 - [CallableDetector](CallableDetector.md)

@@ -540,6 +540,8 @@ composer phpcsfixer-check
 - [`CallableDetector`]
 - [`MbStringDetector`]
 - [`FileInfoDetector`]
+- [`CallableAdapterTrait`]
+- [`ChainOfResponsibilityTrait`]
 
 ## 🤝 Contributing
 
@@ -615,6 +617,8 @@ Made with ❤️ by the Duck Project Team
 [`CallableDetector`]: /assets/documentation/classes/CallableDetector.md
 [`MbStringDetector`]: /assets/documentation/classes/MbStringDetector.md
 [`FileInfoDetector`]: /assets/documentation/classes/FileInfoDetector.md
+[`CallableAdapterTrait`]: /assets/documentation/classes/CallableAdapterTrait.md
+[`ChainOfResponsibilityTrait`]: /assets/documentation/classes/ChainOfResponsibilityTrait.md
 [How To]: /assets/documentation/HowTo.md
 [Changelog]: CHANGELOG.md
 [MIT license]: LICENSE

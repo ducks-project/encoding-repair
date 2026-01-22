@@ -71,7 +71,7 @@ final class CallableTranscoderTest extends TestCase
         $callable = fn (string $data, string $to): ?string => 'result';
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('must accept at least 4 parameters');
+        $this->expectExceptionMessage('must accept at least 3 parameters');
 
         new CallableTranscoder($callable, 50);
     }
