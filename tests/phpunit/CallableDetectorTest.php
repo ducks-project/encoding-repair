@@ -22,11 +22,9 @@ final class CallableDetectorTest extends TestCase
     public function testConstructorAcceptsValidCallable(): void
     {
         /**
-         * @param array<string, mixed> $options
+         * @param array<string, mixed>|null $options
          */
-        $callable = function (string $string, array $options): string {
-            return 'UTF-8';
-        };
+        $callable = fn (string $string, ?array $options = null): string => 'UTF-8';
 
         $detector = new CallableDetector($callable, 50);
 
@@ -37,11 +35,9 @@ final class CallableDetectorTest extends TestCase
     public function testDetectReturnsCallableResult(): void
     {
         /**
-         * @param array<string, mixed> $options
+         * @param array<string, mixed>|null $options
          */
-        $callable = function (string $string, array $options): string {
-            return 'ISO-8859-1';
-        };
+        $callable = fn (string $string, ?array $options = null): string => 'ISO-8859-1';
 
         $detector = new CallableDetector($callable, 50);
         $result = $detector->detect('test', []);
@@ -52,11 +48,9 @@ final class CallableDetectorTest extends TestCase
     public function testDetectReturnsNull(): void
     {
         /**
-         * @param array<string, mixed> $options
+         * @param array<string, mixed>|null $options
          */
-        $callable = function (string $string, array $options): ?string {
-            return null;
-        };
+        $callable = fn (string $string, ?array $options = null): ?string => null;
 
         $detector = new CallableDetector($callable, 50);
         $result = $detector->detect('test', []);
@@ -67,11 +61,9 @@ final class CallableDetectorTest extends TestCase
     public function testDetectThrowsOnInvalidReturnType(): void
     {
         /**
-         * @var callable(string, array<string, mixed>): (string|null) $callable
+         * @var callable(string, array<string, mixed>|null): (string|null) $callable
          */
-        $callable = function (string $string, array $options) {
-            return 123;
-        };
+        $callable = fn (string $string, ?array $options = null) => 123;
 
         // @phpstan-ignore argument.type
         $detector = new CallableDetector($callable, 50);
@@ -84,12 +76,10 @@ final class CallableDetectorTest extends TestCase
 
     public function testConstructorThrowsOnInvalidParameterCount(): void
     {
-        $callable = function (string $string): string {
-            return 'UTF-8';
-        };
+        $callable = fn (): string => 'UTF-8';
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('must accept at least 2 parameters');
+        $this->expectExceptionMessage('must accept at least 1 parameter');
 
         new CallableDetector($callable, 50);
     }

@@ -99,7 +99,7 @@ final class CallableDetector implements DetectorInterface
             $reflection = self::getReflection($callable);
 
             return $reflection->getNumberOfParameters() >= 1;
-        } catch (\ReflectionException $e) {
+        } catch (ReflectionException $e) {
             return true;
         }
     }
@@ -115,7 +115,7 @@ final class CallableDetector implements DetectorInterface
     {
         if (!self::isValidCallable($callable)) {
             throw new InvalidArgumentException(
-                'Callable detector must accept at least 2 parameters: (string, array)'
+                'Callable detector must accept at least 1 parameter: (string)'
             );
         }
     }
@@ -135,7 +135,7 @@ final class CallableDetector implements DetectorInterface
             return new ReflectionMethod($callable[0], $callable[1]);
         }
 
-        if (\is_object($callable) && !$callable instanceof \Closure) {
+        if (\is_object($callable) && !$callable instanceof Closure) {
             return new ReflectionMethod($callable, '__invoke');
         }
 

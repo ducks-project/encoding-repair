@@ -100,7 +100,7 @@ final class CallableTranscoder implements TranscoderInterface
             $reflection = self::getReflection($callable);
 
             return 3 <= $reflection->getNumberOfParameters();
-        } catch (\ReflectionException $e) {
+        } catch (ReflectionException $e) {
             // Because of PHP 7.4 we need to validate the callable
             // if ReflectionException occured.
             return true;
@@ -138,7 +138,7 @@ final class CallableTranscoder implements TranscoderInterface
             return new ReflectionMethod($callable[0], $callable[1]);
         }
 
-        if (\is_object($callable) && !$callable instanceof \Closure) {
+        if (\is_object($callable) && !$callable instanceof Closure) {
             return new ReflectionMethod($callable, '__invoke');
         }
 

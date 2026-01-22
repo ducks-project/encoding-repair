@@ -191,7 +191,7 @@ final class CharsetHelperTest extends TestCase
         /**
          * @param array<string, mixed>|null $options
          */
-        $transcoder = function (string $data, string $to, string $from, ?array $options) use (&$called): ?string {
+        $transcoder = function (string $data, string $to, string $from, ?array $options = null) use (&$called): ?string {
             if ('TEST-ENCODING' === $from) {
                 $called = true;
                 return 'transcoded';
@@ -214,7 +214,7 @@ final class CharsetHelperTest extends TestCase
 
     public function testRegisterDetector(): void
     {
-        $detector = function (string $string, array $options): ?string {
+        $detector = function (string $string, ?array $options = null): ?string {
             // Check for UTF-16LE BOM
             if (2 <= \strlen($string) && 0xFF === \ord($string[0]) && 0xFE === \ord($string[1])) {
                 return 'UTF-16LE';

@@ -22,9 +22,7 @@ final class CallableTranscoderTest extends TestCase
     public function testConstructorAcceptsValidCallable(): void
     {
         // @phpstan-ignore return.unusedType
-        $callable = function (string $data, string $to, string $from, ?array $options = null): ?string {
-            return 'result';
-        };
+        $callable = fn (string $data, string $to, string $from, ?array $options = null): ?string => 'result';
 
         $transcoder = new CallableTranscoder($callable, 50);
 
@@ -35,9 +33,7 @@ final class CallableTranscoderTest extends TestCase
     public function testTranscodeReturnsCallableResult(): void
     {
         // @phpstan-ignore return.unusedType
-        $callable = function (string $data, string $to, string $from, ?array $options = null): ?string {
-            return $data . '_transcoded';
-        };
+        $callable = fn (string $data, string $to, string $from, ?array $options = null): ?string => $data . '_transcoded';
 
         $transcoder = new CallableTranscoder($callable, 50);
         $result = $transcoder->transcode('test', 'UTF-8', 'ISO-8859-1', []);
@@ -47,9 +43,7 @@ final class CallableTranscoderTest extends TestCase
 
     public function testTranscodeReturnsNull(): void
     {
-        $callable = function (string $data, string $to, string $from, ?array $options = null): ?string {
-            return null;
-        };
+        $callable = fn (string $data, string $to, string $from, ?array $options = null): ?string => null;
 
         $transcoder = new CallableTranscoder($callable, 50);
         $result = $transcoder->transcode('test', 'UTF-8', 'ISO-8859-1', []);
@@ -60,9 +54,7 @@ final class CallableTranscoderTest extends TestCase
     public function testTranscodeThrowsOnInvalidReturnType(): void
     {
         // @phpstan-ignore return.unusedType
-        $callable = function (string $data, string $to, string $from, ?array $options = null) {
-            return 123;
-        };
+        $callable = fn (string $data, string $to, string $from, ?array $options = null) => 123;
 
         // @phpstan-ignore argument.type
         $transcoder = new CallableTranscoder($callable, 50);
@@ -76,9 +68,7 @@ final class CallableTranscoderTest extends TestCase
     public function testConstructorThrowsOnInvalidParameterCount(): void
     {
         // @phpstan-ignore return.unusedType
-        $callable = function (string $data, string $to): ?string {
-            return 'result';
-        };
+        $callable = fn (string $data, string $to): ?string => 'result';
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('must accept at least 4 parameters');
@@ -88,7 +78,7 @@ final class CallableTranscoderTest extends TestCase
 
     public function testConstructorAcceptsArrayCallable(): void
     {
-        $obj = new class {
+        $obj = new class () {
             // @phpstan-ignore missingType.iterableValue
             public function transcode(string $data, string $to, string $from, ?array $options = null): ?string
             {
