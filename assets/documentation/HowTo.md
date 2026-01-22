@@ -380,9 +380,12 @@ $result = CharsetHelper::toCharset($ebcdicData, 'UTF-8', 'EBCDIC');
 
 ```php
 use Ducks\Component\EncodingRepair\CharsetHelper;
+use Ducks\Component\EncodingRepair\Detector\DetectorInterface;
 
-CharsetHelper::registerDetector(
-    function (string $string, array $options): ?string {
+class Utf16BomDetector implements DetectorInterface
+{
+    public function detect(string $string, array $options): ?string
+    {
         // Check for UTF-16 BOM
         if (strlen($string) >= 2) {
             if (ord($string[0]) === 0xFF && ord($string[1]) === 0xFE) {
@@ -393,8 +396,32 @@ CharsetHelper::registerDetector(
             }
         }
         return null;
+    }
+    
+    public function getPriority(): int
+    {
+        return 150; // Higher than MbStringDetector (100)
+    }
+    
+    public function isAvailable(): bool
+    {
+        return true;
+    }
+}
+
+CharsetHelper::registerDetector(new Utf16BomDetector());
+
+// Or use a callable
+CharsetHelper::registerDetector(
+    function (string $string, array $options): ?string {
+        if (strlen($string) >= 2) {
+            if (ord($string[0]) === 0xFF && ord($string[1]) === 0xFE) {
+                return 'UTF-16LE';
+            }
+        }
+        return null;
     },
-    true
+    150  // Priority
 );
 ```
 

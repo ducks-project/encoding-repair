@@ -324,20 +324,49 @@ CharsetHelper::registerTranscoder(
 
 ### Registering Custom Detectors
 
-Add custom encoding detection methods:
+Add custom encoding detection methods using the DetectorInterface:
 
 ```php
-CharsetHelper::registerDetector(
-    function (string $string, array $options): ?string {
-        // Your custom detection logic
-        if (myCustomDetection($string)) {
-            return 'MY-CUSTOM-ENCODING';
-        }
+use Ducks\Component\EncodingRepair\Detector\DetectorInterface;
 
+class MyCustomDetector implements DetectorInterface
+{
+    public function detect(string $string, array $options): ?string
+    {
+        // Check for UTF-16LE BOM
+        if (strlen($string) >= 2 && ord($string[0]) === 0xFF && ord($string[1]) === 0xFE) {
+            return 'UTF-16LE';
+        }
         // Return null to try next detector
         return null;
+    }
+
+    public function getPriority(): int
+    {
+        return 150; // Higher than MbStringDetector (100)
+    }
+
+    public function isAvailable(): bool
+    {
+        return true;
+    }
+}
+
+// Register with default priority
+CharsetHelper::registerDetector(new MyCustomDetector());
+
+// Register with custom priority
+CharsetHelper::registerDetector(new MyCustomDetector(), 200);
+
+// Legacy: Register a callable
+CharsetHelper::registerDetector(
+    function (string $string, array $options): ?string {
+        if (strlen($string) >= 2 && ord($string[0]) === 0xFF && ord($string[1]) === 0xFE) {
+            return 'UTF-16LE';
+        }
+        return null;
     },
-    true  // Prepend (higher priority)
+    200  // Priority
 );
 ```
 
@@ -364,8 +393,11 @@ Higher values execute first.
 
 **Detector priorities:**
 
-1. **mb_detect_encoding**: Fast and reliable for common encodings
-2. **finfo (FileInfo)**: Fallback for difficult cases
+1. **MbStringDetector** (priority: 100, requires `ext-mbstring`): Fast and reliable using mb_detect_encoding
+2. **FileInfoDetector** (priority: 50, requires `ext-fileinfo`): Fallback using finfo class
+
+**Custom detectors** can be registered with any priority value.
+Higher values execute first.
 
 ## 📊 Performance
 
@@ -504,6 +536,10 @@ composer phpcsfixer-check
 - [`IconvTranscoder`]
 - [`MbStringTranscoder`]
 - [`UConverterTranscoder`]
+- [`DetectorInterface`]
+- [`CallableDetector`]
+- [`MbStringDetector`]
+- [`FileInfoDetector`]
 
 ## 🤝 Contributing
 
@@ -575,6 +611,10 @@ Made with ❤️ by by the Duck project team
 [`IconvTranscoder`]: /assets/documentation/classes/IconvTranscoder.md
 [`MbStringTranscoder`]: /assets/documentation/classes/MbStringTranscoder.md
 [`UconverterTranscoder`]: /assets/documentation/classes/UconverterTranscoder.md
+[`DetectorInterface`]: /assets/documentation/classes/DetectorInterface.md
+[`CallableDetector`]: /assets/documentation/classes/CallableDetector.md
+[`MbStringDetector`]: /assets/documentation/classes/MbStringDetector.md
+[`FileInfoDetector`]: /assets/documentation/classes/FileInfoDetector.md
 [How To]: /assets/documentation/HowTo.md
 [Changelog]: CHANGELOG.md
 [MIT license]: LICENSE
