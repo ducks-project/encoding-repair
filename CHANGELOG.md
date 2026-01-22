@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- [`CharsetProcessorInterface`] - Service contract for charset processing (namespace: `Ducks\Component\EncodingRepair`)
+- [`CharsetProcessor`] - Service implementation with fluent API (namespace: `Ducks\Component\EncodingRepair`)
+- Transcoder management methods: `registerTranscoder()`, `unregisterTranscoder()`, `queueTranscoders()`, `resetTranscoders()`
+- Detector management methods: `registerDetector()`, `unregisterDetector()`, `queueDetectors()`, `resetDetectors()`
+- Encoding management methods: `addEncodings()`, `removeEncodings()`, `getEncodings()`, `resetEncodings()`
+- Fluent API support - all management methods return `$this` for method chaining
+- Support for multiple independent processor instances with different configurations
+- Example file demonstrating service usage (`examples/service-usage.php`)
+- `SERVICE_ARCHITECTURE.md` - Complete documentation of the new architecture
+
 ### Changed
 
 - Refactored code to use traits for better maintainability and DRY principles
@@ -15,6 +27,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Moved traits to dedicated `Traits/` directory
 - Reduced code duplication by ~80 lines across 4 classes
 - Improved type safety with generic trait annotations (`@template T`)
+- Refactored `CharsetHelper` to act as a static facade delegating to `CharsetProcessor`
+- All business logic moved from `CharsetHelper` to `CharsetProcessor` service
+- `CharsetHelper` now uses lazy initialization for the processor instance
+- 100% backward compatible
 
 ## <a name="v100"></a>[1.0.0] - 2026-01-21
 
@@ -59,6 +75,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [`CharsetHelper`] Advanced charset encoding converter with **Chain of Responsibility** pattern
 
 [`CharsetHelper`]: /assets/documentation/classes/CharsetHelper.md
+[`CharsetProcessorInterface`]: /assets/documentation/classes/CharsetProcessorInterface.md
+[`CharsetProcessor`]: /assets/documentation/classes/CharsetProcessor.md
 [`TranscoderInterface`]: /assets/documentation/classes/TranscoderInterface.md
 [`UConverterTranscoder`]: /assets/documentation/classes/UConverterTranscoder.md
 [`IconvTranscoder`]: /assets/documentation/classes/IconvTranscoder.md

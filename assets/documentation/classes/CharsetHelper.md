@@ -4,16 +4,16 @@
 
 ## [Introduction](#introduction)
 
-CharsetHelper is an advanced charset encoding converter that implements
-the Chain of Responsibility pattern for extensible and robust character
-encoding conversion.
-It provides automatic encoding detection, double-encoding repair capabilities,
-and safe JSON operations with UTF-8 compliance.
+CharsetHelper is a static facade for charset processing that delegates to [CharsetProcessor](CharsetProcessor.md).
+It implements the Chain of Responsibility pattern for extensible and robust character encoding conversion.
+It provides automatic encoding detection, double-encoding repair capabilities, and safe JSON operations with UTF-8 compliance.
 
-Unlike existing libraries, CharsetHelper offers multiple fallback strategies
-(UConverter → iconv → mbstring), recursive conversion for arrays and objects,
-and the ability to repair corrupted double-encoded legacy data
+Unlike existing libraries, CharsetHelper offers multiple fallback strategies (UConverter → iconv → mbstring),
+recursive conversion for arrays and objects, and the ability to repair corrupted double-encoded legacy data
 commonly found in old databases.
+
+**Architecture**: CharsetHelper is now a static facade that delegates all operations to [CharsetProcessor](CharsetProcessor.md).
+For better testability and flexibility, consider using CharsetProcessor directly.
 
 ## [Class synopsis](#class-synopsis)
 
@@ -417,6 +417,8 @@ Benchmarks on 10,000 conversions (PHP 8.2, i7-12700K):
 
 ## [See Also](#see-also)
 
+- [CharsetProcessor](CharsetProcessor.md) — Service implementation
+- [CharsetProcessorInterface](CharsetProcessorInterface.md) — Service contract
 - [mb_convert_encoding()] — Convert character encoding
 - [iconv()] — Convert string to requested character encoding
 - [mb_detect_encoding()] — Detect character encoding

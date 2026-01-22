@@ -7,6 +7,29 @@
 
 Advanced charset encoding converter with **Chain of Responsibility** pattern, auto-detection, double-encoding repair, and JSON safety.
 
+## What's New in v1.1
+
+### Service-Based Architecture
+
+CharsetHelper now uses a service-based architecture following SOLID principles:
+
+- **`CharsetProcessor`**: Instantiable service with fluent API
+- **`CharsetProcessorInterface`**: Service contract for dependency injection
+- **Multiple instances**: Different configurations for different contexts
+- **100% backward compatible**: Existing code works unchanged
+
+```php
+// New way: Service instance
+$processor = new CharsetProcessor();
+$processor->addEncodings('SHIFT_JIS')->resetDetectors();
+$utf8 = $processor->toUtf8($data);
+
+// Old way: Static facade (still works)
+$utf8 = CharsetHelper::toUtf8($data);
+```
+
+See [Service Architecture](guide/service-architecture.md) for details.
+
 ## Why CharsetHelper?
 
 Unlike existing libraries, CharsetHelper provides:

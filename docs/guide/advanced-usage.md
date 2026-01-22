@@ -1,5 +1,70 @@
 # Advanced Usage
 
+## Service Architecture (New in v1.1)
+
+### Using CharsetProcessor Service
+
+For better testability and flexibility, use the `CharsetProcessor` service directly:
+
+```php
+use Ducks\Component\EncodingRepair\CharsetProcessor;
+
+// Create a processor instance
+$processor = new CharsetProcessor();
+
+// Fluent API for configuration
+$processor
+    ->addEncodings('SHIFT_JIS', 'EUC-JP')
+    ->queueTranscoders(new MyCustomTranscoder())
+    ->resetDetectors();
+
+// Use the processor
+$utf8 = $processor->toUtf8($data);
+```
+
+### Multiple Processor Instances
+
+```php
+// Production processor with strict encodings
+$prodProcessor = new CharsetProcessor();
+$prodProcessor->resetEncodings()->addEncodings('UTF-8', 'ISO-8859-1');
+
+// Import processor with permissive encodings
+$importProcessor = new CharsetProcessor();
+$importProcessor->addEncodings('SHIFT_JIS', 'EUC-JP', 'GB2312');
+
+// Both are independent
+$prodResult = $prodProcessor->toUtf8($data);
+$importResult = $importProcessor->toUtf8($legacyData);
+```
+
+### Dependency Injection
+
+```php
+use Ducks\Component\EncodingRepair\CharsetProcessorInterface;
+
+class MyService
+{
+    private CharsetProcessorInterface $processor;
+    
+    public function __construct(CharsetProcessorInterface $processor)
+    {
+        $this->processor = $processor;
+    }
+    
+    public function process($data)
+    {
+        return $this->processor->toUtf8($data);
+    }
+}
+
+// Easy to mock in tests
+$mock = $this->createMock(CharsetProcessorInterface::class);
+$service = new MyService($mock);
+```
+
+See [Service Architecture](service-architecture.md) for complete documentation.
+
 ## Repair Double-Encoded Data
 
 ### Fix Corrupted Strings

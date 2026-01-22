@@ -5,6 +5,7 @@ Complete guide with practical examples and use cases for CharsetHelper.
 ## Table of Contents
 
 - [Basic Usage](#basic-usage)
+- [Service-Based Usage (New in v1.1)](#service-based-usage-new-in-v11)
 - [Common Use Cases](#common-use-cases)
 - [Advanced Scenarios](#advanced-scenarios)
 - [Integration Examples](#integration-examples)
@@ -56,6 +57,101 @@ $user->email = 'jose@example.com';
 
 // Returns a cloned object with converted properties
 $utf8User = CharsetHelper::toUtf8($user, CharsetHelper::ENCODING_ISO);
+```
+
+---
+
+## Service-Based Usage (New in v1.1)
+
+### Using CharsetProcessor
+
+```php
+use Ducks\Component\EncodingRepair\CharsetProcessor;
+
+// Create a processor instance
+$processor = new CharsetProcessor();
+
+// Use it like CharsetHelper
+$utf8 = $processor->toUtf8($data, CharsetHelper::ENCODING_ISO);
+```
+
+### Fluent API Configuration
+
+```php
+use Ducks\Component\EncodingRepair\CharsetProcessor;
+
+$processor = new CharsetProcessor();
+$processor
+    ->addEncodings('SHIFT_JIS', 'EUC-JP')
+    ->removeEncodings('UTF-16', 'UTF-32')
+    ->resetTranscoders()
+    ->queueTranscoders(new MyCustomTranscoder());
+
+$result = $processor->toUtf8($data);
+```
+
+### Multiple Configurations
+
+```php
+use Ducks\Component\EncodingRepair\CharsetProcessor;
+
+// Production processor - strict
+$prodProcessor = new CharsetProcessor();
+$prodProcessor->resetEncodings()->addEncodings('UTF-8', 'ISO-8859-1');
+
+// Import processor - permissive
+$importProcessor = new CharsetProcessor();
+$importProcessor->addEncodings('SHIFT_JIS', 'EUC-JP', 'GB2312');
+
+// Both are independent
+$prodResult = $prodProcessor->toUtf8($apiData);
+$importResult = $importProcessor->toUtf8($legacyData);
+```
+
+### Dependency Injection
+
+```php
+use Ducks\Component\EncodingRepair\CharsetProcessorInterface;
+
+class ImportService
+{
+    private CharsetProcessorInterface $processor;
+    
+    public function __construct(CharsetProcessorInterface $processor)
+    {
+        $this->processor = $processor;
+    }
+    
+    public function import(array $data): array
+    {
+        return $this->processor->toUtf8($data);
+    }
+}
+
+// Easy to test with mocks
+$mock = $this->createMock(CharsetProcessorInterface::class);
+$service = new ImportService($mock);
+```
+
+### Managing Encodings
+
+```php
+use Ducks\Component\EncodingRepair\CharsetProcessor;
+
+$processor = new CharsetProcessor();
+
+// Add custom encodings
+$processor->addEncodings('SHIFT_JIS', 'EUC-JP');
+
+// Remove unused encodings
+$processor->removeEncodings('UTF-32');
+
+// Get current encodings
+$encodings = $processor->getEncodings();
+print_r($encodings);
+
+// Reset to defaults
+$processor->resetEncodings();
 ```
 
 ---
@@ -455,30 +551,39 @@ function convertLargeFile(string $input, string $output, int $chunkSize = 8192):
 ### Laravel Integration
 
 ```php
-use Ducks\Component\EncodingRepair\CharsetHelper;
+use Ducks\Component\EncodingRepair\CharsetProcessor;
+use Ducks\Component\EncodingRepair\CharsetProcessorInterface;
 use Illuminate\Support\ServiceProvider;
 
 class CharsetServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton('charset', function () {
-            return new class {
-                public function toUtf8($data, string $from = 'CP1252')
-                {
-                    return CharsetHelper::toUtf8($data, $from);
-                }
-                
-                public function repair($data)
-                {
-                    return CharsetHelper::repair($data);
-                }
-            };
+        // Register as singleton
+        $this->app->singleton(CharsetProcessorInterface::class, function () {
+            return new CharsetProcessor();
         });
+        
+        // Alias for convenience
+        $this->app->alias(CharsetProcessorInterface::class, 'charset');
     }
 }
 
-// Usage in controller
+// Usage in controller with dependency injection
+class UserController extends Controller
+{
+    public function __construct(
+        private CharsetProcessorInterface $charset
+    ) {}
+    
+    public function import(Request $request)
+    {
+        $data = $this->charset->toUtf8($request->all());
+        User::create($data);
+    }
+}
+
+// Or use facade
 class UserController extends Controller
 {
     public function import(Request $request)
@@ -492,20 +597,30 @@ class UserController extends Controller
 ### Symfony Integration
 
 ```php
-use Ducks\Component\EncodingRepair\CharsetHelper;
+use Ducks\Component\EncodingRepair\CharsetProcessor;
+use Ducks\Component\EncodingRepair\CharsetProcessorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+
+// Register as service in services.yaml
+// services:
+//     Ducks\Component\EncodingRepair\CharsetProcessorInterface:
+//         class: Ducks\Component\EncodingRepair\CharsetProcessor
 
 class ApiController extends AbstractController
 {
+    public function __construct(
+        private CharsetProcessorInterface $charset
+    ) {}
+    
     public function create(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $utf8Data = CharsetHelper::toUtf8($data);
+        $utf8Data = $this->charset->toUtf8($data);
         
         // Process...
         
         return new JsonResponse(
-            CharsetHelper::safeJsonEncode($result)
+            $this->charset->safeJsonEncode($result)
         );
     }
 }
@@ -648,6 +763,9 @@ if ($duration > 1.0) {
 
 ## Additional Resources
 
-- [API Documentation](./classes/CharsetHelper.md)
+- [CharsetHelper API Documentation](./classes/CharsetHelper.md)
+- [CharsetProcessor API Documentation](./classes/CharsetProcessor.md)
+- [CharsetProcessorInterface API Documentation](./classes/CharsetProcessorInterface.md)
+- [Service Architecture Guide](./SERVICE_ARCHITECTURE.md)
 - [GitHub Repository](https://github.com/ducks-project/encoding-repair)
 - [Issue Tracker](https://github.com/ducks-project/encoding-repair/issues)

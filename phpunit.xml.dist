@@ -7,6 +7,7 @@
     <exclude>
       <directory>./Resources</directory>
       <directory>./tests</directory>
+      <directory>./examples</directory>
       <directory>./vendor</directory>
       <directory>./.history</directory>
       <file>./.php-cs-fixer.dist.php</file>

@@ -5,6 +5,7 @@
 
   <exclude-pattern>/vendor/*</exclude-pattern>
   <exclude-pattern>/tests/*\.php$</exclude-pattern>
+  <exclude-pattern>/examples/*\.php$</exclude-pattern>
   <exclude-pattern>/.history/*</exclude-pattern>
   <exclude-pattern>/site/*</exclude-pattern>
 </ruleset>

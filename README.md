@@ -25,6 +25,27 @@
 Advanced charset encoding converter with **Chain of Responsibility** pattern,
 auto-detection, double-encoding repair, and JSON safety.
 
+## 🆕 What's New in v1.1
+
+### Service-Based Architecture
+
+CharsetHelper now uses a service-based architecture following SOLID principles:
+
+- **`CharsetProcessor`**: Instanciable service with fluent API
+- **`CharsetProcessorInterface`**: Service contract for dependency injection
+- **Multiple instances**: Different configurations for different contexts
+- **100% backward compatible**: Existing code works unchanged
+
+```php
+// New way: Service instance
+$processor = new CharsetProcessor();
+$processor->addEncodings('SHIFT_JIS')->resetDetectors();
+$utf8 = $processor->toUtf8($data);
+
+// Old way: Static facade (still works)
+$utf8 = CharsetHelper::toUtf8($data);
+```
+
 ## 🌟 Why CharsetHelper?
 
 Unlike existing libraries, CharsetHelper provides:
@@ -274,6 +295,67 @@ $result = CharsetHelper::toCharset($data, 'UTF-8', 'ISO-8859-1', [
 - `encodings`: List of encodings to try during auto-detection
 
 ## 🎯 Advanced Usage
+
+### Using CharsetProcessor Service (New in v1.1)
+
+For better testability and flexibility, use the `CharsetProcessor` service directly:
+
+```php
+use Ducks\Component\EncodingRepair\CharsetProcessor;
+
+// Create a processor instance
+$processor = new CharsetProcessor();
+
+// Fluent API for configuration
+$processor
+    ->addEncodings('SHIFT_JIS', 'EUC-JP')
+    ->queueTranscoders(new MyCustomTranscoder())
+    ->resetDetectors();
+
+// Use the processor
+$utf8 = $processor->toUtf8($data);
+```
+
+### Multiple Processor Instances
+
+```php
+// Production processor with strict encodings
+$prodProcessor = new CharsetProcessor();
+$prodProcessor->resetEncodings()->addEncodings('UTF-8', 'ISO-8859-1');
+
+// Import processor with permissive encodings
+$importProcessor = new CharsetProcessor();
+$importProcessor->addEncodings('SHIFT_JIS', 'EUC-JP', 'GB2312');
+
+// Both are independent
+$prodResult = $prodProcessor->toUtf8($data);
+$importResult = $importProcessor->toUtf8($legacyData);
+```
+
+### Dependency Injection
+
+```php
+use Ducks\Component\EncodingRepair\CharsetProcessorInterface;
+
+class MyService
+{
+    private CharsetProcessorInterface $processor;
+    
+    public function __construct(CharsetProcessorInterface $processor)
+    {
+        $this->processor = $processor;
+    }
+    
+    public function process($data)
+    {
+        return $this->processor->toUtf8($data);
+    }
+}
+
+// Easy to mock in tests
+$mock = $this->createMock(CharsetProcessorInterface::class);
+$service = new MyService($mock);
+```
 
 ### Registering Custom Transcoders
 
@@ -531,6 +613,8 @@ composer phpcsfixer-check
 - [Changelog]
 - [How To]
 - [`CharsetHelper`]
+- [`CharsetProcessor`]
+- [`CharsetProcessorInterface`]
 - [`TranscoderInterface`]
 - [`CallableTranscoder`]
 - [`IconvTranscoder`]
@@ -608,6 +692,8 @@ If this project helped you, please consider giving it a ⭐ on GitHub!
 Made with ❤️ by the Duck Project Team
 
 [`CharsetHelper`]: /assets/documentation/classes/CharsetHelper.md
+[`CharsetProcessor`]: /assets/documentation/classes/CharsetProcessor.md
+[`CharsetProcessorInterface`]: /assets/documentation/classes/CharsetProcessorInterface.md
 [`TranscoderInterface`]: /assets/documentation/classes/TranscoderInterface.md
 [`CallableTranscoder`]: /assets/documentation/classes/CallableTranscoder.md
 [`IconvTranscoder`]: /assets/documentation/classes/IconvTranscoder.md
