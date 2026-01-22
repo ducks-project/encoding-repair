@@ -25,7 +25,10 @@ final class DetectorChain
     /**
      * @use ChainOfResponsibilityTrait<DetectorInterface>
      */
-    use ChainOfResponsibilityTrait;
+    use ChainOfResponsibilityTrait {
+        ChainOfResponsibilityTrait::register as chainRegister;
+        ChainOfResponsibilityTrait::unregister as chainUnregister;
+    }
 
     /**
      * Register a detector with optional priority override.
@@ -37,14 +40,19 @@ final class DetectorChain
      */
     public function register(DetectorInterface $detector, ?int $priority = null): void
     {
-        $finalPriority = $priority ?? $detector->getPriority();
+        $this->chainRegister($detector, $priority);
+    }
 
-        $this->registered[] = [
-            'handler' => $detector,
-            'priority' => $finalPriority,
-        ];
-
-        $this->getSplPriorityQueue()->insert($detector, $finalPriority);
+    /**
+     * Unregister a detector from the chain.
+     *
+     * @param DetectorInterface $detector Detector instance to remove
+     *
+     * @return void
+     */
+    public function unregister(DetectorInterface $detector): void
+    {
+        $this->chainUnregister($detector);
     }
 
     /**

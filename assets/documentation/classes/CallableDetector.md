@@ -32,6 +32,7 @@ public function __construct(callable $callable, int $priority)
 ```
 
 **Parameters:**
+
 - `$callable` - Callable with signature: `fn(string, array): (string|null)`
 - `$priority` - Detector priority
 
@@ -48,6 +49,7 @@ public function detect(string $string, array $options): ?string
 ```
 
 **Parameters:**
+
 - `$string` - String to analyze
 - `$options` - Detection options
 

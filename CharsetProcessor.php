@@ -91,8 +91,8 @@ final class CharsetProcessor implements CharsetProcessorInterface
      */
     public function unregisterTranscoder(TranscoderInterface $transcoder): self
     {
-        // Note: Unregister not implemented in chain yet
-        // This would require tracking registered transcoders
+        $this->transcoderChain->unregister($transcoder);
+
         return $this;
     }
 
@@ -136,7 +136,8 @@ final class CharsetProcessor implements CharsetProcessorInterface
      */
     public function unregisterDetector(DetectorInterface $detector): self
     {
-        // Note: Unregister not implemented in chain yet
+        $this->detectorChain->unregister($detector);
+
         return $this;
     }
 

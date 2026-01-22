@@ -34,6 +34,7 @@ public function detect(string $string, array $options): ?string
 ```
 
 **Parameters:**
+
 - `$string` - String to analyze
 - `$options` - Detection options
   - `finfo_magic`: string - Custom magic database file path

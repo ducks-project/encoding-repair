@@ -34,6 +34,7 @@ public function detect(string $string, array $options): ?string
 ```
 
 **Parameters:**
+
 - `$string` - String to analyze
 - `$options` - Detection options
   - `encodings`: array - List of encodings to test (default: UTF-8, CP1252, ISO-8859-1, ASCII)

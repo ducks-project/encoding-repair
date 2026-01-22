@@ -33,6 +33,45 @@ trait ChainOfResponsibilityTrait
     private $registered = [];
 
     /**
+     * Register a handler with optional priority override into the chain.
+     *
+     * @param T $handler Handler to register
+     * @param int|null $priority Priority override (null = use transcoder's default)
+     *
+     * @return void
+     */
+    public function register($handler, ?int $priority = null): void
+    {
+        $finalPriority = $priority ?? $handler->getPriority();
+
+        $this->registered[] = [
+            'handler' => $handler,
+            'priority' => $finalPriority,
+        ];
+
+        $this->getSplPriorityQueue()->insert($handler, $finalPriority);
+    }
+
+    /**
+     * Unregister a handler from the chain.
+     *
+     * @param T $handler Handler to remove
+     *
+     * @return void
+     */
+    private function unregister($handler): void
+    {
+        $this->registered = \array_values(
+            \array_filter(
+                $this->registered,
+                static fn(array $item): bool => $item['handler'] !== $handler
+            )
+        );
+
+        $this->queue = null;
+    }
+
+    /**
      * Rebuild queue from registered handlers.
      *
      * @return void

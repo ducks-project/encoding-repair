@@ -2,7 +2,8 @@
 
 ## Overview
 
-`ChainOfResponsibilityTrait` provides common functionality for Chain of Responsibility pattern implementations. It manages priority queues and handler registration for both `TranscoderChain` and `DetectorChain`.
+`ChainOfResponsibilityTrait` provides common functionality for Chain of Responsibility pattern implementations.
+It manages priority queues and handler registration for both `TranscoderChain` and `DetectorChain`.
 
 **Namespace:** `Ducks\Component\EncodingRepair\Traits`
 
@@ -23,7 +24,8 @@ This trait eliminates code duplication between chain classes by providing:
 trait ChainOfResponsibilityTrait
 ```
 
-The trait uses PHP template annotations for type safety, where `T` represents the handler type (e.g., `TranscoderInterface` or `DetectorInterface`).
+The trait uses PHP template annotations for type safety, where `T` represents the handler type
+(e.g., `TranscoderInterface` or `DetectorInterface`).
 
 ## Properties
 

@@ -25,7 +25,10 @@ final class TranscoderChain
     /**
      * @use ChainOfResponsibilityTrait<TranscoderInterface>
      */
-    use ChainOfResponsibilityTrait;
+    use ChainOfResponsibilityTrait {
+        ChainOfResponsibilityTrait::register as chainRegister;
+        ChainOfResponsibilityTrait::unregister as chainUnregister;
+    }
 
     /**
      * Register a transcoder with optional priority override.
@@ -37,14 +40,19 @@ final class TranscoderChain
      */
     public function register(TranscoderInterface $transcoder, ?int $priority = null): void
     {
-        $finalPriority = $priority ?? $transcoder->getPriority();
+        $this->chainRegister($transcoder, $priority);
+    }
 
-        $this->registered[] = [
-            'handler' => $transcoder,
-            'priority' => $finalPriority,
-        ];
-
-        $this->getSplPriorityQueue()->insert($transcoder, $finalPriority);
+    /**
+     * Unregister a transcoder from the chain.
+     *
+     * @param TranscoderInterface $transcoder Transcoder instance to remove
+     *
+     * @return void
+     */
+    public function unregister(TranscoderInterface $transcoder): void
+    {
+        $this->chainUnregister($transcoder);
     }
 
     /**

@@ -2,7 +2,9 @@
 
 ## Overview
 
-`CharsetProcessor` is the default implementation of [CharsetProcessorInterface](CharsetProcessorInterface.md). It provides a complete charset processing service with fluent API, mutable configuration, and support for multiple independent instances.
+`CharsetProcessor` is the default implementation of [CharsetProcessorInterface](CharsetProcessorInterface.md).
+It provides a complete charset processing service with fluent API, mutable configuration,
+and support for multiple independent instances.
 
 **Namespace:** `Ducks\Component\EncodingRepair`
 
@@ -12,21 +14,21 @@
 final class CharsetProcessor implements CharsetProcessorInterface
 {
     public function __construct();
-    
+
     // Fluent API - all return $this
     public function registerTranscoder(TranscoderInterface $transcoder, ?int $priority = null): self;
     public function queueTranscoders(TranscoderInterface ...$transcoders): self;
     public function resetTranscoders(): self;
-    
+
     public function registerDetector(DetectorInterface $detector, ?int $priority = null): self;
     public function queueDetectors(DetectorInterface ...$detectors): self;
     public function resetDetectors(): self;
-    
+
     public function addEncodings(string ...$encodings): self;
     public function removeEncodings(string ...$encodings): self;
     public function getEncodings(): array;
     public function resetEncodings(): self;
-    
+
     // Core operations
     public function toCharset($data, string $to, string $from, array $options = []);
     public function toUtf8($data, string $from, array $options = []);
@@ -52,6 +54,7 @@ public function __construct()
 ```
 
 Creates a new processor with default configuration:
+
 - Transcoders: UConverter (100), Iconv (50), MbString (10)
 - Detectors: MbStringDetector (100), FileInfoDetector (50)
 - Encodings: UTF-8, Windows-1252, ISO-8859-1, ASCII, UTF-16, UTF-32, AUTO
@@ -152,12 +155,12 @@ Easy to mock for unit tests:
 class MyService
 {
     private CharsetProcessorInterface $processor;
-    
+
     public function __construct(CharsetProcessorInterface $processor)
     {
         $this->processor = $processor;
     }
-    
+
     public function process($data)
     {
         return $this->processor->toUtf8($data);

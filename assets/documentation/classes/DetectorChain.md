@@ -19,9 +19,11 @@ final class DetectorChain
 
 ## Description
 
-Manages a priority queue of detectors using `SplPriorityQueue` via [ChainOfResponsibilityTrait](./ChainOfResponsibilityTrait.md). Executes detectors in priority order until one succeeds.
+Manages a priority queue of detectors using `SplPriorityQueue` via [ChainOfResponsibilityTrait](./ChainOfResponsibilityTrait.md).
+Executes detectors in priority order until one succeeds.
 
 **Default Detectors:**
+
 1. MbStringDetector (priority: 100)
 2. FileInfoDetector (priority: 50)
 
@@ -36,6 +38,7 @@ public function register(DetectorInterface $detector, ?int $priority = null): vo
 ```
 
 **Parameters:**
+
 - `$detector` - Detector instance
 - `$priority` - Priority override (null = use detector's default)
 
@@ -59,6 +62,7 @@ public function detect(string $string, array $options): ?string
 ```
 
 **Parameters:**
+
 - `$string` - String to analyze
 - `$options` - Detection options
 
@@ -78,6 +82,7 @@ echo $encoding; // "UTF-8"
 ## Priority System
 
 Higher priority values execute first:
+
 - **100+**: Custom high-priority detectors
 - **100**: MbStringDetector (default)
 - **50**: FileInfoDetector (fallback)
