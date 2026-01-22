@@ -262,24 +262,46 @@ print_r($decoded);
 ```php
 <?php
 
-use Ducks\Component\Component\EncodingRepair\CharsetHelper;
+use Ducks\Component\EncodingRepair\CharsetHelper;
+use Ducks\Component\EncodingRepair\Transcoder\TranscoderInterface;
 
-// Register a custom transcoder for a proprietary encoding
-CharsetHelper::registerTranscoder(
-    function (string $data, string $to, string $from, array $options): ?string {
+class MyCustomTranscoder implements TranscoderInterface
+{
+    public function transcode(string $data, string $to, string $from, array $options): ?string
+    {
         if ($from === 'MY-CUSTOM-ENCODING') {
-            // Custom conversion logic
             return myCustomConversion($data, $to);
         }
+        return null;
+    }
+    
+    public function getPriority(): int
+    {
+        return 75;
+    }
+    
+    public function isAvailable(): bool
+    {
+        return extension_loaded('my_extension');
+    }
+}
 
-        // Return null to try next transcoder in chain
+// Register with default priority
+CharsetHelper::registerTranscoder(new MyCustomTranscoder());
+
+// Register with custom priority
+CharsetHelper::registerTranscoder(new MyCustomTranscoder(), 150);
+
+// Legacy: Register a callable
+CharsetHelper::registerTranscoder(
+    function (string $data, string $to, string $from, ?array $options): ?string {
+        if ($from === 'MY-CUSTOM-ENCODING') {
+            return myCustomConversion($data, $to);
+        }
         return null;
     },
-    true  // Prepend (higher priority)
+    150  // Priority
 );
-
-// Now use it
-$result = CharsetHelper::toCharset($data, 'UTF-8', 'MY-CUSTOM-ENCODING');
 ```
 
 ### Example #7 Database migration
@@ -348,8 +370,8 @@ UConverter (intl) → iconv → mbstring
 
 **Detector priorities:**
 
-1. **mb_detect_encoding**: Fast and reliable for common encodings
-2. **finfo (FileInfo)**: Fallback for difficult cases
+1. **MbStringDetector** (priority: 100): Fast and reliable using mb_detect_encoding
+2. **FileInfoDetector** (priority: 50): Fallback using finfo class
 
 ## [Performance](#performance)
 

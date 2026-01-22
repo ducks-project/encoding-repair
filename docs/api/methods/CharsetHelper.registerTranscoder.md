@@ -8,8 +8,8 @@ CharsetHelper::registerTranscoder — Register custom transcoding strategy
 
 ```php
 public static CharsetHelper::registerTranscoder(
-    string|callable $transcoder,
-    bool $prepend = true
+    TranscoderInterface|callable $transcoder,
+    ?int $priority = null
 ): void
 ```
 
@@ -21,19 +21,19 @@ without modifying the core.
 
 **transcoder**:
 
-A method name (string) or callable with signature:
+TranscoderInterface instance or callable with signature:
 
 ```php
-function(string $data, string $to, string $from, array $options): ?string
+function(string $data, string $to, string $from, ?array $options): ?string
 ```
 
 The transcoder must return the converted string on success,
 or null to pass to the next transcoder in the chain.
 
-**prepend**:
+**priority**:
 
-When true, adds the transcoder at the beginning of the chain (higher priority).
-When false, appends to the end (lower priority).
+Optional priority override (null = use transcoder's default priority).
+Higher values execute first. Default priorities: UConverter (100), iconv (50), mbstring (10).
 
 ## [Return Values](#return-values)
 
@@ -41,62 +41,75 @@ No value is returned.
 
 ## <a name="errors-exceptions"></a>[Errors/Exceptions](#errors-exceptions)
 
-Throws InvalidArgumentException if the transcoder is invalid (not a string or callable).
+Throws InvalidArgumentException if transcoder is not a TranscoderInterface instance or callable.
 
 ## [Examples](#examples)
 
-### Example #1 Register custom transcoder
+### Example #1 Register custom transcoder with TranscoderInterface
 
 ```php
 <?php
-use Ducks\Component\Component\EncodingRepair\CharsetHelper;
+use Ducks\Component\EncodingRepair\CharsetHelper;
+use Ducks\Component\EncodingRepair\Transcoder\TranscoderInterface;
 
-CharsetHelper::registerTranscoder(
-    function (string $data, string $to, string $from, array $options): ?string {
+class MyCustomTranscoder implements TranscoderInterface
+{
+    public function transcode(string $data, string $to, string $from, array $options): ?string
+    {
         if ($from === 'MY-CUSTOM-ENCODING') {
             return myCustomConversion($data, $to);
         }
-        return null; // Pass to next transcoder
+        return null;
+    }
+    
+    public function getPriority(): int
+    {
+        return 75;
+    }
+    
+    public function isAvailable(): bool
+    {
+        return true;
+    }
+}
+
+CharsetHelper::registerTranscoder(new MyCustomTranscoder());
+CharsetHelper::registerTranscoder(new MyCustomTranscoder(), 150); // Override priority
+```
+
+### Example #2 Register callable transcoder
+
+```php
+<?php
+use Ducks\Component\EncodingRepair\CharsetHelper;
+
+CharsetHelper::registerTranscoder(
+    function (string $data, string $to, string $from, ?array $options): ?string {
+        if ($from === 'MY-CUSTOM-ENCODING') {
+            return myCustomConversion($data, $to);
+        }
+        return null;
     },
-    true  // High priority
+    150  // Priority
 );
 
 $result = CharsetHelper::toCharset($data, 'UTF-8', 'MY-CUSTOM-ENCODING');
 ```
 
-### Example #2 Register transcoder for proprietary format
-
-```php
-<?php
-use Ducks\Component\Component\EncodingRepair\CharsetHelper;
-
-class LegacyEncoder {
-    public static function transcode(string $data, string $to, string $from, array $options): ?string {
-        if ($from !== 'LEGACY-FORMAT') {
-            return null;
-        }
-        // Custom conversion logic
-        return convertFromLegacy($data, $to);
-    }
-}
-
-CharsetHelper::registerTranscoder([LegacyEncoder::class, 'transcode']);
-```
-
 ## [Notes](#notes)
 
-Transcoders are called in priority order:
+Transcoders are executed in priority order (highest first):
 
-1. Custom transcoders (prepended)
-2. UConverter (ext-intl)
-3. iconv
-4. mbstring
-5. Custom transcoders (appended)
+- Priority 100+: Custom high-priority transcoders
+- Priority 100: UConverter (ext-intl)
+- Priority 50: iconv
+- Priority 10: mbstring
+- Priority 0-9: Custom low-priority transcoders
 
 ## [See Also](#see-also)
 
 - [CharsetHelper::registerDetector] — Register custom detector
 - [CharsetHelper::toCharset] — Convert with registered transcoders
 
-[CharsetHelper::registerDetector]: ./CharsetHelper.registerDetector.md#CharsetHelper::registerDetector
-[CharsetHelper::toCharset]: ./CharsetHelper.toCharset.md#CharsetHelper::toCharset
+[CharsetHelper::registerDetector]: ./CharsetHelper.registerDetector.md#charsethelper__registerdetector
+[CharsetHelper::toCharset]: ./CharsetHelper.toCharset.md#charsethelper__tocharset
