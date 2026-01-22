@@ -54,4 +54,28 @@ final class FileInfoDetectorTest extends TestCase
         
         $this->assertNull($result);
     }
+
+    public function testDetectWithMagicFile(): void
+    {
+        $detector = new FileInfoDetector();
+        $result = $detector->detect('test', ['finfo_magic' => null]);
+        
+        $this->assertIsString($result);
+    }
+
+    public function testDetectWithContext(): void
+    {
+        $detector = new FileInfoDetector();
+        $result = $detector->detect('test', ['finfo_context' => null]);
+        
+        $this->assertIsString($result);
+    }
+
+    public function testDetectWithInvalidFlags(): void
+    {
+        $detector = new FileInfoDetector();
+        $result = $detector->detect('test', ['finfo_flags' => 'invalid']);
+        
+        $this->assertIsString($result);
+    }
 }

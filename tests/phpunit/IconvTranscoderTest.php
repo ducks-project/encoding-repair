@@ -65,4 +65,31 @@ final class IconvTranscoderTest extends TestCase
         
         $this->assertNull($result);
     }
+
+    public function testTranscodeWithIgnore(): void
+    {
+        if (!extension_loaded('iconv')) {
+            $this->markTestSkipped('iconv extension not available');
+        }
+
+        $transcoder = new IconvTranscoder();
+        $result = $transcoder->transcode('test', 'UTF-8', 'ISO-8859-1', ['ignore' => true]);
+        
+        $this->assertIsString($result);
+    }
+
+    public function testTranscodeWithAllOptions(): void
+    {
+        if (!extension_loaded('iconv')) {
+            $this->markTestSkipped('iconv extension not available');
+        }
+
+        $transcoder = new IconvTranscoder();
+        $result = $transcoder->transcode('Café', 'ASCII', 'UTF-8', [
+            'translit' => true,
+            'ignore' => true
+        ]);
+        
+        $this->assertIsString($result);
+    }
 }

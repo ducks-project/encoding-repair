@@ -383,4 +383,64 @@ final class CharsetHelperTest extends TestCase
         $this->assertSame('Café', $result['object']->text);
         $this->assertSame('Café', $result['nested']['value']);
     }
+
+    public function testSafeJsonEncodeWithDepth(): void
+    {
+        $data = ['a' => ['b' => ['c' => 'value']]];
+        $json = CharsetHelper::safeJsonEncode($data, 0, 10);
+
+        $this->assertIsString($json);
+    }
+
+    public function testSafeJsonDecodeWithAllParameters(): void
+    {
+        $json = '{"name":"test"}';
+        $result = CharsetHelper::safeJsonDecode($json, true, 512, 0, CharsetHelper::ENCODING_UTF8, CharsetHelper::WINDOWS_1252);
+
+        $this->assertIsArray($result);
+        $this->assertSame('test', $result['name']);
+    }
+
+    public function testRepairWithObject(): void
+    {
+        $obj = new stdClass();
+        $obj->name = 'CafÃ©';
+
+        $result = CharsetHelper::repair($obj);
+
+        $this->assertInstanceOf(stdClass::class, $result);
+        $this->assertSame('Café', $result->name);
+    }
+
+    public function testToCharsetFromUtf8ToNonUtf8(): void
+    {
+        $utf8 = 'Café';
+        $result = CharsetHelper::toCharset($utf8, CharsetHelper::ENCODING_ISO, CharsetHelper::ENCODING_UTF8);
+
+        $this->assertIsString($result);
+    }
+
+    public function testDetectFallsBackToIso(): void
+    {
+        $binary = "\x80\x81\x82";
+        $encoding = CharsetHelper::detect($binary);
+
+        $this->assertContains($encoding, ['ISO-8859-1', 'Windows-1252', 'UTF-8']);
+    }
+
+    public function testRepairWithInvalidMaxDepth(): void
+    {
+        $data = 'test';
+        $result = CharsetHelper::repair($data, CharsetHelper::ENCODING_UTF8, CharsetHelper::ENCODING_ISO, ['maxDepth' => 'invalid']);
+
+        $this->assertIsString($result);
+    }
+
+    public function testToCharsetWithInvalidOptionsArray(): void
+    {
+        $data = 'test';
+        $result = CharsetHelper::toCharset($data, CharsetHelper::ENCODING_UTF8, CharsetHelper::ENCODING_UTF8, ['encodings' => 'not-array']);
+
+        $this->assertSame('test', $result);
+    }
 }

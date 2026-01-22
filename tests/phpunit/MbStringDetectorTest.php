@@ -53,4 +53,12 @@ final class MbStringDetectorTest extends TestCase
         
         $this->assertNull($result);
     }
+
+    public function testDetectWithInvalidEncodingsOption(): void
+    {
+        $detector = new MbStringDetector();
+        $result = $detector->detect('test', ['encodings' => 'not-array']);
+        
+        $this->assertIsString($result);
+    }
 }
