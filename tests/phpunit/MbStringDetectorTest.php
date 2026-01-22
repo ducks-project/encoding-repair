@@ -34,7 +34,7 @@ final class MbStringDetectorTest extends TestCase
     {
         $detector = new MbStringDetector();
         $result = $detector->detect('Café', []);
-        
+
         $this->assertSame('UTF-8', $result);
     }
 
@@ -42,7 +42,7 @@ final class MbStringDetectorTest extends TestCase
     {
         $detector = new MbStringDetector();
         $result = $detector->detect('test', ['encodings' => ['UTF-8', 'ISO-8859-1']]);
-        
+
         $this->assertIsString($result);
     }
 
@@ -50,7 +50,7 @@ final class MbStringDetectorTest extends TestCase
     {
         $detector = new MbStringDetector();
         $result = $detector->detect("\x80\x81", ['encodings' => ['ASCII']]);
-        
+
         $this->assertNull($result);
     }
 
@@ -58,7 +58,7 @@ final class MbStringDetectorTest extends TestCase
     {
         $detector = new MbStringDetector();
         $result = $detector->detect('test', ['encodings' => 'not-array']);
-        
+
         $this->assertIsString($result);
     }
 }

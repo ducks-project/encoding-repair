@@ -38,7 +38,7 @@ final class IconvTranscoderTest extends TestCase
 
         $transcoder = new IconvTranscoder();
         $result = $transcoder->transcode('Café', 'ISO-8859-1', 'UTF-8', []);
-        
+
         $this->assertIsString($result);
     }
 
@@ -50,7 +50,7 @@ final class IconvTranscoderTest extends TestCase
 
         $transcoder = new IconvTranscoder();
         $result = $transcoder->transcode('Café', 'ASCII', 'UTF-8', ['translit' => true]);
-        
+
         $this->assertIsString($result);
     }
 
@@ -62,7 +62,7 @@ final class IconvTranscoderTest extends TestCase
 
         $transcoder = new IconvTranscoder();
         $result = $transcoder->transcode('test', 'UTF-8', 'ISO-8859-1', []);
-        
+
         $this->assertNull($result);
     }
 
@@ -74,7 +74,7 @@ final class IconvTranscoderTest extends TestCase
 
         $transcoder = new IconvTranscoder();
         $result = $transcoder->transcode('test', 'UTF-8', 'ISO-8859-1', ['ignore' => true]);
-        
+
         $this->assertIsString($result);
     }
 
@@ -87,9 +87,9 @@ final class IconvTranscoderTest extends TestCase
         $transcoder = new IconvTranscoder();
         $result = $transcoder->transcode('Café', 'ASCII', 'UTF-8', [
             'translit' => true,
-            'ignore' => true
+            'ignore' => true,
         ]);
-        
+
         $this->assertIsString($result);
     }
 }

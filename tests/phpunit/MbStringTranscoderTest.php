@@ -34,7 +34,7 @@ final class MbStringTranscoderTest extends TestCase
     {
         $transcoder = new MbStringTranscoder();
         $result = $transcoder->transcode('Café', 'ISO-8859-1', 'UTF-8', []);
-        
+
         $this->assertIsString($result);
         $this->assertNotEmpty($result);
     }
@@ -44,7 +44,7 @@ final class MbStringTranscoderTest extends TestCase
         $transcoder = new MbStringTranscoder();
         $iso = mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
         $result = $transcoder->transcode($iso, 'UTF-8', 'ISO-8859-1', []);
-        
+
         $this->assertSame('Café', $result);
     }
 }

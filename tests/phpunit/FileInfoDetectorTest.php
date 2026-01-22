@@ -34,7 +34,7 @@ final class FileInfoDetectorTest extends TestCase
     {
         $detector = new FileInfoDetector();
         $result = $detector->detect('Café', []);
-        
+
         $this->assertContains($result, ['UTF-8', 'US-ASCII', null]);
     }
 
@@ -42,7 +42,7 @@ final class FileInfoDetectorTest extends TestCase
     {
         $detector = new FileInfoDetector();
         $result = $detector->detect('test', ['finfo_flags' => FILEINFO_NONE]);
-        
+
         $this->assertIsString($result);
     }
 
@@ -51,7 +51,7 @@ final class FileInfoDetectorTest extends TestCase
         $detector = new FileInfoDetector();
         $binary = "\x00\x01\x02\x03";
         $result = $detector->detect($binary, []);
-        
+
         $this->assertNull($result);
     }
 
@@ -59,7 +59,7 @@ final class FileInfoDetectorTest extends TestCase
     {
         $detector = new FileInfoDetector();
         $result = $detector->detect('test', ['finfo_magic' => null]);
-        
+
         $this->assertIsString($result);
     }
 
@@ -67,7 +67,7 @@ final class FileInfoDetectorTest extends TestCase
     {
         $detector = new FileInfoDetector();
         $result = $detector->detect('test', ['finfo_context' => null]);
-        
+
         $this->assertIsString($result);
     }
 
@@ -75,7 +75,7 @@ final class FileInfoDetectorTest extends TestCase
     {
         $detector = new FileInfoDetector();
         $result = $detector->detect('test', ['finfo_flags' => 'invalid']);
-        
+
         $this->assertIsString($result);
     }
 }
