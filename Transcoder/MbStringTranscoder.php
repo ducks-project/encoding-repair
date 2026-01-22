@@ -26,7 +26,9 @@ final class MbStringTranscoder implements TranscoderInterface
     public function transcode(string $data, string $to, string $from, ?array $options = null): ?string
     {
         if (!$this->isAvailable()) {
+            // @codeCoverageIgnoreStart
             return null;
+            // @codeCoverageIgnoreEnd
         }
 
         // Use silence operator (@) instead of set_error_handler

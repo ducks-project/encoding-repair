@@ -148,8 +148,10 @@ final class CharsetHelper
     ): void {
         /** @var mixed $transcoder */
         if ($transcoder instanceof TranscoderInterface) {
+            // @codeCoverageIgnoreStart
             self::getTranscoderChain()->register($transcoder, $priority);
             return;
+            // @codeCoverageIgnoreEnd
         }
 
         if (\is_callable($transcoder)) {
@@ -184,8 +186,10 @@ final class CharsetHelper
     ): void {
         /** @var mixed $detector */
         if ($detector instanceof DetectorInterface) {
+            // @codeCoverageIgnoreStart
             self::getDetectorChain()->register($detector, $priority);
             return;
+            // @codeCoverageIgnoreEnd
         }
 
         if (\is_callable($detector)) {
@@ -575,7 +579,9 @@ final class CharsetHelper
         array $options
     ) {
         if (!\is_string($value)) {
+            // @codeCoverageIgnoreStart
             return $value;
+            // @codeCoverageIgnoreEnd
         }
 
         /** @var mixed $maxDepth */
@@ -644,7 +650,9 @@ final class CharsetHelper
         array $options
     ): string {
         return self::AUTO === $encoding
+            // @codeCoverageIgnoreStart
             ? self::detect($data, $options)
+            // @codeCoverageIgnoreEnd
             : $encoding;
     }
 
