@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## <a name="v110"></a>[1.1.0] - 2026-01-22
+
 ### Added
 
 - [`CachedDetector`] - Decorator for caching detection results with configurable size limit (namespace: `Ducks\Component\EncodingRepair\Detector`)
@@ -95,6 +97,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [`CallableDetector`]: /assets/documentation/classes/CallableDetector.md
 [`DetectorChain`]: /assets/documentation/classes/DetectorChain.md
 [`CachedDetector`]: /assets/documentation/classes/CachedDetector.md
-[unreleased]: https://github.com/ducks-project/encoding-repair/compare/v1.0.0...HEAD
+[unreleased]: https://github.com/ducks-project/encoding-repair/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/ducks-project/encoding-repair/compare/v1.1.0...v1.0.0
 [1.0.0]: https://github.com/ducks-project/encoding-repair/compare/v1.0.0...v0.1.0
 [0.1.0]: https://github.com/ducks-project/encoding-repair/releases/tag/v0.1.0
