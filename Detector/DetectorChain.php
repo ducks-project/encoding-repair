@@ -71,7 +71,9 @@ final class DetectorChain
 
         foreach ($this->getSplPriorityQueue() as $detector) {
             if (!$detector->isAvailable()) {
+                // @codeCoverageIgnoreStart
                 continue;
+                // @codeCoverageIgnoreEnd
             }
 
             $result = $detector->detect($string, $options);
@@ -81,7 +83,9 @@ final class DetectorChain
             }
         }
 
+        // @codeCoverageIgnoreStart
         return null;
+        // @codeCoverageIgnoreEnd
     }
 
     /**

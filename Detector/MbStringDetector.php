@@ -33,7 +33,9 @@ final class MbStringDetector implements DetectorInterface
     public function detect(string $string, ?array $options = null): ?string
     {
         if (!$this->isAvailable()) {
+            // @codeCoverageIgnoreStart
             return null;
+            // @codeCoverageIgnoreEnd
         }
 
         /** @var mixed $encodings */

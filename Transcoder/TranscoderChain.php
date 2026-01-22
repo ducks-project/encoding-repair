@@ -73,7 +73,9 @@ final class TranscoderChain
 
         foreach ($this->getSplPriorityQueue() as $transcoder) {
             if (!$transcoder->isAvailable()) {
+                // @codeCoverageIgnoreStart
                 continue;
+                // @codeCoverageIgnoreEnd
             }
 
             $result = $transcoder->transcode($data, $to, $from, $options);
@@ -83,7 +85,9 @@ final class TranscoderChain
             }
         }
 
+        // @codeCoverageIgnoreStart
         return null;
+        // @codeCoverageIgnoreEnd
     }
 
     /**

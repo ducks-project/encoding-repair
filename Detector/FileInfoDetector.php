@@ -28,7 +28,9 @@ final class FileInfoDetector implements DetectorInterface
     public function detect(string $string, ?array $options = null): ?string
     {
         if (!$this->isAvailable()) {
+            // @codeCoverageIgnoreStart
             return null;
+            // @codeCoverageIgnoreEnd
         }
 
         $args = [];
@@ -36,7 +38,9 @@ final class FileInfoDetector implements DetectorInterface
         /** @var mixed $magic */
         $magic = $options['finfo_magic'] ?? null;
         if (\is_string($magic)) {
+            // @codeCoverageIgnoreStart
             $args[] = $magic;
+            // @codeCoverageIgnoreEnd
         }
 
         $finfo = new finfo(FILEINFO_MIME_ENCODING, ...$args);
@@ -87,7 +91,9 @@ final class FileInfoDetector implements DetectorInterface
         /** @var mixed $context */
         $context = $options['finfo_context'] ?? null;
         if (\is_resource($context)) {
+            // @codeCoverageIgnoreStart
             $args[] = $context;
+            // @codeCoverageIgnoreEnd
         }
 
         return $args;

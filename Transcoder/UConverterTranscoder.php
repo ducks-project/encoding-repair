@@ -28,7 +28,9 @@ final class UConverterTranscoder implements TranscoderInterface
     public function transcode(string $data, string $to, string $from, ?array $options = null): ?string
     {
         if (!$this->isAvailable()) {
+            // @codeCoverageIgnoreStart
             return null;
+            // @codeCoverageIgnoreEnd
         }
 
         /** @var false|string $result */

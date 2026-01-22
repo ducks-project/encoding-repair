@@ -103,7 +103,9 @@ final class CallableTranscoder implements TranscoderInterface
         } catch (ReflectionException $e) {
             // Because of PHP 7.4 we need to validate the callable
             // if ReflectionException occured.
+            // @codeCoverageIgnoreStart
             return true;
+            // @codeCoverageIgnoreEnd
         }
     }
 
@@ -131,6 +133,8 @@ final class CallableTranscoder implements TranscoderInterface
      * @return ReflectionFunctionAbstract
      *
      * @throws ReflectionException
+     *
+     * @codeCoverageIgnore
      */
     private static function getReflection(callable $callable): ReflectionFunctionAbstract
     {

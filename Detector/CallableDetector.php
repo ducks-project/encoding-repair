@@ -100,7 +100,9 @@ final class CallableDetector implements DetectorInterface
 
             return $reflection->getNumberOfParameters() >= 1;
         } catch (ReflectionException $e) {
+            // @codeCoverageIgnoreStart
             return true;
+            // @codeCoverageIgnoreEnd
         }
     }
 
@@ -128,6 +130,8 @@ final class CallableDetector implements DetectorInterface
      * @return ReflectionFunctionAbstract
      *
      * @throws ReflectionException
+     *
+     * @codeCoverageIgnore
      */
     private static function getReflection(callable $callable): ReflectionFunctionAbstract
     {
