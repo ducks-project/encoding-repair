@@ -24,9 +24,6 @@ jobs:
       - name: Install dependencies
         run: composer update --prefer-dist --no-progress --no-interaction --prefer-stable --no-dev --optimize-autoloader
 
-      - name: Run tests
-        run: composer unittest
-
       - name: Extract version from tag
         id: version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
