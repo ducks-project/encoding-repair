@@ -57,7 +57,7 @@ final class UConverterTranscoder implements TranscoderInterface
     /**
      * Resolve options for UConverter.
      *
-     * @param array<string,mixed> $options
+     * @param array<string,mixed> $options Conversion options
      *
      * @return array<string,mixed>|null
      */

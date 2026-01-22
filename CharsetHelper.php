@@ -19,7 +19,11 @@ use Ducks\Component\EncodingRepair\Transcoder\UConverterTranscoder;
 use Ducks\Component\EncodingRepair\Transcoder\IconvTranscoder;
 use Ducks\Component\EncodingRepair\Transcoder\MbStringTranscoder;
 use Ducks\Component\EncodingRepair\Transcoder\CallableTranscoder;
-use finfo;
+use Ducks\Component\EncodingRepair\Detector\DetectorChain;
+use Ducks\Component\EncodingRepair\Detector\DetectorInterface;
+use Ducks\Component\EncodingRepair\Detector\MbStringDetector;
+use Ducks\Component\EncodingRepair\Detector\FileInfoDetector;
+use Ducks\Component\EncodingRepair\Detector\CallableDetector;
 use InvalidArgumentException;
 use Normalizer;
 use RuntimeException;
@@ -74,14 +78,11 @@ final class CharsetHelper
     private static $transcoderChain = null;
 
     /**
-     * List of internal detectors (Providers) by priority.
+     * Detector chain instance.
      *
-     * @var list<string|callable(string, array<string, mixed>): (string|null)>
+     * @var DetectorChain|null
      */
-    private static $detectors = [
-        'detectWithMbString',
-        'detectWithFileInfo',
-    ];
+    private static $detectorChain = null;
 
     /**
      * Private constructor to prevent instantiation of static utility class.
@@ -107,6 +108,22 @@ final class CharsetHelper
         }
 
         return self::$transcoderChain;
+    }
+
+    /**
+     * Get or initialize detector chain.
+     *
+     * @return DetectorChain
+     */
+    private static function getDetectorChain(): DetectorChain
+    {
+        if (null === self::$detectorChain) {
+            self::$detectorChain = new DetectorChain();
+            self::$detectorChain->register(new MbStringDetector());
+            self::$detectorChain->register(new FileInfoDetector());
+        }
+
+        return self::$detectorChain;
     }
 
     /**
@@ -146,12 +163,12 @@ final class CharsetHelper
     }
 
     /**
-     * Register a custom detector provider.
+     * Register a detector with optional priority.
      *
      * @phpcs:disable Generic.Files.LineLength.TooLong
      *
-     * @param string|callable(string, array<string, mixed>): (string|null) $detector Method name or callable with signature: fn (string, string, string, array): string|null
-     * @param bool $prepend Priority (Top of the list)
+     * @param DetectorInterface|callable(string, array<string, mixed>|null): (string|null) $detector Detector instance or callable
+     * @param int|null $priority Priority override (null = use detector's default)
      *
      * @return void
      *
@@ -161,15 +178,24 @@ final class CharsetHelper
      */
     public static function registerDetector(
         $detector,
-        bool $prepend = true
+        ?int $priority = null
     ): void {
-        self::validateDetector($detector);
-
-        if ($prepend) {
-            \array_unshift(self::$detectors, $detector);
-        } else {
-            self::$detectors[] = $detector;
+        /** @var mixed $detector */
+        if ($detector instanceof DetectorInterface) {
+            self::getDetectorChain()->register($detector, $priority);
+            return;
         }
+
+        if (\is_callable($detector)) {
+            /** @var callable(string, array<string, mixed>|null): (string|null) $detector */
+            $wrapper = new CallableDetector($detector, $priority ?? 0);
+            self::getDetectorChain()->register($wrapper, $priority);
+            return;
+        }
+
+        throw new InvalidArgumentException(
+            'Detector must be an instance of DetectorInterface or a callable'
+        );
     }
 
     /**
@@ -188,21 +214,9 @@ final class CharsetHelper
             return self::ENCODING_UTF8;
         }
 
-        // Loop over registered detectors
-        foreach (self::$detectors as $detector) {
-            try {
-                $args = [$string, $options];
-                $detected = self::invokeProvider($detector, ...$args);
-            } catch (\Throwable $th) {
-                continue;
-            }
+        $detected = self::getDetectorChain()->detect($string, $options);
 
-            if (null !== $detected) {
-                return $detected;
-            }
-        }
-
-        return self::ENCODING_ISO;
+        return $detected ?? self::ENCODING_ISO;
     }
 
     /**
@@ -633,87 +647,6 @@ final class CharsetHelper
     }
 
     /**
-     * Invokes a provider (method name or callable) with given arguments.
-     *
-     * @phpcs:disable Generic.Files.LineLength.TooLong
-     *
-     * @param string|callable(string, string, string, array<string, mixed>): (string|null)|callable(string, array<string, mixed>): (string|null) $provider Provider to call (method name or callable)
-     * @param array<mixed>|string $args Arguments to pass to the provider
-     *
-     * @return string|null Result of the provider call
-     *
-     * @throws InvalidArgumentException when provider is not callable.
-     *
-     * @psalm-param array<string, mixed>|string $args
-     *
-     * @phpcs:enable Generic.Files.LineLength.TooLong
-     */
-    private static function invokeProvider($provider, ...$args)
-    {
-        /** @var mixed $result */
-        $result = null;
-
-        if (\is_string($provider) && \method_exists(self::class, $provider)) {
-            /** @var mixed $result */
-            $result = self::$provider(...$args);
-        } elseif (\is_callable($provider)) {
-            /**
-             * @psalm-suppress InvalidArgument
-             * @psalm-suppress MixedArgument
-             */
-            $result = $provider(...$args);
-        }
-
-        if (null !== $result && !\is_string($result)) {
-            throw new InvalidArgumentException('Provider is not callable');
-        }
-
-        return $result;
-    }
-
-    /**
-     * Validates a provider before registration.
-     *
-     * @param mixed $provider Provider to validate
-     * @param string $type Type name for error message
-     *
-     * @throws InvalidArgumentException If provider is invalid
-     */
-    private static function validateProvider($provider, string $type): void
-    {
-        if (!\is_string($provider) && !\is_callable($provider)) {
-            throw new InvalidArgumentException(
-                \sprintf(
-                    '%s must be a string (method name) or callable',
-                    $type
-                )
-            );
-        }
-
-        if (\is_string($provider) && !\method_exists(self::class, $provider)) {
-            throw new InvalidArgumentException(
-                \sprintf(
-                    'Method "%s" does not exist in %s',
-                    $provider,
-                    self::class
-                )
-            );
-        }
-    }
-
-    /**
-     * Validates a detector before registration.
-     *
-     * @param mixed $detector Detector to validate
-     *
-     * @throws InvalidArgumentException If invalid
-     */
-    private static function validateDetector($detector): void
-    {
-        self::validateProvider($detector, 'Detector');
-    }
-
-    /**
      * Normalizes UTF-8 string if needed.
      *
      * @param string $value String to normalize
@@ -738,87 +671,6 @@ final class CharsetHelper
         $normalized = Normalizer::normalize($value);
 
         return false !== $normalized ? $normalized : $value;
-    }
-
-    /**
-     * Detects encoding using mbstring extension.
-     *
-     * @param string $string String to analyze
-     * @param array<string, mixed> $options Options usable by mb_string
-     *                                      - encodings : A list of character encodings to try
-     *
-     * @return string|null Detected encoding or null
-     *
-     * @psalm-api
-     */
-    private static function detectWithMbString(string $string, array $options = []): ?string
-    {
-        /** @var mixed|list<string> */
-        $encodings = $options['encodings'] ?? self::DEFAULT_ENCODINGS;
-
-        if (!\is_array($encodings)) {
-            $encodings = self::DEFAULT_ENCODINGS;
-        }
-
-        $detected = \mb_detect_encoding($string, $encodings, true);
-
-        return false !== $detected ? $detected : null;
-    }
-
-    /**
-     * Detects encoding using FileInfo extension.
-     *
-     * @param string $string String to analyze
-     * @param array<string, mixed> $options Options usable by finfo
-     *
-     * @return string|null Detected encoding or null
-     *
-     * @psalm-api
-     */
-    private static function detectWithFileInfo(string $string, array $options = []): ?string
-    {
-        if (!\class_exists(finfo::class)) {
-            return null;
-        }
-
-        // use an array in order to pass args througt functions
-        // in order to ensure several php compatibility.
-        $args = [];
-
-        /** @var mixed|string|null $magic */
-        $magic = $options['finfo_magic'] ?? null;
-        if (\is_string($magic)) {
-            $args[] = $magic;
-        }
-
-        $finfo = new finfo(FILEINFO_MIME_ENCODING, ...$args);
-
-        $args = [];
-
-        /** @var mixed|int */
-        $flags = $options['finfo_flags'] ?? \FILEINFO_NONE;
-        if (!\is_int($flags)) {
-            $flags = \FILEINFO_NONE;
-        }
-        $args[] = $flags;
-
-        /** @var mixed|resource|null */
-        $context = $options['finfo_context'] ?? null;
-        if (\is_resource($context)) {
-            $args[] = $context;
-        }
-
-        $detected = $finfo->buffer(
-            $string,
-            ...$args
-        );
-
-        if (false === $detected || 'binary' === $detected) {
-            return null;
-        }
-
-        // Returns things like 'iso-8859-1', we uppercase it
-        return \strtoupper($detected);
     }
 
     /**

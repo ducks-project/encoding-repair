@@ -93,11 +93,14 @@ final class TranscoderChain
      */
     private function rebuildQueue(): void
     {
-        $this->queue = new SplPriorityQueue();
+        /** @var SplPriorityQueue<int, TranscoderInterface> $queue */
+        $queue = new SplPriorityQueue();
 
         foreach ($this->registered as $item) {
-            $this->queue->insert($item['transcoder'], $item['priority']);
+            $queue->insert($item['transcoder'], $item['priority']);
         }
+
+        $this->queue = $queue;
     }
 
     /**
@@ -108,7 +111,9 @@ final class TranscoderChain
     private function getSplPriorityQueue(): SplPriorityQueue
     {
         if (!$this->queue instanceof SplPriorityQueue) {
-            $this->queue = new SplPriorityQueue();
+            /** @var SplPriorityQueue<int, TranscoderInterface> $queue */
+            $queue = new SplPriorityQueue();
+            $this->queue = $queue;
         }
 
         return $this->queue;

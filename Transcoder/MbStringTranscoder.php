@@ -31,9 +31,9 @@ final class MbStringTranscoder implements TranscoderInterface
 
         // Use silence operator (@) instead of set_error_handler
         // set_error_handler is too expensive for high-volume loops.
-        /** @var false|string $result */
         $result = @\mb_convert_encoding($data, $to, $from);
 
+        // @phpstan-ignore ternary.elseUnreachable
         return false !== $result ? $result : null;
     }
 

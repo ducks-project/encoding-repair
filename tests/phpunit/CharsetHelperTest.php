@@ -188,7 +188,10 @@ final class CharsetHelperTest extends TestCase
     public function testRegisterTranscoder(): void
     {
         $called = false;
-        $transcoder = function (string $data, string $to, string $from, array $options) use (&$called): ?string {
+        /**
+         * @param array<string, mixed>|null $options
+         */
+        $transcoder = function (string $data, string $to, string $from, ?array $options) use (&$called): ?string {
             if ('TEST-ENCODING' === $from) {
                 $called = true;
                 return 'transcoded';
@@ -219,7 +222,7 @@ final class CharsetHelperTest extends TestCase
             return null;
         };
 
-        CharsetHelper::registerDetector($detector, true);
+        CharsetHelper::registerDetector($detector, 200);
 
         // Use a non-UTF-8 string to bypass the fast path
         $utf16String = "\xFF\xFE" . \mb_convert_encoding('test', 'UTF-16LE', 'UTF-8');
@@ -239,10 +242,10 @@ final class CharsetHelperTest extends TestCase
     public function testRegisterDetectorThrowsOnInvalidType(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Detector must be a string');
+        $this->expectExceptionMessage('Detector must be');
 
         // @phpstan-ignore argument.type
-        CharsetHelper::registerDetector(123, true);
+        CharsetHelper::registerDetector(123, null);
     }
 
     public function testValidateEncodingThrowsOnInvalidEncoding(): void

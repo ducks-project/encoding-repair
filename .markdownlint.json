@@ -2,8 +2,9 @@
   "default": true,
   "MD013": {
     "code_blocks": false,
-    "tables": false,
-    "headings": false
+    "headings": false,
+    "line_length": 120,
+    "tables": false
   },
   "MD033": {
     "allowed_elements": [ "a" ]
