@@ -158,36 +158,26 @@ interface CharsetProcessorInterface
     );
 
     /**
-     * Converts anything (string, array, object) to UTF-8.
+     * Batch convert iterable items from one encoding to another.
      *
-     * @param mixed $data Data to convert
-     * @param string $from Source encoding
+     * Optimized for homogeneous arrays: detects encoding once on first non-empty string.
+     * Use this instead of toCharset() when processing large arrays with AUTO detection.
+     *
+     * @param array<mixed> $items Items to convert
+     * @param string $to Target encoding
+     * @param string $from Source encoding (use AUTO for detection)
      * @param array<string, mixed> $options Conversion options
-     *                                      - 'normalize': bool (default: true)
-     *                                      - 'translit': bool (default: true)
-     *                                      - 'ignore': bool (default: true)
      *
-     * @return mixed
+     * @return array<mixed> Converted items
      *
      * @throws InvalidArgumentException If encoding is invalid
      */
-    public function toUtf8($data, string $from = self::WINDOWS_1252, array $options = []);
-
-    /**
-     * Converts anything to ISO-8859-1 (Windows-1252).
-     *
-     * @param mixed $data Data to convert
-     * @param string $from Source encoding
-     * @param array<string, mixed> $options Conversion options
-     *                                      - 'normalize': bool (default: true)
-     *                                      - 'translit': bool (default: true)
-     *                                      - 'ignore': bool (default: true)
-     *
-     * @return mixed
-     *
-     * @throws InvalidArgumentException If encoding is invalid
-     */
-    public function toIso($data, string $from = self::ENCODING_UTF8, array $options = []);
+    public function toCharsetBatch(
+        array $items,
+        string $to = self::ENCODING_UTF8,
+        string $from = self::ENCODING_ISO,
+        array $options = []
+    ): array;
 
     /**
      * Detects the charset encoding of a string.
@@ -199,6 +189,17 @@ interface CharsetProcessorInterface
      * @return string Detected encoding (uppercase)
      */
     public function detect(string $string, array $options = []): string;
+
+    /**
+     * Batch detects the charset encoding of iterable items.
+     *
+     * @param iterable<mixed> $items items to loop for analyzis
+     * @param array<string, mixed> $options Conversion options
+     *                                      - 'encodings': array of encodings to test
+     *
+     * @return string Detected encoding (uppercase)
+     */
+    public function detectBatch(iterable $items, array $options = []): string;
 
     /**
      * Repairs double-encoded strings.

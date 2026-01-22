@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Batch processing API for optimized array conversion with single encoding detection
+- `toCharsetBatch()` method in `CharsetProcessorInterface` for batch conversion with AUTO detection optimization
+- `detectBatch()` method in `CharsetProcessorInterface` for detecting encoding from iterable items
+- `toUtf8Batch()` convenience method in `CharsetProcessor` (shortcut to `toCharsetBatch(..., 'UTF-8', ...)`)
+- `toIsoBatch()` convenience method in `CharsetProcessor` (shortcut to `toCharsetBatch(..., 'CP1252', ...)`)
+- Static facade methods in `CharsetHelper`: `toCharsetBatch()`, `toUtf8Batch()`, `toIsoBatch()`, `detectBatch()`
+- Performance improvement: 40-60% faster for batch processing with AUTO detection on arrays > 100 items
+
+### Changed
+
+- Interface `CharsetProcessorInterface` kept minimal with core methods only
+- Convenience methods (`toUtf8()`, `toIso()`, `toUtf8Batch()`, `toIsoBatch()`) remain in concrete implementation only
+- `toCharsetBatch()` now uses `detectBatch()` internally for cleaner code and better maintainability
+
 ## <a name="v110"></a>[1.1.0] - 2026-01-22
 
 ### Added

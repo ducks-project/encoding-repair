@@ -65,8 +65,6 @@ final class CallableTranscoder implements TranscoderInterface
         return $result;
     }
 
-
-
     /**
      * Return true if callable is a valid callable transcoder.
      *
@@ -104,5 +102,4 @@ final class CallableTranscoder implements TranscoderInterface
             );
         }
     }
-
 }

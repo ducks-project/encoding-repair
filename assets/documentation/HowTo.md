@@ -184,7 +184,7 @@ foreach ($users as $user) {
 }
 ```
 
-#### Batch Migration with Progress
+#### Batch Migration with Progress (Optimized)
 
 ```php
 use Ducks\Component\EncodingRepair\CharsetHelper;
@@ -198,9 +198,14 @@ function migrateTable(PDO $source, PDO $target, string $table, int $batchSize = 
         $stmt = $source->query("SELECT * FROM {$table} LIMIT {$batchSize} OFFSET {$offset}");
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
+        // Use batch processing for 40-60% performance improvement
+        $rows = CharsetHelper::toCharsetBatch(
+            $rows,
+            CharsetHelper::ENCODING_UTF8,
+            CharsetHelper::AUTO  // Single detection for entire batch
+        );
+        
         foreach ($rows as $row) {
-            $row = CharsetHelper::toUtf8($row, CharsetHelper::ENCODING_ISO);
-            // Insert into target database
             insertRow($target, $table, $row);
         }
         
@@ -237,6 +242,26 @@ function importCsv(string $filename): array
     $data = array_map(fn($line) => str_getcsv($line), $lines);
     
     return $data;
+}
+```
+
+#### Import CSV with Batch Processing (Optimized)
+
+```php
+use Ducks\Component\EncodingRepair\CharsetHelper;
+
+function importCsvOptimized(string $filename): array
+{
+    // Parse CSV first
+    $lines = file($filename);
+    $data = array_map(fn($line) => str_getcsv($line), $lines);
+    
+    // Batch convert all rows (40-60% faster with AUTO detection)
+    return CharsetHelper::toCharsetBatch(
+        $data,
+        CharsetHelper::ENCODING_UTF8,
+        CharsetHelper::AUTO  // Single detection for entire file
+    );
 }
 ```
 
@@ -723,7 +748,28 @@ try {
 }
 ```
 
-### 2. Use Specific Encodings When Known
+### 2. Use Batch Processing for Large Arrays
+
+```php
+// Slow: Individual conversion with AUTO detection
+$results = [];
+foreach ($items as $item) {
+    $results[] = CharsetHelper::toUtf8($item, CharsetHelper::AUTO);
+}
+
+// Fast: Batch conversion (40-60% faster)
+$results = CharsetHelper::toCharsetBatch(
+    $items,
+    CharsetHelper::ENCODING_UTF8,
+    CharsetHelper::AUTO
+);
+
+// Or detect once, then convert
+$encoding = CharsetHelper::detectBatch($items);
+$results = CharsetHelper::toCharsetBatch($items, 'UTF-8', $encoding);
+```
+
+### 3. Use Specific Encodings When Known
 
 ```php
 // Good: Specific encoding
@@ -731,9 +777,16 @@ $result = CharsetHelper::toUtf8($data, CharsetHelper::WINDOWS_1252);
 
 // Avoid: Auto-detection when encoding is known
 $result = CharsetHelper::toUtf8($data, CharsetHelper::AUTO);
+
+// Exception: Use AUTO with batch processing for large arrays
+$results = CharsetHelper::toCharsetBatch(
+    $largeArray,
+    CharsetHelper::ENCODING_UTF8,
+    CharsetHelper::AUTO  // Only 1 detection instead of N
+);
 ```
 
-### 3. Handle Errors Gracefully
+### 4. Handle Errors Gracefully
 
 ```php
 try {
@@ -745,7 +798,7 @@ try {
 }
 ```
 
-### 4. Test with Real Data
+### 5. Test with Real Data
 
 ```php
 // Unit test with actual problematic data
@@ -758,7 +811,7 @@ public function testRealWorldData(): void
 }
 ```
 
-### 5. Monitor Performance
+### 6. Monitor Performance
 
 ```php
 $start = microtime(true);

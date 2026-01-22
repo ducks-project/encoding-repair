@@ -15,8 +15,6 @@ namespace Ducks\Component\EncodingRepair;
 
 use Ducks\Component\EncodingRepair\Detector\CallableDetector;
 use Ducks\Component\EncodingRepair\Detector\DetectorInterface;
-use Ducks\Component\EncodingRepair\CharsetProcessor;
-use Ducks\Component\EncodingRepair\CharsetProcessorInterface;
 use Ducks\Component\EncodingRepair\Transcoder\CallableTranscoder;
 use Ducks\Component\EncodingRepair\Transcoder\TranscoderInterface;
 use InvalidArgumentException;
@@ -26,6 +24,7 @@ use RuntimeException;
  * Static facade for charset processing.
  *
  * @psalm-api
+ *
  * @final
  */
 final class CharsetHelper
@@ -44,6 +43,8 @@ final class CharsetHelper
     private static $processor = null;
 
     /**
+     * @psalm-api
+     *
      * @codeCoverageIgnore
      */
     private function __construct()
@@ -151,6 +152,30 @@ final class CharsetHelper
     }
 
     /**
+     * Batch detects the charset encoding of iterable items.
+     *
+     * @param iterable<mixed> $items items to loop for analyzis
+     * @param array<string, mixed> $options Conversion options
+     *                                      - 'encodings': array of encodings to test
+     *
+     * @return string Detected encoding (uppercase)
+     */
+    public static function detectBatch(iterable $items, array $options = []): string
+    {
+        $detected = null;
+
+        /** @var mixed $item */
+        foreach ($items as $item) {
+            if (\is_string($item) && '' !== $item) {
+                $detected = self::getProcessor()->detect($item, $options);
+                break;
+            }
+        }
+
+        return $detected ?? self::ENCODING_ISO;
+    }
+
+    /**
      * Convert $data string from one encoding to another.
      *
      * @param mixed $data Data to convert
@@ -175,6 +200,27 @@ final class CharsetHelper
     }
 
     /**
+     * Batch convert array items from one encoding to another.
+     *
+     * @param array<mixed> $items Items to convert
+     * @param string $to Target encoding
+     * @param string $from Source encoding (use AUTO for detection)
+     * @param array<string, mixed> $options Conversion options
+     *
+     * @return array<mixed> Converted items
+     *
+     * @throws InvalidArgumentException If encoding is invalid
+     */
+    public static function toCharsetBatch(
+        array $items,
+        string $to = self::ENCODING_UTF8,
+        string $from = self::ENCODING_ISO,
+        array $options = []
+    ): array {
+        return self::getProcessor()->toCharsetBatch($items, $to, $from, $options);
+    }
+
+    /**
      * Converts anything (string, array, object) to UTF-8.
      *
      * @param mixed $data Data to convert
@@ -190,7 +236,7 @@ final class CharsetHelper
      */
     public static function toUtf8($data, string $from = self::WINDOWS_1252, array $options = [])
     {
-        return self::getProcessor()->toUtf8($data, $from, $options);
+        return self::getProcessor()->toCharset($data, self::ENCODING_UTF8, $from, $options);
     }
 
     /**
@@ -209,7 +255,7 @@ final class CharsetHelper
      */
     public static function toIso($data, string $from = self::ENCODING_UTF8, array $options = [])
     {
-        return self::getProcessor()->toIso($data, $from, $options);
+        return self::getProcessor()->toCharset($data, self::WINDOWS_1252, $from, $options);
     }
 
     /**

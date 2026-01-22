@@ -36,6 +36,13 @@ final class CharsetHelper {
         array $options = []
     ): mixed
 
+    public static toCharsetBatch(
+        array $items,
+        string $to = CharsetHelper::ENCODING_UTF8,
+        string $from = CharsetHelper::ENCODING_ISO,
+        array $options = []
+    ): array
+
     public static toUtf8(
         mixed $data,
         string $from = CharsetHelper::WINDOWS_1252,
@@ -49,6 +56,8 @@ final class CharsetHelper {
     ): mixed
 
     public static detect(string $string, array $options = []): string
+
+    public static detectBatch(iterable $items, array $options = []): string
 
     public static repair(
         mixed $data,
@@ -74,13 +83,13 @@ final class CharsetHelper {
     ): mixed
 
     public static registerTranscoder(
-        string|callable $transcoder,
-        bool $prepend = true
+        TranscoderInterface|callable $transcoder,
+        ?int $priority = null
     ): void
 
     public static registerDetector(
-        string|callable $detector,
-        bool $prepend = true
+        DetectorInterface|callable $detector,
+        ?int $priority = null
     ): void
 }
 ```
@@ -379,9 +388,11 @@ Benchmarks on 10,000 conversions (PHP 8.2, i7-12700K):
 ## [Table of Contents](#table-of-contents)
 
 - [CharsetHelper::toCharset] — Convert data from one encoding to another
+- [CharsetHelper::toCharsetBatch] — Batch convert array items with optimized detection
 - [CharsetHelper::toUtf8] — Convert data to UTF-8
 - [CharsetHelper::toIso] — Convert data to ISO-8859-1/Windows-1252
 - [CharsetHelper::detect] — Detect charset encoding of a string
+- [CharsetHelper::detectBatch] — Detect charset encoding from iterable items
 - [CharsetHelper::repair] — Repair double-encoded strings
 - [CharsetHelper::safeJsonEncode] — JSON encode with automatic charset repair
 - [CharsetHelper::safeJsonDecode] — JSON decode with charset conversion
@@ -396,15 +407,17 @@ Benchmarks on 10,000 conversions (PHP 8.2, i7-12700K):
 - [json_encode()] — Returns the JSON representation of a value
 - [Normalizer::normalize()] — Normalizes the input provided
 
-[CharsetHelper::toCharset]: ./CharsetHelper.toCharset.md#CharsetHelper::toCharset
-[CharsetHelper::toUtf8]: ./CharsetHelper.toUtf8.md#CharsetHelper::toUtf8
-[CharsetHelper::toIso]: ./CharsetHelper.toIso.md#CharsetHelper::toIso
-[CharsetHelper::detect]: ./CharsetHelper.detect.md#CharsetHelper::detect
-[CharsetHelper::repair]: ./CharsetHelper.repair.md#CharsetHelper::repair
-[CharsetHelper::safeJsonEncode]: ./CharsetHelper.safeJsonEncode.md#CharsetHelper::safeJsonEncode
-[CharsetHelper::safeJsonDecode]: ./CharsetHelper.safeJsonDecode.md#CharsetHelper::safeJsonDecode
-[CharsetHelper::registerTranscoder]: ./CharsetHelper.registerTranscoder.md#CharsetHelper::registerTranscoder
-[CharsetHelper::registerDetector]: ./CharsetHelper.registerDetector.md#CharsetHelper::registerDetector
+[CharsetHelper::toCharset]: ./methods/CharsetHelper.toCharset.md#CharsetHelper::toCharset
+[CharsetHelper::toCharsetBatch]: ./methods/CharsetHelper.toCharsetBatch.md#CharsetHelper::toCharsetBatch
+[CharsetHelper::toUtf8]: ./methods/CharsetHelper.toUtf8.md#CharsetHelper::toUtf8
+[CharsetHelper::toIso]: ./methods/CharsetHelper.toIso.md#CharsetHelper::toIso
+[CharsetHelper::detect]: ./methods/CharsetHelper.detect.md#CharsetHelper::detect
+[CharsetHelper::detectBatch]: ./methods/CharsetHelper.detectBatch.md#CharsetHelper::detectBatch
+[CharsetHelper::repair]: ./methods/CharsetHelper.repair.md#CharsetHelper::repair
+[CharsetHelper::safeJsonEncode]: ./methods/CharsetHelper.safeJsonEncode.md#CharsetHelper::safeJsonEncode
+[CharsetHelper::safeJsonDecode]: ./methods/CharsetHelper.safeJsonDecode.md#CharsetHelper::safeJsonDecode
+[CharsetHelper::registerTranscoder]: ./methods/CharsetHelper.registerTranscoder.md#CharsetHelper::registerTranscoder
+[CharsetHelper::registerDetector]: ./methods/CharsetHelper.registerDetector.md#CharsetHelper::registerDetector
 [mb_convert_encoding()]: https://www.php.net/manual/en/function.mb-convert-encoding.php
 [iconv()]: https://www.php.net/manual/en/function.iconv.php
 [mb_detect_encoding()]: https://www.php.net/manual/en/function.mb-detect-encoding.php

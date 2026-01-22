@@ -25,11 +25,11 @@ final class CharsetProcessorTest extends TestCase
     {
         $processor = new CharsetProcessor();
         $transcoder = new MbStringTranscoder();
-        
+
         $processor->registerTranscoder($transcoder, 200);
         $result1 = $processor->toUtf8('test');
         $this->assertSame('test', $result1);
-        
+
         $processor->unregisterTranscoder($transcoder);
         $result2 = $processor->toUtf8('test');
         $this->assertSame('test', $result2);
@@ -39,11 +39,11 @@ final class CharsetProcessorTest extends TestCase
     {
         $processor = new CharsetProcessor();
         $detector = new MbStringDetector();
-        
+
         $processor->registerDetector($detector, 200);
         $encoding1 = $processor->detect('Café');
         $this->assertSame('UTF-8', $encoding1);
-        
+
         $processor->unregisterDetector($detector);
         $encoding2 = $processor->detect('Café');
         $this->assertSame('UTF-8', $encoding2);
@@ -54,12 +54,12 @@ final class CharsetProcessorTest extends TestCase
         $processor = new CharsetProcessor();
         $transcoder1 = new IconvTranscoder();
         $transcoder2 = new MbStringTranscoder();
-        
+
         $processor->registerTranscoder($transcoder1, 100);
         $processor->registerTranscoder($transcoder2, 50);
-        
+
         $processor->unregisterTranscoder($transcoder1);
-        
+
         $result = $processor->toUtf8('test');
         $this->assertSame('test', $result);
     }
@@ -68,9 +68,9 @@ final class CharsetProcessorTest extends TestCase
     {
         $processor = new CharsetProcessor();
         $transcoder = new MbStringTranscoder();
-        
+
         $processor->unregisterTranscoder($transcoder);
-        
+
         $result = $processor->toUtf8('test');
         $this->assertSame('test', $result);
     }
@@ -78,12 +78,12 @@ final class CharsetProcessorTest extends TestCase
     public function testRemoveEncodings(): void
     {
         $processor = new CharsetProcessor();
-        
+
         $processor->addEncodings('SHIFT_JIS', 'EUC-JP');
         $encodings = $processor->getEncodings();
         $this->assertContains('SHIFT_JIS', $encodings);
         $this->assertContains('EUC-JP', $encodings);
-        
+
         $processor->removeEncodings('SHIFT_JIS');
         $encodings = $processor->getEncodings();
         $this->assertNotContains('SHIFT_JIS', $encodings);
@@ -93,7 +93,7 @@ final class CharsetProcessorTest extends TestCase
     public function testGetEncodings(): void
     {
         $processor = new CharsetProcessor();
-        
+
         $encodings = $processor->getEncodings();
         $this->assertIsArray($encodings);
         $this->assertContains('UTF-8', $encodings);
@@ -103,9 +103,19 @@ final class CharsetProcessorTest extends TestCase
     public function testRepairWithInvalidMaxDepth(): void
     {
         $processor = new CharsetProcessor();
+
+        /** @var string|false $corrupted */
         $corrupted = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+        if (false === $corrupted) {
+            $this->fail('mb_convert_encoding failed');
+        }
+
+        /** @var string|false $doubleEncoded */
         $doubleEncoded = \mb_convert_encoding($corrupted, 'UTF-8', 'ISO-8859-1');
-        
+        if (false === $doubleEncoded) {
+            $this->fail('mb_convert_encoding failed');
+        }
+
         $result = $processor->repair($doubleEncoded, 'UTF-8', 'ISO-8859-1', ['maxDepth' => 'invalid']);
         $this->assertSame('Café', $result);
     }
@@ -113,10 +123,10 @@ final class CharsetProcessorTest extends TestCase
     public function testRemoveMultipleEncodings(): void
     {
         $processor = new CharsetProcessor();
-        
+
         $processor->addEncodings('SHIFT_JIS', 'EUC-JP', 'GB2312');
         $processor->removeEncodings('SHIFT_JIS', 'EUC-JP');
-        
+
         $encodings = $processor->getEncodings();
         $this->assertNotContains('SHIFT_JIS', $encodings);
         $this->assertNotContains('EUC-JP', $encodings);
@@ -128,10 +138,10 @@ final class CharsetProcessorTest extends TestCase
         $processor = new CharsetProcessor();
         $transcoder1 = new IconvTranscoder();
         $transcoder2 = new MbStringTranscoder();
-        
+
         $processor->resetTranscoders();
         $processor->queueTranscoders($transcoder1, $transcoder2);
-        
+
         $result = $processor->toUtf8('test');
         $this->assertSame('test', $result);
     }
@@ -141,10 +151,10 @@ final class CharsetProcessorTest extends TestCase
         $processor = new CharsetProcessor();
         $detector1 = new MbStringDetector();
         $detector2 = new MbStringDetector();
-        
+
         $processor->resetDetectors();
         $processor->queueDetectors($detector1, $detector2);
-        
+
         $encoding = $processor->detect('Café');
         $this->assertSame('UTF-8', $encoding);
     }
@@ -152,11 +162,11 @@ final class CharsetProcessorTest extends TestCase
     public function testResetEncodings(): void
     {
         $processor = new CharsetProcessor();
-        
+
         $processor->addEncodings('SHIFT_JIS', 'EUC-JP');
         $encodings = $processor->getEncodings();
         $this->assertContains('SHIFT_JIS', $encodings);
-        
+
         $processor->resetEncodings();
         $encodings = $processor->getEncodings();
         $this->assertNotContains('SHIFT_JIS', $encodings);

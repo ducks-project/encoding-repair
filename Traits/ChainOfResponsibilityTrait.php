@@ -64,7 +64,7 @@ trait ChainOfResponsibilityTrait
         $this->registered = \array_values(
             \array_filter(
                 $this->registered,
-                static fn(array $item): bool => $item['handler'] !== $handler
+                static fn (array $item): bool => $item['handler'] !== $handler
             )
         );
 

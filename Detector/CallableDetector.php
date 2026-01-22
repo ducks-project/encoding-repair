@@ -64,8 +64,6 @@ final class CallableDetector implements DetectorInterface
         return $result;
     }
 
-
-
     /**
      * Return true if callable is a valid callable detector.
      *
@@ -101,5 +99,4 @@ final class CallableDetector implements DetectorInterface
             );
         }
     }
-
 }

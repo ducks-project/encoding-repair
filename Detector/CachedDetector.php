@@ -17,6 +17,8 @@ namespace Ducks\Component\EncodingRepair\Detector;
  * Cached detector decorator with LRU-like eviction.
  *
  * @final
+ *
+ * @psalm-api
  */
 final class CachedDetector implements DetectorInterface
 {
@@ -85,6 +87,8 @@ final class CachedDetector implements DetectorInterface
      * Clear cache entries.
      *
      * @return void
+     *
+     * @psalm-api
      */
     public function clearCache(): void
     {
@@ -95,6 +99,8 @@ final class CachedDetector implements DetectorInterface
      * Get cache statistics.
      *
      * @return array{size: int, maxSize: int}
+     *
+     * @psalm-api
      */
     public function getCacheStats(): array
     {

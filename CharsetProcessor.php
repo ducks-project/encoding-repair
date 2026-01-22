@@ -237,6 +237,24 @@ final class CharsetProcessor implements CharsetProcessorInterface
     /**
      * @inheritDoc
      */
+    public function detectBatch(iterable $items, array $options = []): string
+    {
+        $detected = null;
+
+        /** @var mixed $item */
+        foreach ($items as $item) {
+            if (\is_string($item) && '' !== $item) {
+                $detected = $this->detect($item, $options);
+                break;
+            }
+        }
+
+        return $detected ?? self::ENCODING_ISO;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function toCharset(
         $data,
         string $to = self::ENCODING_UTF8,
@@ -259,7 +277,20 @@ final class CharsetProcessor implements CharsetProcessorInterface
     }
 
     /**
-     * @inheritDoc
+     * Converts anything (string, array, object) to UTF-8.
+     *
+     * @param mixed $data Data to convert
+     * @param string $from Source encoding
+     * @param array<string, mixed> $options Conversion options
+     *                                      - 'normalize': bool (default: true)
+     *                                      - 'translit': bool (default: true)
+     *                                      - 'ignore': bool (default: true)
+     *
+     * @return mixed
+     *
+     * @throws InvalidArgumentException If encoding is invalid
+     *
+     * @psalm-api
      */
     public function toUtf8($data, string $from = self::WINDOWS_1252, array $options = [])
     {
@@ -267,11 +298,92 @@ final class CharsetProcessor implements CharsetProcessorInterface
     }
 
     /**
-     * @inheritDoc
+     * Converts anything to ISO-8859-1 (Windows-1252).
+     *
+     * @param mixed $data Data to convert
+     * @param string $from Source encoding
+     * @param array<string, mixed> $options Conversion options
+     *                                      - 'normalize': bool (default: true)
+     *                                      - 'translit': bool (default: true)
+     *                                      - 'ignore': bool (default: true)
+     *
+     * @return mixed
+     *
+     * @throws InvalidArgumentException If encoding is invalid
+     *
+     * @psalm-api
      */
     public function toIso($data, string $from = self::ENCODING_UTF8, array $options = [])
     {
         return $this->toCharset($data, self::WINDOWS_1252, $from, $options);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function toCharsetBatch(
+        array $items,
+        string $to = self::ENCODING_UTF8,
+        string $from = self::ENCODING_ISO,
+        array $options = []
+    ): array {
+        $this->validateEncoding($to, 'target');
+        $this->validateEncoding($from, 'source');
+
+        if (self::AUTO === $from) {
+            $from = $this->detectBatch($items, $options);
+        }
+
+        /** @psalm-suppress MissingClosureReturnType */
+        return \array_map(fn ($item) => $this->toCharset($item, $to, $from, $options), $items);
+    }
+
+    /**
+     * Batch convert array items from one encoding to utf8.
+     *
+     * Optimized for homogeneous arrays: detects encoding once on first non-empty string.
+     * Use this instead of toUtf8() when processing large arrays with AUTO detection.
+     *
+     * @param array<mixed> $items Items to convert
+     * @param string $from Source encoding (use AUTO for detection)
+     * @param array<string, mixed> $options Conversion options
+     *
+     * @return array<mixed> Converted items
+     *
+     * @throws InvalidArgumentException If encoding is
+     *
+     * @psalm-api
+     */
+    public function toUtf8Batch(
+        array $items,
+        string $from = self::WINDOWS_1252,
+        array $options = []
+    ): array {
+        return $this->toCharsetBatch($items, self::ENCODING_UTF8, $from, $options);
+    }
+
+    /**
+     * Batch convert array items from one encoding to iso.
+     *
+     * Optimized for homogeneous arrays: detects encoding once on first non-empty string.
+     * Use this instead of toIso() when processing large arrays with AUTO detection.
+     *
+     * @param array<mixed> $items Items to convert
+     * @param string $from Source encoding (use AUTO for detection)
+     * @param array<string, mixed> $options Conversion options
+     *
+     * @return array<mixed> Converted items
+     *
+     * @throws InvalidArgumentException If encoding is invalid
+     *
+     * @psalm-api
+     */
+    public function toIsoBatch(
+        array $items,
+        string $from = self::ENCODING_UTF8,
+        array $options = []
+    ): array {
+        return $this->toCharsetBatch($items, self::WINDOWS_1252, $from, $options);
     }
 
     /**

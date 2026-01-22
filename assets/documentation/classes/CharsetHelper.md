@@ -36,6 +36,13 @@ final class CharsetHelper {
         array $options = []
     ): mixed
 
+    public static toCharsetBatch(
+        array $items,
+        string $to = CharsetHelper::ENCODING_UTF8,
+        string $from = CharsetHelper::ENCODING_ISO,
+        array $options = []
+    ): array
+
     public static toUtf8(
         mixed $data,
         string $from = CharsetHelper::WINDOWS_1252,
@@ -49,6 +56,8 @@ final class CharsetHelper {
     ): mixed
 
     public static detect(string $string, array $options = []): string
+
+    public static detectBatch(iterable $items, array $options = []): string
 
     public static repair(
         mixed $data,
@@ -74,13 +83,13 @@ final class CharsetHelper {
     ): mixed
 
     public static registerTranscoder(
-        string|callable $transcoder,
-        bool $prepend = true
+        TranscoderInterface|callable $transcoder,
+        ?int $priority = null
     ): void
 
     public static registerDetector(
-        string|callable $detector,
-        bool $prepend = true
+        DetectorInterface|callable $detector,
+        ?int $priority = null
     ): void
 }
 ```
@@ -401,9 +410,11 @@ Benchmarks on 10,000 conversions (PHP 8.2, i7-12700K):
 ## [Table of Contents](#table-of-contents)
 
 - [CharsetHelper::toCharset] — Convert data from one encoding to another
+- [CharsetHelper::toCharsetBatch] — Batch convert array items with optimized detection
 - [CharsetHelper::toUtf8] — Convert data to UTF-8
 - [CharsetHelper::toIso] — Convert data to ISO-8859-1/Windows-1252
 - [CharsetHelper::detect] — Detect charset encoding of a string
+- [CharsetHelper::detectBatch] — Detect charset encoding from iterable items
 - [CharsetHelper::repair] — Repair double-encoded strings
 - [CharsetHelper::safeJsonEncode] — JSON encode with automatic charset repair
 - [CharsetHelper::safeJsonDecode] — JSON decode with charset conversion
@@ -426,9 +437,11 @@ Benchmarks on 10,000 conversions (PHP 8.2, i7-12700K):
 - [Normalizer::normalize()] — Normalizes the input provided
 
 [CharsetHelper::toCharset]: ./CharsetHelper.toCharset.md#charsethelper__tocharset
+[CharsetHelper::toCharsetBatch]: ./CharsetHelper.toCharsetBatch.md#charsethelper__tocharsetbatch
 [CharsetHelper::toUtf8]: ./CharsetHelper.toUtf8.md#charsethelper__toutf8
 [CharsetHelper::toIso]: ./CharsetHelper.toIso.md#charsethelper__toiso
 [CharsetHelper::detect]: ./CharsetHelper.detect.md#charsethelper__detect
+[CharsetHelper::detectBatch]: ./CharsetHelper.detectBatch.md#charsethelper__detectbatch
 [CharsetHelper::repair]: ./CharsetHelper.repair.md#charsethelper__repair
 [CharsetHelper::safeJsonEncode]: ./CharsetHelper.safeJsonEncode.md#charsethelper__safejsonencode
 [CharsetHelper::safeJsonDecode]: ./CharsetHelper.safeJsonDecode.md#charsethelper__safejsondecode
