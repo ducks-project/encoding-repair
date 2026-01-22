@@ -27,7 +27,7 @@ final class CallableTranscoderEdgeCasesTest extends TestCase
 
     public function testIsValidCallableWithInvokableObject(): void
     {
-        $callable = new class {
+        $callable = new class () {
             // @phpstan-ignore missingType.iterableValue
             public function __invoke(string $data, string $to, string $from, ?array $options = null): ?string
             {

@@ -42,8 +42,8 @@ final class MbStringTranscoderTest extends TestCase
     public function testTranscodeIsoToUtf8(): void
     {
         $transcoder = new MbStringTranscoder();
-        $iso = mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
-        $result = $transcoder->transcode($iso, 'UTF-8', 'ISO-8859-1', []);
+        $iso = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+        $result = $transcoder->transcode((string) $iso, 'UTF-8', 'ISO-8859-1', []);
 
         $this->assertSame('Café', $result);
     }

@@ -27,12 +27,12 @@ final class IconvTranscoderTest extends TestCase
     public function testIsAvailable(): void
     {
         $transcoder = new IconvTranscoder();
-        $this->assertSame(extension_loaded('iconv'), $transcoder->isAvailable());
+        $this->assertSame(\extension_loaded('iconv'), $transcoder->isAvailable());
     }
 
     public function testTranscodeUtf8ToIso(): void
     {
-        if (!extension_loaded('iconv')) {
+        if (!\extension_loaded('iconv')) {
             $this->markTestSkipped('iconv extension not available');
         }
 
@@ -44,7 +44,7 @@ final class IconvTranscoderTest extends TestCase
 
     public function testTranscodeWithTranslit(): void
     {
-        if (!extension_loaded('iconv')) {
+        if (!\extension_loaded('iconv')) {
             $this->markTestSkipped('iconv extension not available');
         }
 

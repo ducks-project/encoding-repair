@@ -27,7 +27,7 @@ final class CallableDetectorEdgeCasesTest extends TestCase
 
     public function testIsValidCallableWithInvokableObject(): void
     {
-        $callable = new class {
+        $callable = new class () {
             // @phpstan-ignore missingType.iterableValue
             public function __invoke(string $string, ?array $options = null): ?string
             {

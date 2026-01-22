@@ -478,7 +478,7 @@ final class CharsetHelperTest extends TestCase
         $this->expectExceptionMessage('JSON Encode Error');
 
         /** @var resource $resource */
-        $resource = fopen('php://memory', 'r');
+        $resource = \fopen('php://memory', 'r');
         CharsetHelper::safeJsonEncode(['resource' => $resource]);
         \fclose($resource);
     }
