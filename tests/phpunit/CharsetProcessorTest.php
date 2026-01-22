@@ -74,4 +74,52 @@ final class CharsetProcessorTest extends TestCase
         $result = $processor->toUtf8('test');
         $this->assertSame('test', $result);
     }
+
+    public function testRemoveEncodings(): void
+    {
+        $processor = new CharsetProcessor();
+        
+        $processor->addEncodings('SHIFT_JIS', 'EUC-JP');
+        $encodings = $processor->getEncodings();
+        $this->assertContains('SHIFT_JIS', $encodings);
+        $this->assertContains('EUC-JP', $encodings);
+        
+        $processor->removeEncodings('SHIFT_JIS');
+        $encodings = $processor->getEncodings();
+        $this->assertNotContains('SHIFT_JIS', $encodings);
+        $this->assertContains('EUC-JP', $encodings);
+    }
+
+    public function testGetEncodings(): void
+    {
+        $processor = new CharsetProcessor();
+        
+        $encodings = $processor->getEncodings();
+        $this->assertIsArray($encodings);
+        $this->assertContains('UTF-8', $encodings);
+        $this->assertContains('AUTO', $encodings);
+    }
+
+    public function testRepairWithInvalidMaxDepth(): void
+    {
+        $processor = new CharsetProcessor();
+        $corrupted = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+        $doubleEncoded = \mb_convert_encoding($corrupted, 'UTF-8', 'ISO-8859-1');
+        
+        $result = $processor->repair($doubleEncoded, 'UTF-8', 'ISO-8859-1', ['maxDepth' => 'invalid']);
+        $this->assertSame('Café', $result);
+    }
+
+    public function testRemoveMultipleEncodings(): void
+    {
+        $processor = new CharsetProcessor();
+        
+        $processor->addEncodings('SHIFT_JIS', 'EUC-JP', 'GB2312');
+        $processor->removeEncodings('SHIFT_JIS', 'EUC-JP');
+        
+        $encodings = $processor->getEncodings();
+        $this->assertNotContains('SHIFT_JIS', $encodings);
+        $this->assertNotContains('EUC-JP', $encodings);
+        $this->assertContains('GB2312', $encodings);
+    }
 }
