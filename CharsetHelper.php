@@ -88,6 +88,8 @@ final class CharsetHelper
      * Private constructor to prevent instantiation of static utility class.
      *
      * @psalm-api
+     *
+     * @codeCoverageIgnore
      */
     private function __construct()
     {

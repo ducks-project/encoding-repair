@@ -517,7 +517,7 @@ processData($clean);
 composer test
 
 # Run tests with coverage
-composer test -- --coverage-html coverage
+composer unittest -- --coverage-html coverage
 
 # Static analysis
 composer phpstan

@@ -105,7 +105,7 @@ brew install php@8.2  # Extensions included by default
 composer unittest
 
 # Run tests with coverage report
-composer test -- --coverage-html coverage
+composer unittest -- --coverage-html coverage
 
 # Run specific test
 ./vendor/bin/phpunit tests/phpunit/SpecificTest.php
