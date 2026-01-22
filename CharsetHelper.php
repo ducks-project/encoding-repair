@@ -674,9 +674,11 @@ final class CharsetHelper
             return $value;
         }
 
+        // @codeCoverageIgnoreStart
         if (!\class_exists(Normalizer::class)) {
             return $value;
         }
+        // @codeCoverageIgnoreEnd
 
         $normalized = Normalizer::normalize($value);
 

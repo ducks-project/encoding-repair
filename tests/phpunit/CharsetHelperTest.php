@@ -443,4 +443,32 @@ final class CharsetHelperTest extends TestCase
 
         $this->assertSame('test', $result);
     }
+
+    public function testNormalizeWithNormalizerNotAvailable(): void
+    {
+        if (\class_exists('Normalizer')) {
+            $this->markTestSkipped('Normalizer is available');
+        }
+
+        $data = 'Café';
+        $result = CharsetHelper::toCharset($data, CharsetHelper::ENCODING_UTF8, CharsetHelper::ENCODING_UTF8, ['normalize' => true]);
+
+        $this->assertSame('Café', $result);
+    }
+
+    public function testConvertValueAlreadyInTargetEncoding(): void
+    {
+        $utf8 = 'Café';
+        $result = CharsetHelper::toCharset($utf8, CharsetHelper::ENCODING_UTF8, CharsetHelper::ENCODING_UTF8);
+
+        $this->assertSame('Café', $result);
+    }
+
+    public function testPeelEncodingLayersBreaksOnSameResult(): void
+    {
+        $data = 'test';
+        $result = CharsetHelper::repair($data);
+
+        $this->assertSame('test', $result);
+    }
 }
