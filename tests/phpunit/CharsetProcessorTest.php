@@ -122,4 +122,45 @@ final class CharsetProcessorTest extends TestCase
         $this->assertNotContains('EUC-JP', $encodings);
         $this->assertContains('GB2312', $encodings);
     }
+
+    public function testQueueTranscoders(): void
+    {
+        $processor = new CharsetProcessor();
+        $transcoder1 = new IconvTranscoder();
+        $transcoder2 = new MbStringTranscoder();
+        
+        $processor->resetTranscoders();
+        $processor->queueTranscoders($transcoder1, $transcoder2);
+        
+        $result = $processor->toUtf8('test');
+        $this->assertSame('test', $result);
+    }
+
+    public function testQueueDetectors(): void
+    {
+        $processor = new CharsetProcessor();
+        $detector1 = new MbStringDetector();
+        $detector2 = new MbStringDetector();
+        
+        $processor->resetDetectors();
+        $processor->queueDetectors($detector1, $detector2);
+        
+        $encoding = $processor->detect('Café');
+        $this->assertSame('UTF-8', $encoding);
+    }
+
+    public function testResetEncodings(): void
+    {
+        $processor = new CharsetProcessor();
+        
+        $processor->addEncodings('SHIFT_JIS', 'EUC-JP');
+        $encodings = $processor->getEncodings();
+        $this->assertContains('SHIFT_JIS', $encodings);
+        
+        $processor->resetEncodings();
+        $encodings = $processor->getEncodings();
+        $this->assertNotContains('SHIFT_JIS', $encodings);
+        $this->assertContains('UTF-8', $encodings);
+        $this->assertContains('AUTO', $encodings);
+    }
 }
