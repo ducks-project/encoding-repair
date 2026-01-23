@@ -24,6 +24,7 @@ nav:
   - User Guide:
     - Basic Usage: guide/basic-usage.md
     - Advanced Usage: guide/advanced-usage.md
+    - Type Interpreters: guide/type-interpreters.md
     - Service Architecture: guide/service-architecture.md
     - Use Cases: guide/use-cases.md
   - API Reference:
@@ -31,6 +32,10 @@ nav:
     - Service:
       - CharsetProcessorInterface: api/CharsetProcessorInterface.md
       - CharsetProcessor: api/CharsetProcessor.md
+    - Interpreters:
+      - TypeInterpreterInterface: api/TypeInterpreterInterface.md
+      - PropertyMapperInterface: api/PropertyMapperInterface.md
+      - InterpreterChain: api/InterpreterChain.md
     - Transcoders:
       - TranscoderInterface: api/TranscoderInterface.md
       - TranscoderChain: api/TranscoderChain.md
@@ -49,9 +54,11 @@ nav:
       - ChainOfResponsibilityTrait: api/ChainOfResponsibilityTrait.md
     - Methods:
       - toCharset: api/methods/CharsetHelper.toCharset.md
+      - toCharsetBatch: api/methods/CharsetHelper.toCharsetBatch.md
       - toUtf8: api/methods/CharsetHelper.toUtf8.md
       - toIso: api/methods/CharsetHelper.toIso.md
       - detect: api/methods/CharsetHelper.detect.md
+      - detectBatch: api/methods/CharsetHelper.detectBatch.md
       - repair: api/methods/CharsetHelper.repair.md
       - safeJsonEncode: api/methods/CharsetHelper.safeJsonEncode.md
       - safeJsonDecode: api/methods/CharsetHelper.safeJsonDecode.md
@@ -63,6 +70,7 @@ nav:
   - About:
     - Changelog: about/changelog.md
     - License: about/license.md
+    - About Middleware Pattern: about/middleware.md
 
 markdown_extensions:
   - admonition

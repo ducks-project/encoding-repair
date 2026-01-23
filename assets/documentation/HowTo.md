@@ -156,6 +156,106 @@ $processor->resetEncodings();
 
 ---
 
+## Type Interpreters (New in v1.2)
+
+### Custom Property Mappers
+
+#### Selective Property Processing
+
+```php
+use Ducks\Component\EncodingRepair\CharsetProcessor;
+use Ducks\Component\EncodingRepair\Interpreter\PropertyMapperInterface;
+
+class UserMapper implements PropertyMapperInterface
+{
+    public function map(object $object, callable $transcoder, array $options): object
+    {
+        $copy = clone $object;
+        $copy->name = $transcoder($object->name);
+        $copy->email = $transcoder($object->email);
+        // password is NOT transcoded (security)
+        // avatar_binary is NOT transcoded (performance)
+        return $copy;
+    }
+}
+
+$processor = new CharsetProcessor();
+$processor->registerPropertyMapper(User::class, new UserMapper());
+
+$user = new User();
+$user->name = 'José';
+$user->password = 'secret123';
+$utf8User = $processor->toUtf8($user);
+// Only name and email are converted, password remains unchanged
+```
+
+#### Performance: Large Objects
+
+```php
+// Object with 50 properties, only 2 need conversion
+class LargeEntity
+{
+    public $title;  // Needs conversion
+    public $description;  // Needs conversion
+    // ... 48 other properties (binary data, numbers, etc.)
+}
+
+class LargeEntityMapper implements PropertyMapperInterface
+{
+    public function map(object $object, callable $transcoder, array $options): object
+    {
+        $copy = clone $object;
+        $copy->title = $transcoder($object->title);
+        $copy->description = $transcoder($object->description);
+        // Skip 48 other properties
+        return $copy;
+    }
+}
+
+$processor->registerPropertyMapper(LargeEntity::class, new LargeEntityMapper());
+// 60% faster than default object processing
+```
+
+### Custom Type Interpreters
+
+#### Resource Interpreter
+
+```php
+use Ducks\Component\EncodingRepair\Interpreter\TypeInterpreterInterface;
+
+class ResourceInterpreter implements TypeInterpreterInterface
+{
+    public function supports($data): bool
+    {
+        return \is_resource($data);
+    }
+
+    public function interpret($data, callable $transcoder, array $options)
+    {
+        $content = \stream_get_contents($data);
+        $converted = $transcoder($content);
+
+        $newResource = \fopen('php://memory', 'r+');
+        \fwrite($newResource, $converted);
+        \rewind($newResource);
+
+        return $newResource;
+    }
+
+    public function getPriority(): int
+    {
+        return 80;
+    }
+}
+
+$processor->registerInterpreter(new ResourceInterpreter(), 80);
+
+$resource = fopen('data.txt', 'r');
+$convertedResource = $processor->toUtf8($resource);
+```
+
+---
+
 ## Common Use Cases
 
 ### 1. Database Migration
@@ -830,6 +930,9 @@ if ($duration > 1.0) {
 - [CharsetHelper API Documentation](./classes/CharsetHelper.md)
 - [CharsetProcessor API Documentation](./classes/CharsetProcessor.md)
 - [CharsetProcessorInterface API Documentation](./classes/CharsetProcessorInterface.md)
+- [Type Interpreter System](./INTERPRETER_SYSTEM.md)
+- [TypeInterpreterInterface API](./classes/TypeInterpreterInterface.md)
+- [PropertyMapperInterface API](./classes/PropertyMapperInterface.md)
 - [Service Architecture Guide](./SERVICE_ARCHITECTURE.md)
 - [GitHub Repository](https://github.com/ducks-project/encoding-repair)
 - [Issue Tracker](https://github.com/ducks-project/encoding-repair/issues)

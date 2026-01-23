@@ -18,6 +18,12 @@ use Ducks\Component\EncodingRepair\Detector\DetectorChain;
 use Ducks\Component\EncodingRepair\Detector\DetectorInterface;
 use Ducks\Component\EncodingRepair\Detector\FileInfoDetector;
 use Ducks\Component\EncodingRepair\Detector\MbStringDetector;
+use Ducks\Component\EncodingRepair\Interpreter\ArrayInterpreter;
+use Ducks\Component\EncodingRepair\Interpreter\InterpreterChain;
+use Ducks\Component\EncodingRepair\Interpreter\ObjectInterpreter;
+use Ducks\Component\EncodingRepair\Interpreter\PropertyMapperInterface;
+use Ducks\Component\EncodingRepair\Interpreter\StringInterpreter;
+use Ducks\Component\EncodingRepair\Interpreter\TypeInterpreterInterface;
 use Ducks\Component\EncodingRepair\Transcoder\IconvTranscoder;
 use Ducks\Component\EncodingRepair\Transcoder\MbStringTranscoder;
 use Ducks\Component\EncodingRepair\Transcoder\TranscoderChain;
@@ -55,6 +61,11 @@ final class CharsetProcessor implements CharsetProcessorInterface
     private DetectorChain $detectorChain;
 
     /**
+     * @var InterpreterChain
+     */
+    private InterpreterChain $interpreterChain;
+
+    /**
      * @var list<string>
      */
     private $allowedEncodings;
@@ -63,6 +74,7 @@ final class CharsetProcessor implements CharsetProcessorInterface
     {
         $this->transcoderChain = new TranscoderChain();
         $this->detectorChain = new DetectorChain();
+        $this->interpreterChain = new InterpreterChain();
         $this->allowedEncodings = [
             self::AUTO,
             self::ENCODING_UTF8,
@@ -75,6 +87,7 @@ final class CharsetProcessor implements CharsetProcessorInterface
 
         $this->resetTranscoders();
         $this->resetDetectors();
+        $this->resetInterpreters();
     }
 
     /**
@@ -216,6 +229,71 @@ final class CharsetProcessor implements CharsetProcessorInterface
             self::ENCODING_UTF16,
             self::ENCODING_UTF32,
         ];
+
+        return $this;
+    }
+
+    /**
+     * Register a type interpreter with optional priority.
+     *
+     * @param TypeInterpreterInterface $interpreter Interpreter to register
+     * @param int|null $priority Priority override (null = use interpreter's default)
+     *
+     * @return self
+     */
+    public function registerInterpreter(TypeInterpreterInterface $interpreter, ?int $priority = null): self
+    {
+        $this->interpreterChain->register($interpreter, $priority);
+
+        return $this;
+    }
+
+    /**
+     * Unregister a type interpreter from the chain.
+     *
+     * @param TypeInterpreterInterface $interpreter Interpreter to remove
+     *
+     * @return self
+     */
+    public function unregisterInterpreter(TypeInterpreterInterface $interpreter): self
+    {
+        $this->interpreterChain->unregister($interpreter);
+
+        return $this;
+    }
+
+    /**
+     * Register a property mapper for a specific class.
+     *
+     * @param string $className Fully qualified class name
+     * @param PropertyMapperInterface $mapper Property mapper instance
+     *
+     * @return self
+     */
+    public function registerPropertyMapper(string $className, PropertyMapperInterface $mapper): self
+    {
+        $objectInterpreter = $this->interpreterChain->getObjectInterpreter();
+
+        if (null === $objectInterpreter) {
+            throw new RuntimeException('ObjectInterpreter not registered in chain');
+        }
+
+        $objectInterpreter->registerMapper($className, $mapper);
+
+        return $this;
+    }
+
+    /**
+     * Reset interpreters to default configuration.
+     *
+     * @return self
+     */
+    public function resetInterpreters(): self
+    {
+        $this->interpreterChain = new InterpreterChain();
+        $this->interpreterChain->register(new StringInterpreter(), 100);
+        $this->interpreterChain->register(new ArrayInterpreter($this->interpreterChain), 50);
+        $this->interpreterChain->register(new ObjectInterpreter($this->interpreterChain), 30);
 
         return $this;
     }
@@ -452,7 +530,7 @@ final class CharsetProcessor implements CharsetProcessorInterface
     }
 
     /**
-     * Applies a callback recursively to arrays, objects, and scalar values.
+     * Applies a callback recursively using type interpreters.
      *
      * @param mixed $data Data to process
      * @param callable $callback Processing callback function
@@ -461,40 +539,7 @@ final class CharsetProcessor implements CharsetProcessorInterface
      */
     private function applyRecursive($data, callable $callback)
     {
-        if (\is_array($data)) {
-            /**
-             * @psalm-suppress MissingClosureReturnType
-             * @psalm-suppress MissingClosureParamType
-             */
-            return \array_map(fn ($item) => $this->applyRecursive($item, $callback), $data);
-        }
-
-        if (\is_object($data)) {
-            return $this->applyToObject($data, $callback);
-        }
-
-        return $callback($data);
-    }
-
-    /**
-     * Applies callback to object properties recursively.
-     *
-     * @param object $data Object to process
-     * @param callable $callback Processing function
-     *
-     * @return object Cloned object with processed properties
-     */
-    private function applyToObject(object $data, callable $callback): object
-    {
-        $copy = clone $data;
-        $properties = \get_object_vars($copy);
-
-        /** @var mixed $value */
-        foreach ($properties as $key => $value) {
-            $copy->$key = $this->applyRecursive($value, $callback);
-        }
-
-        return $copy;
+        return $this->interpreterChain->interpret($data, $callback, []);
     }
 
     /**
