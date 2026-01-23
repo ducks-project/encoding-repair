@@ -60,6 +60,8 @@ trait ChainOfResponsibilityTrait
      * @param T $handler Handler to remove
      *
      * @return void
+     *
+     * @psalm-suppress PossiblyUnusedParam
      */
     public function unregister($handler): void
     {
