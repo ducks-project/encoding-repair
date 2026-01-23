@@ -173,4 +173,100 @@ final class CharsetProcessorTest extends TestCase
         $this->assertContains('UTF-8', $encodings);
         $this->assertContains('AUTO', $encodings);
     }
+
+    public function testNormalizationWithCombiningCharacters(): void
+    {
+        if (!\class_exists(\Normalizer::class)) {
+            $this->markTestSkipped('Normalizer class not available');
+        }
+
+        $processor = new CharsetProcessor();
+        $nfd = "e\u{0301}";
+
+        $result = $processor->toCharset($nfd, 'UTF-8', 'UTF-8', ['normalize' => true]);
+        $expected = "\u{00E9}";
+
+        $this->assertSame($expected, $result);
+        $this->assertSame(2, strlen($result));
+    }
+
+    public function testNormalizationDisabled(): void
+    {
+        if (!\class_exists(\Normalizer::class)) {
+            $this->markTestSkipped('Normalizer class not available');
+        }
+
+        $processor = new CharsetProcessor();
+        $nfd = "e\u{0301}";
+
+        $result = $processor->toCharset($nfd, 'UTF-8', 'UTF-8', ['normalize' => false]);
+
+        $this->assertSame($nfd, $result);
+        $this->assertSame(3, strlen($result));
+    }
+
+    public function testNormalizationOnlyForUtf8(): void
+    {
+        if (!\class_exists(\Normalizer::class)) {
+            $this->markTestSkipped('Normalizer class not available');
+        }
+
+        $processor = new CharsetProcessor();
+        $nfd = "e\u{0301}";
+
+        $result = $processor->toCharset($nfd, 'ISO-8859-1', 'UTF-8', ['normalize' => true]);
+
+        $this->assertIsString($result);
+    }
+
+    public function testNormalizationWithRealWorldExample(): void
+    {
+        if (!\class_exists(\Normalizer::class)) {
+            $this->markTestSkipped('Normalizer class not available');
+        }
+
+        $processor = new CharsetProcessor();
+        $nfd = "Cafe\u{0301}";
+
+        $result = $processor->toUtf8($nfd, 'UTF-8', ['normalize' => true]);
+        $expected = "Caf\u{00E9}";
+
+        $this->assertSame($expected, $result);
+    }
+
+    public function testNormalizationDefaultBehavior(): void
+    {
+        if (!\class_exists(\Normalizer::class)) {
+            $this->markTestSkipped('Normalizer class not available');
+        }
+
+        $processor = new CharsetProcessor();
+        $nfd = "e\u{0301}";
+
+        $result = $processor->toUtf8($nfd, 'UTF-8');
+        $expected = "\u{00E9}";
+
+        $this->assertSame($expected, $result);
+    }
+
+    public function testNormalizationWithFalsyValues(): void
+    {
+        if (!\class_exists(\Normalizer::class)) {
+            $this->markTestSkipped('Normalizer class not available');
+        }
+
+        $processor = new CharsetProcessor();
+        $nfd = "e\u{0301}";
+        $expected = "\u{00E9}";
+
+        $result = $processor->toUtf8($nfd, 'UTF-8', ['normalize' => false]);
+        $this->assertSame($nfd, $result);
+
+        $falsyValues = [0, '0', '', null];
+
+        foreach ($falsyValues as $falsyValue) {
+            $result = $processor->toUtf8($nfd, 'UTF-8', ['normalize' => $falsyValue]);
+            $this->assertSame($expected, $result);
+        }
+    }
 }

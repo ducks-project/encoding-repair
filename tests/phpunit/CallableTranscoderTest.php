@@ -75,4 +75,30 @@ final class CallableTranscoderTest extends TestCase
 
         new CallableTranscoder($callable, 50);
     }
+
+    public function testIsValidCallableWithArrayCallable(): void
+    {
+        $callable = [self::class, 'staticMethod'];
+
+        $this->assertTrue(CallableTranscoder::isValidCallable($callable));
+    }
+
+    public function testIsValidCallableWithInvokableObject(): void
+    {
+        $callable = new class () {
+            // @phpstan-ignore missingType.iterableValue
+            public function __invoke(string $data, string $to, string $from, ?array $options = null): ?string
+            {
+                return null;
+            }
+        };
+
+        $this->assertTrue(CallableTranscoder::isValidCallable($callable));
+    }
+
+    // @phpstan-ignore missingType.iterableValue
+    public static function staticMethod(string $data, string $to, string $from, ?array $options = null): ?string
+    {
+        return null;
+    }
 }

@@ -30,7 +30,6 @@ use Ducks\Component\EncodingRepair\Transcoder\TranscoderChain;
 use Ducks\Component\EncodingRepair\Transcoder\TranscoderInterface;
 use Ducks\Component\EncodingRepair\Transcoder\UConverterTranscoder;
 use InvalidArgumentException;
-use JsonException;
 use Normalizer;
 use RuntimeException;
 

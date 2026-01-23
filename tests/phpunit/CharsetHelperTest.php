@@ -187,28 +187,15 @@ final class CharsetHelperTest extends TestCase
     public function testRegisterTranscoder(): void
     {
         $called = false;
-        /**
-         * @param array<string, mixed>|null $options
-         */
         $transcoder = function (string $data, string $to, string $from, ?array $options = null) use (&$called): ?string {
-            if ('TEST-ENCODING' === $from) {
-                $called = true;
-                return 'transcoded';
-            }
+            $called = true;
             return null;
         };
 
-        CharsetHelper::registerTranscoder($transcoder, 100);
+        CharsetHelper::registerTranscoder($transcoder, 50);
+        $result = CharsetHelper::toUtf8('test');
 
-        // This should trigger our custom transcoder
-        try {
-            CharsetHelper::toCharset('test', CharsetHelper::ENCODING_UTF8, 'TEST-ENCODING');
-        } catch (InvalidArgumentException $e) {
-            // Expected: TEST-ENCODING is not in allowed list
-        }
-
-        // Note: We can't fully test this without modifying ALLOWED_ENCODINGS
-        $this->assertTrue(true);
+        $this->assertIsString($result);
     }
 
     public function testRegisterDetector(): void
@@ -401,7 +388,10 @@ final class CharsetHelperTest extends TestCase
         $utf8 = 'Café';
         $result = CharsetHelper::toCharset($utf8, CharsetHelper::ENCODING_ISO, CharsetHelper::ENCODING_UTF8);
 
-        $this->assertIsString($result);
+        $this->assertNotNull($result);
+        $this->assertNotSame('', $result);
+        $converted = CharsetHelper::toUtf8($result, CharsetHelper::ENCODING_ISO);
+        $this->assertSame('Café', $converted);
     }
 
     public function testDetectFallsBackToIso(): void
@@ -417,7 +407,7 @@ final class CharsetHelperTest extends TestCase
         $data = 'test';
         $result = CharsetHelper::repair($data, CharsetHelper::ENCODING_UTF8, CharsetHelper::ENCODING_ISO, ['maxDepth' => 'invalid']);
 
-        $this->assertIsString($result);
+        $this->assertSame('test', $result, 'Should return original string when maxDepth is invalid');
     }
 
     public function testToCharsetWithInvalidOptionsArray(): void
@@ -464,5 +454,103 @@ final class CharsetHelperTest extends TestCase
         $resource = \fopen('php://memory', 'r');
         CharsetHelper::safeJsonEncode(['resource' => $resource]);
         \fclose($resource);
+    }
+
+    public function testRegisterTranscoderWithInterface(): void
+    {
+        $transcoder = $this->createMock(\Ducks\Component\EncodingRepair\Transcoder\TranscoderInterface::class);
+        $transcoder->method('getPriority')->willReturn(50);
+        $transcoder->method('isAvailable')->willReturn(true);
+        $transcoder->method('transcode')->willReturn(null);
+
+        CharsetHelper::registerTranscoder($transcoder, 50);
+
+        $result = CharsetHelper::toUtf8('test');
+        $this->assertIsString($result);
+    }
+
+    public function testRegisterDetectorWithInterface(): void
+    {
+        $detector = $this->createMock(\Ducks\Component\EncodingRepair\Detector\DetectorInterface::class);
+        $detector->method('getPriority')->willReturn(100);
+        $detector->method('isAvailable')->willReturn(true);
+        $detector->method('detect')->willReturn('UTF-8');
+
+        CharsetHelper::registerDetector($detector, 250);
+
+        $encoding = CharsetHelper::detect('test');
+        $this->assertSame('UTF-8', $encoding);
+    }
+
+    public function testToCharsetBatchWithArray(): void
+    {
+        $items = ['Café', 'Thé', 'Crème'];
+
+        $result = CharsetHelper::toCharsetBatch($items, CharsetHelper::ENCODING_UTF8, CharsetHelper::ENCODING_UTF8);
+
+        $this->assertIsArray($result);
+        $this->assertCount(3, $result);
+    }
+
+    public function testToCharsetBatchWithIso(): void
+    {
+        $items = ['test1', 'test2', 'test3'];
+
+        $result = CharsetHelper::toCharsetBatch($items, CharsetHelper::WINDOWS_1252, CharsetHelper::ENCODING_UTF8);
+
+        $this->assertIsArray($result);
+        $this->assertCount(3, $result);
+    }
+
+    public function testToCharsetBatchWithAutoDetection(): void
+    {
+        $items = ['test1', 'test2'];
+
+        $result = CharsetHelper::toCharsetBatch($items, 'UTF-8', CharsetHelper::AUTO);
+
+        $this->assertIsArray($result);
+        $this->assertCount(2, $result);
+    }
+
+    public function testRegisterTranscoderWithInvalidType(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Transcoder must be an instance of TranscoderInterface or a callable');
+
+        /** @var mixed $invalidTranscoder */
+        $invalidTranscoder = 'not a transcoder';
+        CharsetHelper::registerTranscoder($invalidTranscoder);
+    }
+
+    public function testRegisterDetectorWithInvalidType(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Detector must be an instance of DetectorInterface or a callable');
+
+        /** @var mixed $invalidDetector */
+        $invalidDetector = 123;
+        CharsetHelper::registerDetector($invalidDetector);
+    }
+
+    public function testRegisterTranscoderWithCallable(): void
+    {
+        // @phpstan-ignore return.unusedType
+        $callable = static fn (string $data, string $to, string $from, ?array $options = null): ?string => 'custom-' . $data;
+
+        CharsetHelper::registerTranscoder($callable, 200);
+
+        $result = CharsetHelper::toUtf8('test');
+        $this->assertIsString($result);
+    }
+
+    public function testRegisterDetectorWithCallable(): void
+    {
+        // @phpstan-ignore return.unusedType
+        $callable = static fn (string $string, ?array $options): ?string => 'UTF-8';
+
+        CharsetHelper::registerDetector($callable, 300);
+
+        $encoding = CharsetHelper::detect('test');
+        $this->assertSame('UTF-8', $encoding);
     }
 }

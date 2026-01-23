@@ -28,8 +28,10 @@ final class UConverterTranscoderTest extends TestCase
     public function testIsAvailable(): void
     {
         $transcoder = new UConverterTranscoder();
+        $available = $transcoder->isAvailable();
 
-        $this->assertIsBool($transcoder->isAvailable());
+        $this->assertIsBool($available);
+        $this->assertSame(\class_exists(\UConverter::class), $available);
     }
 
     public function testTranscodeReturnsNullWhenNotAvailable(): void
@@ -75,7 +77,8 @@ final class UConverterTranscoderTest extends TestCase
 
         $result = $transcoder->transcode($data, 'UTF-8', 'UTF-8', ['to_subst' => '?']);
 
-        $this->assertIsString($result);
+        $this->assertNotNull($result);
+        $this->assertSame('test', $result);
     }
 
     public function testTranscodeIgnoresIrrelevantOptions(): void
@@ -92,6 +95,7 @@ final class UConverterTranscoderTest extends TestCase
             'irrelevant' => 'ignored',
         ]);
 
-        $this->assertIsString($result);
+        $this->assertNotNull($result);
+        $this->assertSame('test', $result);
     }
 }

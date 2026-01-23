@@ -83,4 +83,30 @@ final class CallableDetectorTest extends TestCase
 
         new CallableDetector($callable, 50);
     }
+
+    public function testIsValidCallableWithArrayCallable(): void
+    {
+        $callable = [self::class, 'staticMethod'];
+
+        $this->assertTrue(CallableDetector::isValidCallable($callable));
+    }
+
+    public function testIsValidCallableWithInvokableObject(): void
+    {
+        $callable = new class () {
+            // @phpstan-ignore missingType.iterableValue
+            public function __invoke(string $string, ?array $options = null): ?string
+            {
+                return null;
+            }
+        };
+
+        $this->assertTrue(CallableDetector::isValidCallable($callable));
+    }
+
+    // @phpstan-ignore missingType.iterableValue
+    public static function staticMethod(string $string, ?array $options = null): ?string
+    {
+        return null;
+    }
 }
