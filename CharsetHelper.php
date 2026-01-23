@@ -16,7 +16,7 @@ namespace Ducks\Component\EncodingRepair;
 use finfo;
 use InvalidArgumentException;
 use Normalizer;
-use RuntimeException;
+use JsonException;
 use UConverter;
 
 /**
@@ -316,13 +316,13 @@ final class CharsetHelper
      * Safe JSON encoding to ensure UTF-8 compliance.
      *
      * @param mixed $data
-     * @param int $flags JSON encode flags
+     * @param int $flags JSON encode flags (JSON_THROW_ON_ERROR is automatically added)
      * @param int<1, 2147483647> $depth Maximum depth
      * @param string $from Source encoding for repair
      *
      * @return string JSON UTF-8 string
      *
-     * @throws RuntimeException if error occured.
+     * @throws JsonException if error occured.
      */
     public static function safeJsonEncode(
         $data,
@@ -332,16 +332,9 @@ final class CharsetHelper
     ): string {
         /** @var mixed $data */
         $data = self::repair($data, self::ENCODING_UTF8, $from);
-        /** @var string|false $json */
-        $json = \json_encode($data, $flags, $depth);
 
-        if (false === $json) {
-            throw new RuntimeException(
-                'JSON Encode Error: ' . \json_last_error_msg()
-            );
-        }
-
-        return $json;
+        // Force JSON_THROW_ON_ERROR flag
+        return \json_encode($data, $flags | \JSON_THROW_ON_ERROR, $depth);
     }
 
     /**
@@ -350,13 +343,13 @@ final class CharsetHelper
      * @param string $json JSON string
      * @param bool|null $associative Return associative array
      * @param int<1, 2147483647> $depth Maximum depth
-     * @param int $flags JSON decode flags
+     * @param int $flags JSON decode flags (JSON_THROW_ON_ERROR is automatically added)
      * @param string $to Target encoding
      * @param string $from Source encoding for repair
      *
      * @return mixed Decoded data
      *
-     * @throws RuntimeException If decoding fails
+     * @throws JsonException If decoding fails
      */
     public static function safeJsonDecode(
         string $json,
@@ -369,14 +362,10 @@ final class CharsetHelper
         // Repair string to a valid UTF-8 for decoding
         /** @var string $data */
         $data = self::repair($json, self::ENCODING_UTF8, $from);
-        /** @var mixed $result */
-        $result = \json_decode($data, $associative, $depth, $flags);
 
-        if (null === $result && \JSON_ERROR_NONE !== \json_last_error()) {
-            throw new RuntimeException(
-                'JSON Decode Error: ' . \json_last_error_msg()
-            );
-        }
+        // Force JSON_THROW_ON_ERROR flag
+        /** @var mixed $result */
+        $result = \json_decode($data, $associative, $depth, $flags | \JSON_THROW_ON_ERROR);
 
         return self::toCharset($result, $to, self::ENCODING_UTF8);
     }

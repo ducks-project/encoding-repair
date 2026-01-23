@@ -16,7 +16,7 @@ namespace Ducks\Component\EncodingRepair\Tests\phpunit;
 use Ducks\Component\EncodingRepair\CharsetHelper;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
+use JsonException;
 use stdClass;
 
 final class CharsetHelperTest extends TestCase
@@ -179,8 +179,7 @@ final class CharsetHelperTest extends TestCase
 
     public function testSafeJsonDecodeThrowsOnInvalidJson(): void
     {
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('JSON Decode Error');
+        $this->expectException(JsonException::class);
 
         CharsetHelper::safeJsonDecode('invalid json{');
     }

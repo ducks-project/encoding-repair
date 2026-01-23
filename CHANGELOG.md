@@ -7,12 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## <a name="v100"></a>[1.0.0] - 2026-01-20
+## <a name="v012"></a>[0.1.2] - 2026-01-23
+
+### Fixed
+
+- **BREAKING CHANGE**:
+safeJsonEncode & safeJsonDecode should return a JsonException.
+
+## <a name="v011"></a>[0.1.1] - 2026-01-23
+
+### Fixed
+
+- Bad normalize option call.
+
+## <a name="v010"></a>[0.1.0] - 2026-01-20
 
 ### Added
 
-- [`CharsetHelper`]
+- [`CharsetHelper`] Advanced charset encoding converter with
+**Chain of Responsibility** pattern
 
 [`CharsetHelper`]: /assets/documentation/classes/CharsetHelper.md
-[unreleased]: https://github.com/ducks-project/encoding-repair/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/ducks-project/encoding-repair/releases/tag/v1.0.0
+[unreleased]: https://github.com/ducks-project/encoding-repair/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/ducks-project/encoding-repair/releases/tag/v0.1.1
+[0.1.0]: https://github.com/ducks-project/encoding-repair/releases/tag/v0.1.0
