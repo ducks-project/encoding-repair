@@ -683,7 +683,8 @@ final class CharsetProcessor implements CharsetProcessorInterface
      */
     private function normalize(string $value, string $to, array $options): string
     {
-        if (self::ENCODING_UTF8 !== $to || false !== ($options['normalize'] ?? true)) {
+        // Only normalize if: target is UTF-8 AND normalize option is true
+        if (self::ENCODING_UTF8 !== $to || false === ($options['normalize'] ?? true)) {
             return $value;
         }
 
