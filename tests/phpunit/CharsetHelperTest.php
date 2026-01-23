@@ -553,4 +553,13 @@ final class CharsetHelperTest extends TestCase
         $encoding = CharsetHelper::detect('test');
         $this->assertSame('UTF-8', $encoding);
     }
+
+    public function testDetectBatch(): void
+    {
+        $items = ['Café', 'Thé', 'test'];
+        
+        $encoding = CharsetHelper::detectBatch($items);
+        
+        $this->assertSame('UTF-8', $encoding);
+    }
 }
