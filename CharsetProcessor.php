@@ -234,12 +234,7 @@ final class CharsetProcessor implements CharsetProcessorInterface
     }
 
     /**
-     * Register a type interpreter with optional priority.
-     *
-     * @param TypeInterpreterInterface $interpreter Interpreter to register
-     * @param int|null $priority Priority override (null = use interpreter's default)
-     *
-     * @return self
+     * @inheritDoc
      */
     public function registerInterpreter(TypeInterpreterInterface $interpreter, ?int $priority = null): self
     {
@@ -249,11 +244,7 @@ final class CharsetProcessor implements CharsetProcessorInterface
     }
 
     /**
-     * Unregister a type interpreter from the chain.
-     *
-     * @param TypeInterpreterInterface $interpreter Interpreter to remove
-     *
-     * @return self
+     * @inheritDoc
      */
     public function unregisterInterpreter(TypeInterpreterInterface $interpreter): self
     {
@@ -263,12 +254,7 @@ final class CharsetProcessor implements CharsetProcessorInterface
     }
 
     /**
-     * Register a property mapper for a specific class.
-     *
-     * @param string $className Fully qualified class name
-     * @param PropertyMapperInterface $mapper Property mapper instance
-     *
-     * @return self
+     * @inheritDoc
      */
     public function registerPropertyMapper(string $className, PropertyMapperInterface $mapper): self
     {
@@ -284,9 +270,7 @@ final class CharsetProcessor implements CharsetProcessorInterface
     }
 
     /**
-     * Reset interpreters to default configuration.
-     *
-     * @return self
+     * @inheritDoc
      */
     public function resetInterpreters(): self
     {

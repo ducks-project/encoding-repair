@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair\Interpreter;
 
+use Ducks\Component\EncodingRepair\PrioritizedHandlerInterface;
+
 /**
  * Contract for type-specific data interpreters.
  *
@@ -20,7 +22,7 @@ namespace Ducks\Component\EncodingRepair\Interpreter;
  *
  * @psalm-api
  */
-interface TypeInterpreterInterface
+interface TypeInterpreterInterface extends PrioritizedHandlerInterface
 {
     /**
      * Check if this interpreter supports the given data type.
@@ -41,11 +43,4 @@ interface TypeInterpreterInterface
      * @return mixed Processed data
      */
     public function interpret($data, callable $transcoder, array $options);
-
-    /**
-     * Get interpreter priority (higher = executed first).
-     *
-     * @return int Priority value
-     */
-    public function getPriority(): int;
 }

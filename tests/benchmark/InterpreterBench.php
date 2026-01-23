@@ -31,7 +31,7 @@ final class InterpreterBench
         $this->processorWithMapper = new CharsetProcessor();
 
         // Register custom mapper that only processes 2 properties
-        $mapper = new class implements PropertyMapperInterface {
+        $mapper = new class () implements PropertyMapperInterface {
             public function map(object $object, callable $transcoder, array $options): object
             {
                 $copy = clone $object;
@@ -57,6 +57,7 @@ final class InterpreterBench
 
     /**
      * @Revs(1000)
+     *
      * @Iterations(5)
      */
     public function benchObjectWithoutMapper(): void
@@ -66,6 +67,7 @@ final class InterpreterBench
 
     /**
      * @Revs(1000)
+     *
      * @Iterations(5)
      */
     public function benchObjectWithMapper(): void
@@ -75,6 +77,7 @@ final class InterpreterBench
 
     /**
      * @Revs(1000)
+     *
      * @Iterations(5)
      */
     public function benchSimpleString(): void
@@ -85,6 +88,7 @@ final class InterpreterBench
 
     /**
      * @Revs(1000)
+     *
      * @Iterations(5)
      */
     public function benchSimpleArray(): void

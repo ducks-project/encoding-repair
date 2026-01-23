@@ -13,12 +13,14 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair\Transcoder;
 
+use Ducks\Component\EncodingRepair\PrioritizedHandlerInterface;
+
 /**
  * Interface for charset transcoder implementations.
  *
  * @psalm-api
  */
-interface TranscoderInterface
+interface TranscoderInterface extends PrioritizedHandlerInterface
 {
     /**
      * Transcode data from one encoding to another.
@@ -31,13 +33,6 @@ interface TranscoderInterface
      * @return string|null Transcoded string or null if transcoder cannot handle
      */
     public function transcode(string $data, string $to, string $from, ?array $options = null): ?string;
-
-    /**
-     * Get transcoder priority (higher = executed first).
-     *
-     * @return int Priority value
-     */
-    public function getPriority(): int;
 
     /**
      * Check if transcoder is available on current system.

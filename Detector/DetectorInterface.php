@@ -13,12 +13,14 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair\Detector;
 
+use Ducks\Component\EncodingRepair\PrioritizedHandlerInterface;
+
 /**
  * Interface for charset detector implementations.
  *
  * @psalm-api
  */
-interface DetectorInterface
+interface DetectorInterface extends PrioritizedHandlerInterface
 {
     /**
      * Detect charset encoding of a string.
@@ -29,13 +31,6 @@ interface DetectorInterface
      * @return string|null Detected encoding or null if cannot detect
      */
     public function detect(string $string, ?array $options = null): ?string;
-
-    /**
-     * Get detector priority (higher = executed first).
-     *
-     * @return int Priority value
-     */
-    public function getPriority(): int;
 
     /**
      * Check if detector is available on current system.

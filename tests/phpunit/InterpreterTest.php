@@ -63,9 +63,9 @@ final class InterpreterTest extends TestCase
     {
         $processor = new CharsetProcessor();
 
-        $mapper = new class implements PropertyMapperInterface {
+        $mapper = new class () implements PropertyMapperInterface {
             /**
-             * Undocumented function
+             * Mapping for test.
              *
              * @param object $object
              * @param callable $transcoder
@@ -73,7 +73,7 @@ final class InterpreterTest extends TestCase
              *
              * @return object
              *
-             * @psalm-param stdClass&object{name: string, password: string} $object
+             * @psalm-param \stdClass&object{name: string, password: string} $object
              */
             public function map(object $object, callable $transcoder, array $options): object
             {

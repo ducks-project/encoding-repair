@@ -14,6 +14,8 @@ declare(strict_types=1);
 namespace Ducks\Component\EncodingRepair;
 
 use Ducks\Component\EncodingRepair\Detector\DetectorInterface;
+use Ducks\Component\EncodingRepair\Interpreter\PropertyMapperInterface;
+use Ducks\Component\EncodingRepair\Interpreter\TypeInterpreterInterface;
 use Ducks\Component\EncodingRepair\Transcoder\TranscoderInterface;
 use InvalidArgumentException;
 use RuntimeException;
@@ -134,6 +136,42 @@ interface CharsetProcessorInterface
      * @return self
      */
     public function resetEncodings(): self;
+
+    /**
+     * Register a type interpreter with optional priority.
+     *
+     * @param TypeInterpreterInterface $interpreter Interpreter to register
+     * @param int|null $priority Priority override (null = use interpreter's default)
+     *
+     * @return self
+     */
+    public function registerInterpreter(TypeInterpreterInterface $interpreter, ?int $priority = null): self;
+
+    /**
+     * Unregister a type interpreter from the chain.
+     *
+     * @param TypeInterpreterInterface $interpreter Interpreter to remove
+     *
+     * @return self
+     */
+    public function unregisterInterpreter(TypeInterpreterInterface $interpreter): self;
+
+    /**
+     * Register a property mapper for a specific class.
+     *
+     * @param string $className Fully qualified class name
+     * @param PropertyMapperInterface $mapper Property mapper instance
+     *
+     * @return self
+     */
+    public function registerPropertyMapper(string $className, PropertyMapperInterface $mapper): self;
+
+    /**
+     * Reset interpreters to default configuration.
+     *
+     * @return self
+     */
+    public function resetInterpreters(): self;
 
     /**
      * Convert $data string from one encoding to another.

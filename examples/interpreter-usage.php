@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+use InvalidArgumentException;
 use Ducks\Component\EncodingRepair\CharsetProcessor;
 use Ducks\Component\EncodingRepair\Interpreter\PropertyMapperInterface;
 use Ducks\Component\EncodingRepair\Interpreter\TypeInterpreterInterface;
@@ -27,7 +28,7 @@ class UserMapper implements PropertyMapperInterface
     public function map(object $object, callable $transcoder, array $options): object
     {
         if (!$object instanceof User) {
-            throw new \InvalidArgumentException('Expected User instance');
+            throw new InvalidArgumentException('Expected User instance');
         }
 
         $copy = clone $object;

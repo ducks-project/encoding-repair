@@ -18,7 +18,7 @@ use SplPriorityQueue;
 /**
  * Common functionality for Chain of Responsibility pattern.
  *
- * @template T
+ * @template T of \Ducks\Component\EncodingRepair\PrioritizedHandlerInterface
  */
 trait ChainOfResponsibilityTrait
 {
@@ -51,6 +51,7 @@ trait ChainOfResponsibilityTrait
             'priority' => $finalPriority,
         ];
 
+        /** @psalm-suppress ArgumentTypeCoercion */
         $this->getSplPriorityQueue()->insert($handler, $finalPriority);
     }
 
