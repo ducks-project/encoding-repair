@@ -269,4 +269,220 @@ final class CharsetProcessorTest extends TestCase
             $this->assertSame($expected, $result);
         }
     }
+
+    public function testAddEncodings(): void
+    {
+        $processor = new CharsetProcessor();
+
+        $processor->addEncodings('SHIFT_JIS', 'EUC-JP');
+        $encodings = $processor->getEncodings();
+
+        $this->assertContains('SHIFT_JIS', $encodings);
+        $this->assertContains('EUC-JP', $encodings);
+    }
+
+    public function testDetect(): void
+    {
+        $processor = new CharsetProcessor();
+
+        $encoding = $processor->detect('Café');
+
+        $this->assertSame('UTF-8', $encoding);
+    }
+
+    public function testDetectBatch(): void
+    {
+        $processor = new CharsetProcessor();
+
+        $items = ['Café', 'Thé', 'test'];
+        $encoding = $processor->detectBatch($items);
+
+        $this->assertSame('UTF-8', $encoding);
+    }
+
+    public function testRegisterTranscoder(): void
+    {
+        $processor = new CharsetProcessor();
+        $transcoder = new MbStringTranscoder();
+
+        $processor->registerTranscoder($transcoder, 150);
+        $result = $processor->toUtf8('test');
+
+        $this->assertSame('test', $result);
+    }
+
+    public function testRegisterDetector(): void
+    {
+        $processor = new CharsetProcessor();
+        $detector = new MbStringDetector();
+
+        $processor->registerDetector($detector, 150);
+        $encoding = $processor->detect('test');
+
+        $this->assertSame('UTF-8', $encoding);
+    }
+
+    public function testRegisterInterpreter(): void
+    {
+        $processor = new CharsetProcessor();
+        $interpreter = $this->createMock(\Ducks\Component\EncodingRepair\Interpreter\TypeInterpreterInterface::class);
+        $interpreter->method('getPriority')->willReturn(50);
+        $interpreter->method('supports')->willReturn(false);
+
+        $processor->registerInterpreter($interpreter, 50);
+        $result = $processor->toUtf8('test');
+
+        $this->assertSame('test', $result);
+    }
+
+    public function testRegisterPropertyMapper(): void
+    {
+        $processor = new CharsetProcessor();
+        $mapper = $this->createMock(\Ducks\Component\EncodingRepair\Interpreter\PropertyMapperInterface::class);
+
+        $processor->registerPropertyMapper(\stdClass::class, $mapper);
+        $result = $processor->toUtf8('test');
+
+        $this->assertSame('test', $result);
+    }
+
+    public function testRepair(): void
+    {
+        $processor = new CharsetProcessor();
+
+        $original = 'Café';
+        $iso = \mb_convert_encoding($original, 'ISO-8859-1', 'UTF-8');
+        $doubleEncoded = \mb_convert_encoding($iso ?: '', 'UTF-8', 'ISO-8859-1');
+
+        $result = $processor->repair($doubleEncoded ?: '');
+
+        $this->assertSame('Café', $result);
+    }
+
+    public function testResetTranscoders(): void
+    {
+        $processor = new CharsetProcessor();
+
+        $processor->resetTranscoders();
+        $processor->registerTranscoder(new MbStringTranscoder(), 100);
+        $result = $processor->toUtf8('test');
+
+        $this->assertSame('test', $result);
+    }
+
+    public function testResetDetectors(): void
+    {
+        $processor = new CharsetProcessor();
+
+        $processor->resetDetectors();
+        $processor->registerDetector(new MbStringDetector(), 100);
+        $encoding = $processor->detect('test');
+
+        $this->assertSame('UTF-8', $encoding);
+    }
+
+    public function testResetInterpreters(): void
+    {
+        $processor = new CharsetProcessor();
+
+        $processor->resetInterpreters();
+        $result = $processor->toUtf8('test');
+
+        $this->assertSame('test', $result);
+    }
+
+    public function testUnregisterInterpreter(): void
+    {
+        $processor = new CharsetProcessor();
+        $interpreter = $this->createMock(\Ducks\Component\EncodingRepair\Interpreter\TypeInterpreterInterface::class);
+        $interpreter->method('getPriority')->willReturn(50);
+
+        $processor->registerInterpreter($interpreter, 50);
+        $processor->unregisterInterpreter($interpreter);
+        $result = $processor->toUtf8('test');
+
+        $this->assertSame('test', $result);
+    }
+
+    public function testToCharset(): void
+    {
+        $processor = new CharsetProcessor();
+
+        $result = $processor->toCharset('Café', 'UTF-8', 'UTF-8');
+
+        $this->assertSame('Café', $result);
+    }
+
+    public function testToCharsetBatch(): void
+    {
+        $processor = new CharsetProcessor();
+
+        $items = ['test1', 'test2', 'test3'];
+        $result = $processor->toCharsetBatch($items, 'UTF-8', 'UTF-8');
+
+        $this->assertIsArray($result);
+        $this->assertCount(3, $result);
+    }
+
+    public function testToIso(): void
+    {
+        $processor = new CharsetProcessor();
+
+        $result = $processor->toIso('test', 'UTF-8');
+
+        $this->assertIsString($result);
+    }
+
+    public function testToIsoBatch(): void
+    {
+        $processor = new CharsetProcessor();
+
+        $items = ['test1', 'test2'];
+        $result = $processor->toIsoBatch($items, 'UTF-8');
+
+        $this->assertIsArray($result);
+        $this->assertCount(2, $result);
+    }
+
+    public function testToUtf8(): void
+    {
+        $processor = new CharsetProcessor();
+
+        $result = $processor->toUtf8('test', 'UTF-8');
+
+        $this->assertSame('test', $result);
+    }
+
+    public function testToUtf8Batch(): void
+    {
+        $processor = new CharsetProcessor();
+
+        $items = ['test1', 'test2'];
+        $result = $processor->toUtf8Batch($items, 'UTF-8');
+
+        $this->assertIsArray($result);
+        $this->assertCount(2, $result);
+    }
+
+    public function testSafeJsonEncode(): void
+    {
+        $processor = new CharsetProcessor();
+
+        $data = ['name' => 'Café'];
+        $json = $processor->safeJsonEncode($data);
+
+        $this->assertIsString($json);
+        $this->assertStringContainsString('Caf', $json);
+    }
+
+    public function testSafeJsonDecode(): void
+    {
+        $processor = new CharsetProcessor();
+
+        $json = '{"name":"Café"}';
+        $result = $processor->safeJsonDecode($json, true);
+
+        $this->assertIsArray($result);
+        $this->assertSame('Café', $result['name']);
+    }
 }
