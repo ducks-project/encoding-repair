@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `toIsoBatch()` convenience method in `CharsetProcessor` (shortcut to `toCharsetBatch(..., 'CP1252', ...)`)
 - Static facade methods in `CharsetHelper`: `toCharsetBatch()`, `toUtf8Batch()`, `toIsoBatch()`, `detectBatch()`
 - Performance improvement: 40-60% faster for batch processing with AUTO detection on arrays > 100 items
+- New benchmarks with phpbench
 
 ### Changed
 

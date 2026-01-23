@@ -30,19 +30,19 @@ trait ChainOfResponsibilityTrait
     /**
      * @var list<array{handler: T, priority: int}>
      */
-    private $registered = [];
+    private array $registered = [];
 
     /**
      * Register a handler with optional priority override into the chain.
      *
      * @param T $handler Handler to register
-     * @param int|null $_priority Priority override (null = use transcoder's default)
+     * @param int|null $priority Priority override (null = use transcoder's default)
      *
      * @return void
      *
      * @psalm-suppress PossiblyUnusedParam
      */
-    public function register($handler, ?int $_priority = null): void
+    public function register($handler, ?int $priority = null): void
     {
         $finalPriority = $priority ?? $handler->getPriority();
 
@@ -61,7 +61,7 @@ trait ChainOfResponsibilityTrait
      *
      * @return void
      */
-    private function unregister($handler): void
+    public function unregister($handler): void
     {
         $this->registered = \array_values(
             \array_filter(
@@ -70,7 +70,7 @@ trait ChainOfResponsibilityTrait
             )
         );
 
-        $this->queue = null;
+        $this->rebuildQueue();
     }
 
     /**
