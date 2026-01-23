@@ -25,7 +25,6 @@ use Ducks\Component\EncodingRepair\Transcoder\TranscoderInterface;
 use Ducks\Component\EncodingRepair\Transcoder\UConverterTranscoder;
 use InvalidArgumentException;
 use Normalizer;
-use RuntimeException;
 
 /**
  * Charset processing service.
@@ -305,14 +304,9 @@ final class CharsetProcessor implements CharsetProcessorInterface
     ): string {
         /** @var mixed $data */
         $data = $this->repair($data, self::ENCODING_UTF8, $from);
-        /** @var string|false $json */
-        $json = \json_encode($data, $flags, $depth);
 
-        if (false === $json) {
-            throw new RuntimeException('JSON Encode Error: ' . \json_last_error_msg());
-        }
-
-        return $json;
+        // Force JSON_THROW_ON_ERROR flag
+        return \json_encode($data, $flags | \JSON_THROW_ON_ERROR, $depth);
     }
 
     /**
@@ -329,12 +323,10 @@ final class CharsetProcessor implements CharsetProcessorInterface
         // Repair string to a valid UTF-8 for decoding
         /** @var string $data */
         $data = $this->repair($json, self::ENCODING_UTF8, $from);
-        /** @var mixed $result */
-        $result = \json_decode($data, $associative, $depth, $flags);
 
-        if (null === $result && \JSON_ERROR_NONE !== \json_last_error()) {
-            throw new RuntimeException('JSON Decode Error: ' . \json_last_error_msg());
-        }
+        // Force JSON_THROW_ON_ERROR flag
+        /** @var mixed $result */
+        $result = \json_decode($data, $associative, $depth, $flags | \JSON_THROW_ON_ERROR);
 
         return $this->toCharset($result, $to, self::ENCODING_UTF8);
     }

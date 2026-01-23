@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## <a name="v112"></a>[1.1.2] - 2026-01-23
+
+### Fixed
+
+- **BREAKING CHANGE**:
+safeJsonEncode & safeJsonDecode should return a JsonException.
+
+## <a name="v111"></a>[1.1.1] - 2026-01-23
+
+### Fixed
+
 ## <a name="v110"></a>[1.1.0] - 2026-01-22
 
 ### Added
@@ -39,6 +50,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All business logic moved from [`CharsetHelper`] to `CharsetProcessor`] service
 - [`CharsetHelper`] now uses lazy initialization for the processor instance
 - 100% backward compatible
+
+## <a name="v102"></a>[1.0.2] - 2026-01-23
+
+### Fixed
+
+- **BREAKING CHANGE**:
+safeJsonEncode & safeJsonDecode should return a JsonException.
+
+## <a name="v101"></a>[1.0.1] - 2026-01-23
+
+### Fixed
+
+- Bad normalize option call.
 
 ## <a name="v100"></a>[1.0.0] - 2026-01-21
 
@@ -76,6 +100,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Legacy boolean `$prepend` parameter in `registerTranscoder()` (use `?int $priority` instead)
 - Legacy boolean `$prepend` parameter in `registerDetector()` (use `?int $priority` instead)
 
+## <a name="v012"></a>[0.1.2] - 2026-01-23
+
+### Fixed
+
+- **BREAKING CHANGE**:
+safeJsonEncode & safeJsonDecode should return a JsonException.
+
+## <a name="v011"></a>[0.1.1] - 2026-01-23
+
+### Fixed
+
+- Bad normalize option call.
+
 ## <a name="v010"></a>[0.1.0] - 2026-01-20
 
 ### Added
@@ -97,7 +134,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [`CallableDetector`]: /assets/documentation/classes/CallableDetector.md
 [`DetectorChain`]: /assets/documentation/classes/DetectorChain.md
 [`CachedDetector`]: /assets/documentation/classes/CachedDetector.md
-[unreleased]: https://github.com/ducks-project/encoding-repair/compare/v1.1.0...HEAD
+[unreleased]: https://github.com/ducks-project/encoding-repair/compare/v1.1.2...HEAD
+[1.1.2]: https://github.com/ducks-project/encoding-repair/compare/v1.1.2...v1.1.1
+[1.1.1]: https://github.com/ducks-project/encoding-repair/compare/v1.1.1...v1.1.0
 [1.1.0]: https://github.com/ducks-project/encoding-repair/compare/v1.1.0...v1.0.0
+[1.0.2]: https://github.com/ducks-project/encoding-repair/compare/v1.0.2...v1.0.1
+[1.0.1]: https://github.com/ducks-project/encoding-repair/compare/v1.0.1...v1.0.0
 [1.0.0]: https://github.com/ducks-project/encoding-repair/compare/v1.0.0...v0.1.0
+[0.1.2]: https://github.com/ducks-project/encoding-repair/compare/v0.1.2...v0.1.0
+[0.1.1]: https://github.com/ducks-project/encoding-repair/compare/v0.1.1...v0.1.0
 [0.1.0]: https://github.com/ducks-project/encoding-repair/releases/tag/v0.1.0

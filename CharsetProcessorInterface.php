@@ -16,7 +16,7 @@ namespace Ducks\Component\EncodingRepair;
 use Ducks\Component\EncodingRepair\Detector\DetectorInterface;
 use Ducks\Component\EncodingRepair\Transcoder\TranscoderInterface;
 use InvalidArgumentException;
-use RuntimeException;
+use JsonException;
 
 /**
  * Interface for charset processing service.
@@ -230,14 +230,16 @@ interface CharsetProcessorInterface
     /**
      * Safe JSON encoding to ensure UTF-8 compliance.
      *
+     * Note: JSON_THROW_ON_ERROR flag is automatically added to $flags.
+     *
      * @param mixed $data
-     * @param int $flags JSON encode flags
+     * @param int $flags JSON encode flags (JSON_THROW_ON_ERROR is automatically added)
      * @param int<1, 2147483647> $depth Maximum depth
      * @param string $from Source encoding for repair
      *
      * @return string JSON UTF-8 string
      *
-     * @throws RuntimeException if error occured.
+     * @throws JsonException If JSON encoding fails
      */
     public function safeJsonEncode(
         $data,
@@ -249,16 +251,18 @@ interface CharsetProcessorInterface
     /**
      * Safe JSON decoding with charset conversion.
      *
+     * Note: JSON_THROW_ON_ERROR flag is automatically added to $flags.
+     *
      * @param string $json JSON string
      * @param bool|null $associative Return associative array
      * @param int<1, 2147483647> $depth Maximum depth
-     * @param int $flags JSON decode flags
+     * @param int $flags JSON decode flags (JSON_THROW_ON_ERROR is automatically added)
      * @param string $to Target encoding
      * @param string $from Source encoding for repair
      *
      * @return mixed Decoded data
      *
-     * @throws RuntimeException If decoding fails
+     * @throws JsonException If JSON decoding fails
      */
     public function safeJsonDecode(
         string $json,
