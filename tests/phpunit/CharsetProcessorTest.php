@@ -534,19 +534,19 @@ final class CharsetProcessorTest extends TestCase
     public function testRegisterPropertyMapperThrowsWhenObjectInterpreterNotRegistered(): void
     {
         $processor = new CharsetProcessor();
-        
+
         $reflectionClass = new \ReflectionClass($processor);
         $property = $reflectionClass->getProperty('interpreterChain');
         $property->setAccessible(true);
-        
+
         $emptyChain = new \Ducks\Component\EncodingRepair\Interpreter\InterpreterChain();
         $property->setValue($processor, $emptyChain);
-        
+
         $mapper = $this->createMock(\Ducks\Component\EncodingRepair\Interpreter\PropertyMapperInterface::class);
-        
+
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('ObjectInterpreter not registered in chain');
-        
+
         $processor->registerPropertyMapper(\stdClass::class, $mapper);
     }
 }
