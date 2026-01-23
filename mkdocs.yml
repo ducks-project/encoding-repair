@@ -32,6 +32,8 @@ nav:
     - Service:
       - CharsetProcessorInterface: api/CharsetProcessorInterface.md
       - CharsetProcessor: api/CharsetProcessor.md
+    - Base Interfaces:
+      - PrioritizedHandlerInterface: api/PrioritizedHandlerInterface.md
     - Interpreters:
       - TypeInterpreterInterface: api/TypeInterpreterInterface.md
       - PropertyMapperInterface: api/PropertyMapperInterface.md

@@ -410,12 +410,12 @@ use Ducks\Component\EncodingRepair\CharsetProcessorInterface;
 class MyService
 {
     private CharsetProcessorInterface $processor;
-    
+
     public function __construct(CharsetProcessorInterface $processor)
     {
         $this->processor = $processor;
     }
-    
+
     public function process($data)
     {
         return $this->processor->toUtf8($data);
@@ -759,6 +759,7 @@ composer phpcsfixer-check
 - [`CharsetHelper`]
 - [`CharsetProcessor`]
 - [`CharsetProcessorInterface`]
+- [`PrioritizedHandlerInterface`]
 - [`TypeInterpreterInterface`]
 - [`PropertyMapperInterface`]
 - [`InterpreterChain`]
@@ -845,6 +846,7 @@ Made with ❤️ by the Duck Project Team
 [`CharsetHelper`]: /assets/documentation/classes/CharsetHelper.md
 [`CharsetProcessor`]: /assets/documentation/classes/CharsetProcessor.md
 [`CharsetProcessorInterface`]: /assets/documentation/classes/CharsetProcessorInterface.md
+[`PrioritizedHandlerInterface`]: /assets/documentation/classes/PrioritizedHandlerInterface.md
 [`TypeInterpreterInterface`]: /assets/documentation/classes/TypeInterpreterInterface.md
 [`PropertyMapperInterface`]: /assets/documentation/classes/PropertyMapperInterface.md
 [`InterpreterChain`]: /assets/documentation/classes/InterpreterChain.md

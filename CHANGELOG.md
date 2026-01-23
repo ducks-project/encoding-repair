@@ -57,6 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for multiple independent processor instances with different configurations
 - Example file demonstrating service usage (`examples/service-usage.php`)
 - `SERVICE_ARCHITECTURE.md` - Complete documentation of the new architecture
+- [`PrioritizedHandlerInterface`] - Force implentation of `getPriority(): int` method (namespace: `Ducks\Component\EncodingRepair`)
 
 ### Changed
 
@@ -134,6 +135,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [`StringInterpreter`]: /assets/documentation/classes/StringInterpreter.md
 [`ArrayInterpreter`]: /assets/documentation/classes/ArrayInterpreter.md
 [`ObjectInterpreter`]: /assets/documentation/classes/ObjectInterpreter.md
+[`PrioritizedHandlerInterface`]: /assets/documentation/classes/PrioritizedHandlerInterface.md
 [`PropertyMapperInterface`]: /assets/documentation/classes/PropertyMapperInterface.md
 [unreleased]: https://github.com/ducks-project/encoding-repair/compare/v1.1.0...HEAD
 [1.1.0]: https://github.com/ducks-project/encoding-repair/compare/v1.1.0...v1.0.0
