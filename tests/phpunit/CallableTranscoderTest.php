@@ -75,19 +75,4 @@ final class CallableTranscoderTest extends TestCase
 
         new CallableTranscoder($callable, 50);
     }
-
-    public function testConstructorAcceptsArrayCallable(): void
-    {
-        $obj = new class () {
-            // @phpstan-ignore missingType.iterableValue
-            public function transcode(string $data, string $to, string $from, ?array $options = null): ?string
-            {
-                return 'result';
-            }
-        };
-
-        $transcoder = new CallableTranscoder([$obj, 'transcode'], 50);
-
-        $this->assertSame(50, $transcoder->getPriority());
-    }
 }

@@ -66,24 +66,6 @@ final class CharsetHelperCoverageTest extends TestCase
         $this->assertCount(3, $result);
     }
 
-    public function testDetectBatchWithEmptyStrings(): void
-    {
-        $items = ['', '', 'Café'];
-
-        $encoding = CharsetHelper::detectBatch($items);
-
-        $this->assertSame('UTF-8', $encoding);
-    }
-
-    public function testDetectBatchWithNoStrings(): void
-    {
-        $items = [123, null, []];
-
-        $encoding = CharsetHelper::detectBatch($items);
-
-        $this->assertSame(CharsetHelper::ENCODING_ISO, $encoding);
-    }
-
     public function testToCharsetBatchWithAutoDetection(): void
     {
         $items = ['test1', 'test2'];

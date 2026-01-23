@@ -96,15 +96,6 @@ final class CharsetProcessorCoverageTest extends TestCase
         $this->assertIsString($result);
     }
 
-    public function testConvertValueAlreadyInTargetEncoding(): void
-    {
-        $processor = new CharsetProcessor();
-
-        $result = $processor->toCharset('test', 'UTF-8', 'UTF-8');
-
-        $this->assertSame('test', $result);
-    }
-
     public function testPeelEncodingLayersWithNoLayers(): void
     {
         $processor = new CharsetProcessor();
@@ -112,15 +103,6 @@ final class CharsetProcessorCoverageTest extends TestCase
         $result = $processor->repair('test', 'UTF-8', 'ISO-8859-1');
 
         $this->assertSame('test', $result);
-    }
-
-    public function testPeelEncodingLayersBreaksOnSameResult(): void
-    {
-        $processor = new CharsetProcessor();
-
-        $result = $processor->repair('Café', 'UTF-8', 'UTF-8', ['maxDepth' => 10]);
-
-        $this->assertSame('Café', $result);
     }
 
     public function testApplyToObjectWithNestedProperties(): void

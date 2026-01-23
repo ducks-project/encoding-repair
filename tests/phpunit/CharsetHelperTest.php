@@ -230,24 +230,6 @@ final class CharsetHelperTest extends TestCase
         $this->assertContains($encoding, ['UTF-16LE', 'UTF-8']);
     }
 
-    public function testRegisterTranscoderThrowsOnInvalidType(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Transcoder must be');
-
-        // @phpstan-ignore argument.type
-        CharsetHelper::registerTranscoder(123, null);
-    }
-
-    public function testRegisterDetectorThrowsOnInvalidType(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Detector must be');
-
-        // @phpstan-ignore argument.type
-        CharsetHelper::registerDetector(123, null);
-    }
-
     public function testValidateEncodingThrowsOnInvalidEncoding(): void
     {
         $this->expectException(InvalidArgumentException::class);

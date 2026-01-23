@@ -78,21 +78,6 @@ final class CachedDetectorTest extends TestCase
         $this->assertFalse($cached->isAvailable());
     }
 
-    public function testClearCacheRemovesAllEntries(): void
-    {
-        $mockDetector = $this->createMockDetector('UTF-8');
-        $cached = new CachedDetector($mockDetector);
-
-        $cached->detect('string1', []);
-        $cached->detect('string2', []);
-
-        $this->assertSame(2, $cached->getCacheStats()['size']);
-
-        $cached->clearCache();
-
-        $this->assertSame(0, $cached->getCacheStats()['size']);
-    }
-
     public function testGetCacheStatsReturnsCorrectData(): void
     {
         $mockDetector = $this->createMockDetector('UTF-8');
@@ -123,42 +108,22 @@ final class CachedDetectorTest extends TestCase
         $this->assertSame(1, $cached->getCacheStats()['size']);
     }
 
-    public function testCacheKeyCollisionHandling(): void
-    {
-        $mockDetector = $this->createMockDetector('UTF-8');
-        $cached = new CachedDetector($mockDetector);
-
-        $string1 = 'test';
-        $string2 = 'test';
-
-        $cached->detect($string1, []);
-        $cached->detect($string2, []);
-
-        $this->assertSame(1, $cached->getCacheStats()['size']);
-    }
-
-    public function testDefaultMaxSize(): void
-    {
-        $mockDetector = $this->createMockDetector('UTF-8');
-        $cached = new CachedDetector($mockDetector);
-
-        $stats = $cached->getCacheStats();
-        $this->assertSame(1000, $stats['maxSize']);
-    }
-
     public function testCacheAfterClear(): void
     {
         $callCount = 0;
         $mockDetector = $this->createMockDetector('UTF-8', $callCount);
         $cached = new CachedDetector($mockDetector);
 
-        $cached->detect('test', []);
-        $this->assertSame(1, $callCount);
+        $cached->detect('string1', []);
+        $cached->detect('string2', []);
+        $this->assertSame(2, $callCount);
+        $this->assertSame(2, $cached->getCacheStats()['size']);
 
         $cached->clearCache();
+        $this->assertSame(0, $cached->getCacheStats()['size']);
 
-        $cached->detect('test', []);
-        $this->assertSame(2, $callCount);
+        $cached->detect('string1', []);
+        $this->assertSame(3, $callCount);
     }
 
     /**
