@@ -30,6 +30,7 @@ use Ducks\Component\EncodingRepair\Transcoder\TranscoderChain;
 use Ducks\Component\EncodingRepair\Transcoder\TranscoderInterface;
 use Ducks\Component\EncodingRepair\Transcoder\UConverterTranscoder;
 use InvalidArgumentException;
+use JsonException;
 use Normalizer;
 use RuntimeException;
 
@@ -49,6 +50,7 @@ final class CharsetProcessor implements CharsetProcessorInterface
 
     private const MAX_REPAIR_DEPTH = 5;
     private const JSON_DEFAULT_DEPTH = 512;
+    private const DEFAULT_MAX_SAMPLES = 1;
 
     /**
      * @var TranscoderChain
@@ -301,17 +303,46 @@ final class CharsetProcessor implements CharsetProcessorInterface
      */
     public function detectBatch(iterable $items, array $options = []): string
     {
-        $detected = null;
+        /** @var mixed $maxSamples */
+        $maxSamples = $options['maxSamples'] ?? self::DEFAULT_MAX_SAMPLES;
+        if (!\is_int($maxSamples) || 1 > $maxSamples) {
+            $maxSamples = self::DEFAULT_MAX_SAMPLES;
+        }
+
+        /** @var list<string> $samples */
+        $samples = [];
 
         /** @var mixed $item */
         foreach ($items as $item) {
             if (\is_string($item) && '' !== $item) {
-                $detected = $this->detect($item, $options);
-                break;
+                $samples[] = $item;
+                if (\count($samples) >= $maxSamples) {
+                    break;
+                }
             }
         }
 
-        return $detected ?? self::ENCODING_ISO;
+        // Fast return.
+        if (empty($samples)) {
+            return self::ENCODING_ISO;
+        }
+
+        // Fast path: single sample (default behavior)
+        if (1 === $maxSamples) {
+            return $this->detect($samples[0], $options);
+        }
+
+        // Detect on longest sample (more reliable for multiple samples)
+        $longest = \array_reduce(
+            $samples,
+            /**
+             * @param null|string $carry
+             * @param string $item
+             */
+            static fn ($carry, $item) => \strlen($item) > \strlen($carry ?? '') ? $item : $carry
+        );
+
+        return $this->detect($longest, $options);
     }
 
     /**
@@ -479,14 +510,9 @@ final class CharsetProcessor implements CharsetProcessorInterface
     ): string {
         /** @var mixed $data */
         $data = $this->repair($data, self::ENCODING_UTF8, $from);
-        /** @var string|false $json */
-        $json = \json_encode($data, $flags, $depth);
 
-        if (false === $json) {
-            throw new RuntimeException('JSON Encode Error: ' . \json_last_error_msg());
-        }
-
-        return $json;
+        // Force JSON_THROW_ON_ERROR flag
+        return \json_encode($data, $flags | \JSON_THROW_ON_ERROR, $depth);
     }
 
     /**
@@ -503,12 +529,10 @@ final class CharsetProcessor implements CharsetProcessorInterface
         // Repair string to a valid UTF-8 for decoding
         /** @var string $data */
         $data = $this->repair($json, self::ENCODING_UTF8, $from);
-        /** @var mixed $result */
-        $result = \json_decode($data, $associative, $depth, $flags);
 
-        if (null === $result && \JSON_ERROR_NONE !== \json_last_error()) {
-            throw new RuntimeException('JSON Decode Error: ' . \json_last_error_msg());
-        }
+        // Force JSON_THROW_ON_ERROR flag
+        /** @var mixed $result */
+        $result = \json_decode($data, $associative, $depth, $flags | \JSON_THROW_ON_ERROR);
 
         return $this->toCharset($result, $to, self::ENCODING_UTF8);
     }
@@ -542,10 +566,14 @@ final class CharsetProcessor implements CharsetProcessorInterface
             return $value;
         }
 
+        // Special handling when converting FROM UTF-8
+        // Do not trust mbstring when return utf-8 but we want another encoding,
+        // because it will return true even if it's not really valid.
         if (self::ENCODING_UTF8 !== $to && $this->isValidUtf8($value)) {
             return $this->convertString($value, $to, self::ENCODING_UTF8, $options);
         }
 
+        // Check if already in target encoding
         if (\mb_check_encoding($value, $to)) {
             return $this->normalize($value, $to, $options);
         }
@@ -580,10 +608,16 @@ final class CharsetProcessor implements CharsetProcessorInterface
      */
     private function transcodeString(string $data, string $to, string $from, array $options): ?string
     {
-        $targetEncoding = $this->resolveEncoding($to, $data, $options);
-        $sourceEncoding = (self::AUTO === $to && self::AUTO === $from)
-                ? $targetEncoding
-                : $this->resolveEncoding($from, $data, $options);
+        // Optimize: detect once if both are AUTO
+        $detectedEncoding = null;
+        if (self::AUTO === $to || self::AUTO === $from) {
+            $detectedEncoding = $this->detect($data, $options);
+        }
+
+        /** @var string $targetEncoding */
+        $targetEncoding = self::AUTO === $to ? $detectedEncoding : $to;
+        /** @var string $sourceEncoding */
+        $sourceEncoding = self::AUTO === $from ? $detectedEncoding : $from;
 
         $result = $this->transcoderChain->transcode($data, $targetEncoding, $sourceEncoding, $options);
 
@@ -644,7 +678,8 @@ final class CharsetProcessor implements CharsetProcessorInterface
             // Attempt to reverse convert (UTF-8 -> $from)
             $test = $this->transcodeString($fixed, $from, self::ENCODING_UTF8, $options);
 
-            if (null === $test || $test === $fixed || !$this->isValidUtf8($test)) {
+            // Break if conversion failed, no change, or result is longer (infinite loop detection)
+            if (null === $test || $test === $fixed || \strlen($test) >= \strlen($fixed) || !$this->isValidUtf8($test)) {
                 break;
             }
 
@@ -654,22 +689,6 @@ final class CharsetProcessor implements CharsetProcessorInterface
         }
 
         return $fixed;
-    }
-
-    /**
-     * Resolves AUTO encoding to actual encoding.
-     *
-     * @param string $encoding Encoding constant
-     * @param string $data String for detection
-     * @param array<string, mixed> $options Detection options
-     *
-     * @return string Resolved encoding
-     *
-     * @codeCoverageIgnore
-     */
-    private function resolveEncoding(string $encoding, string $data, array $options): string
-    {
-        return self::AUTO === $encoding ? $this->detect($data, $options) : $encoding;
     }
 
     /**

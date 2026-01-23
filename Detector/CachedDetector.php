@@ -22,6 +22,8 @@ namespace Ducks\Component\EncodingRepair\Detector;
  */
 final class CachedDetector implements DetectorInterface
 {
+    private const MAX_SIZE = 1000;
+
     /**
      * @var DetectorInterface
      */
@@ -33,18 +35,11 @@ final class CachedDetector implements DetectorInterface
     private array $cache = [];
 
     /**
-     * @var int
-     */
-    private int $maxSize;
-
-    /**
      * @param DetectorInterface $detector Wrapped detector
-     * @param int $maxSize Maximum cache entries (default: 1000)
      */
-    public function __construct(DetectorInterface $detector, int $maxSize = 1000)
+    public function __construct(DetectorInterface $detector)
     {
         $this->detector = $detector;
-        $this->maxSize = $maxSize;
     }
 
     /**
@@ -52,16 +47,23 @@ final class CachedDetector implements DetectorInterface
      */
     public function detect(string $string, ?array $options = null): ?string
     {
-        $key = \hash('sha256', $string);
+        /** @phan-var string|false $key */
+        $key = \hash('xxh64', $string);
 
-        if (isset($this->cache[$key])) {
+        if (false !== $key && isset($this->cache[$key])) {
             return $this->cache[$key];
         }
 
         $result = $this->detector->detect($string, $options);
 
-        if (null !== $result && \count($this->cache) < $this->maxSize) {
-            $this->cache[$key] = $result;
+        if (null !== $result) {
+            if (\count($this->cache) >= self::MAX_SIZE) {
+                // LRU eviction: remove oldest entry
+                \array_shift($this->cache);
+            }
+            if (false !== $key) {
+                $this->cache[$key] = $result;
+            }
         }
 
         return $result;
@@ -106,7 +108,7 @@ final class CachedDetector implements DetectorInterface
     {
         return [
             'size' => \count($this->cache),
-            'maxSize' => $this->maxSize,
+            'maxSize' => self::MAX_SIZE,
         ];
     }
 }

@@ -110,7 +110,7 @@ final class CachedDetectorTest extends TestCase
     public function testGetCacheStatsReturnsCorrectData(): void
     {
         $mockDetector = $this->createMockDetector('UTF-8');
-        $cached = new CachedDetector($mockDetector, 500);
+        $cached = new CachedDetector($mockDetector);
 
         $cached->detect('test', []);
 
@@ -120,7 +120,7 @@ final class CachedDetectorTest extends TestCase
         $this->assertArrayHasKey('size', $stats);
         $this->assertArrayHasKey('maxSize', $stats);
         $this->assertSame(1, $stats['size']);
-        $this->assertSame(500, $stats['maxSize']);
+        $this->assertSame(1000, $stats['maxSize']);
     }
 
     public function testIntegrationWithMbStringDetector(): void
