@@ -162,17 +162,7 @@ final class CharsetHelper
      */
     public static function detectBatch(iterable $items, array $options = []): string
     {
-        $detected = null;
-
-        /** @var mixed $item */
-        foreach ($items as $item) {
-            if (\is_string($item) && '' !== $item) {
-                $detected = self::getProcessor()->detect($item, $options);
-                break;
-            }
-        }
-
-        return $detected ?? self::ENCODING_ISO;
+        return self::getProcessor()->detectBatch($items, $options);
     }
 
     /**
