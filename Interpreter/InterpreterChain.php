@@ -25,7 +25,35 @@ final class InterpreterChain
     /**
      * @use ChainOfResponsibilityTrait<TypeInterpreterInterface>
      */
-    use ChainOfResponsibilityTrait;
+    use ChainOfResponsibilityTrait {
+        ChainOfResponsibilityTrait::register as chainRegister;
+        ChainOfResponsibilityTrait::unregister as chainUnregister;
+    }
+
+    /**
+     * Register a interpreter with optional priority override.
+     *
+     * @param TypeInterpreterInterface $interpreter Detector instance
+     * @param int|null $priority Priority override (null = use detector's default)
+     *
+     * @return void
+     */
+    public function register(TypeInterpreterInterface $interpreter, ?int $priority = null): void
+    {
+        $this->chainRegister($interpreter, $priority);
+    }
+
+    /**
+     * Unregister a interpreter from the chain.
+     *
+     * @param TypeInterpreterInterface $interpreter Detector instance to remove
+     *
+     * @return void
+     */
+    public function unregister(TypeInterpreterInterface $interpreter): void
+    {
+        $this->chainUnregister($interpreter);
+    }
 
     /**
      * Interpret data using the first matching interpreter.
@@ -57,7 +85,10 @@ final class InterpreterChain
      */
     public function getObjectInterpreter(): ?ObjectInterpreter
     {
-        foreach ($this->getSplPriorityQueue() as $interpreter) {
+        // Clone the queue to avoid consuming it
+        $queue = clone $this->getSplPriorityQueue();
+
+        foreach ($queue as $interpreter) {
             if ($interpreter instanceof ObjectInterpreter) {
                 return $interpreter;
             }

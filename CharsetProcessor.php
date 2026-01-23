@@ -581,7 +581,9 @@ final class CharsetProcessor implements CharsetProcessorInterface
     private function transcodeString(string $data, string $to, string $from, array $options): ?string
     {
         $targetEncoding = $this->resolveEncoding($to, $data, $options);
-        $sourceEncoding = $this->resolveEncoding($from, $data, $options);
+        $sourceEncoding = (self::AUTO === $to && self::AUTO === $from)
+                ? $targetEncoding
+                : $this->resolveEncoding($from, $data, $options);
 
         $result = $this->transcoderChain->transcode($data, $targetEncoding, $sourceEncoding, $options);
 
