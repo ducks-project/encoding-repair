@@ -38,7 +38,10 @@ final class InterpreterChain
      */
     public function interpret($data, callable $transcoder, array $options)
     {
-        foreach ($this->getSplPriorityQueue() as $interpreter) {
+        // Clone the queue to avoid consuming it
+        $queue = clone $this->getSplPriorityQueue();
+
+        foreach ($queue as $interpreter) {
             if ($interpreter->supports($data)) {
                 return $interpreter->interpret($data, $transcoder, $options);
             }

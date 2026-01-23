@@ -65,9 +65,10 @@ final class DetectorChain
      */
     public function detect(string $string, array $options): ?string
     {
-        $this->rebuildQueue();
+        // Clone the queue to avoid consuming it (more efficient than rebuildQueue)
+        $queue = clone $this->getSplPriorityQueue();
 
-        foreach ($this->getSplPriorityQueue() as $detector) {
+        foreach ($queue as $detector) {
             if (!$detector->isAvailable()) {
                 // @codeCoverageIgnoreStart
                 continue;

@@ -67,9 +67,10 @@ final class TranscoderChain
      */
     public function transcode(string $data, string $to, string $from, array $options): ?string
     {
-        $this->rebuildQueue();
+        // Clone the queue to avoid consuming it (more efficient than rebuildQueue)
+        $queue = clone $this->getSplPriorityQueue();
 
-        foreach ($this->getSplPriorityQueue() as $transcoder) {
+        foreach ($queue as $transcoder) {
             if (!$transcoder->isAvailable()) {
                 // @codeCoverageIgnoreStart
                 continue;
