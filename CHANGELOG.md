@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## <a name="v120"></a>[1.2.0] - 2026-01-23
+
 ### Added
 
 - Type-specific interpreter system with Strategy + Visitor pattern for optimized transcoding
@@ -31,6 +33,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Performance improvement: 40-60% faster for batch processing with AUTO detection on arrays > 100 items
 - New benchmarks with phpbench
 
+### Fixed
+
+- Bad normalize option call.
+
 ### Changed
 
 - Refactored `applyRecursive()` to use `InterpreterChain` instead of manual type checking
@@ -38,6 +44,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Interface `CharsetProcessorInterface` kept minimal with core methods only
 - Convenience methods (`toUtf8()`, `toIso()`, `toUtf8Batch()`, `toIsoBatch()`) remain in concrete implementation only
 - `toCharsetBatch()` now uses `detectBatch()` internally for cleaner code and better maintainability
+
+## <a name="v111"></a>[1.1.1] - 2026-01-23
+
+### Fixed
+
+- Bad normalize option call.
 
 ## <a name="v110"></a>[1.1.0] - 2026-01-22
 
@@ -72,6 +84,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All business logic moved from [`CharsetHelper`] to `CharsetProcessor`] service
 - [`CharsetHelper`] now uses lazy initialization for the processor instance
 - 100% backward compatible
+
+## <a name="v101"></a>[1.0.1] - 2026-01-23
+
+### Fixed
+
+- Bad normalize option call.
 
 ## <a name="v100"></a>[1.0.0] - 2026-01-21
 
@@ -109,6 +127,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Legacy boolean `$prepend` parameter in `registerTranscoder()` (use `?int $priority` instead)
 - Legacy boolean `$prepend` parameter in `registerDetector()` (use `?int $priority` instead)
 
+## <a name="v011"></a>[0.1.1] - 2026-01-23
+
+### Fixed
+
+- Bad normalize option call.
+
 ## <a name="v010"></a>[0.1.0] - 2026-01-20
 
 ### Added
@@ -138,6 +162,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [`PrioritizedHandlerInterface`]: /assets/documentation/classes/PrioritizedHandlerInterface.md
 [`PropertyMapperInterface`]: /assets/documentation/classes/PropertyMapperInterface.md
 [unreleased]: https://github.com/ducks-project/encoding-repair/compare/v1.1.0...HEAD
+[1.2.0]: https://github.com/ducks-project/encoding-repair/compare/v1.2.0...v1.1.0
+[1.1.1]: https://github.com/ducks-project/encoding-repair/compare/v1.1.1...v1.1.0
 [1.1.0]: https://github.com/ducks-project/encoding-repair/compare/v1.1.0...v1.0.0
+[1.0.1]: https://github.com/ducks-project/encoding-repair/compare/v1.0.1...v1.0.0
 [1.0.0]: https://github.com/ducks-project/encoding-repair/compare/v1.0.0...v0.1.0
+[0.1.1]: https://github.com/ducks-project/encoding-repair/releases/tag/v0.1.1
 [0.1.0]: https://github.com/ducks-project/encoding-repair/releases/tag/v0.1.0
