@@ -36,11 +36,13 @@ trait ChainOfResponsibilityTrait
      * Register a handler with optional priority override into the chain.
      *
      * @param T $handler Handler to register
-     * @param int|null $priority Priority override (null = use transcoder's default)
+     * @param int|null $_priority Priority override (null = use transcoder's default)
      *
      * @return void
+     *
+     * @psalm-suppress PossiblyUnusedParam
      */
-    public function register($handler, ?int $priority = null): void
+    public function register($handler, ?int $_priority = null): void
     {
         $finalPriority = $priority ?? $handler->getPriority();
 
