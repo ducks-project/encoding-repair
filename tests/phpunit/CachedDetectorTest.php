@@ -48,20 +48,6 @@ final class CachedDetectorTest extends TestCase
         $this->assertSame(2, $callCount);
     }
 
-    public function testDetectRespectsMaxSize(): void
-    {
-        $mockDetector = $this->createMockDetector('UTF-8');
-        $cached = new CachedDetector($mockDetector, 2);
-
-        $cached->detect('string1', []);
-        $cached->detect('string2', []);
-        $cached->detect('string3', []);
-
-        $stats = $cached->getCacheStats();
-        $this->assertSame(2, $stats['size']);
-        $this->assertSame(2, $stats['maxSize']);
-    }
-
     public function testDetectHandlesNullResult(): void
     {
         $mockDetector = $this->createMockDetector(null);

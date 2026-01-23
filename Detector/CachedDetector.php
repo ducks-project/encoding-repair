@@ -47,8 +47,12 @@ final class CachedDetector implements DetectorInterface
      */
     public function detect(string $string, ?array $options = null): ?string
     {
-        /** @phan-var string|false $key */
-        $key = \hash('xxh64', $string);
+        /**
+         * xxh64 does not exits.
+         *
+         * @phan-var string|false $key
+         */
+        $key = \hash('sha256', $string);
 
         if (false !== $key && isset($this->cache[$key])) {
             return $this->cache[$key];
