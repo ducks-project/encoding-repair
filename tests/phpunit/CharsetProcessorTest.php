@@ -300,6 +300,51 @@ final class CharsetProcessorTest extends TestCase
         $this->assertSame('UTF-8', $encoding);
     }
 
+    public function testDetectBatchWithInvalidMaxSamples(): void
+    {
+        $processor = new CharsetProcessor();
+
+        $items = ['Café', 'Thé', 'test'];
+        $encoding = $processor->detectBatch($items, ['maxSamples' => -1]);
+
+        $this->assertSame('UTF-8', $encoding);
+
+        $encoding = $processor->detectBatch($items, ['maxSamples' => 0]);
+        $this->assertSame('UTF-8', $encoding);
+
+        $encoding = $processor->detectBatch($items, ['maxSamples' => 'invalid']);
+        $this->assertSame('UTF-8', $encoding);
+    }
+
+    public function testDetectBatchReturnsUtf8WhenNoSamples(): void
+    {
+        $processor = new CharsetProcessor();
+
+        $encoding = $processor->detectBatch([]);
+        $this->assertSame('UTF-8', $encoding);
+
+        $encoding = $processor->detectBatch(['', '', '']);
+        $this->assertSame('UTF-8', $encoding);
+
+        $encoding = $processor->detectBatch([123, null, []]);
+        $this->assertSame('UTF-8', $encoding);
+    }
+
+    public function testDetectBatchWithMultipleSamplesReturnsLongest(): void
+    {
+        $processor = new CharsetProcessor();
+
+        $iso = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+        $items = [
+            'short',
+            $iso ?: '',
+            'This is a much longer string that should be selected for detection',
+        ];
+
+        $encoding = $processor->detectBatch($items, ['maxSamples' => 3]);
+        $this->assertSame('UTF-8', $encoding);
+    }
+
     public function testRegisterTranscoder(): void
     {
         $processor = new CharsetProcessor();
@@ -484,5 +529,24 @@ final class CharsetProcessorTest extends TestCase
 
         $this->assertIsArray($result);
         $this->assertSame('Café', $result['name']);
+    }
+
+    public function testRegisterPropertyMapperThrowsWhenObjectInterpreterNotRegistered(): void
+    {
+        $processor = new CharsetProcessor();
+        
+        $reflectionClass = new \ReflectionClass($processor);
+        $property = $reflectionClass->getProperty('interpreterChain');
+        $property->setAccessible(true);
+        
+        $emptyChain = new \Ducks\Component\EncodingRepair\Interpreter\InterpreterChain();
+        $property->setValue($processor, $emptyChain);
+        
+        $mapper = $this->createMock(\Ducks\Component\EncodingRepair\Interpreter\PropertyMapperInterface::class);
+        
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('ObjectInterpreter not registered in chain');
+        
+        $processor->registerPropertyMapper(\stdClass::class, $mapper);
     }
 }

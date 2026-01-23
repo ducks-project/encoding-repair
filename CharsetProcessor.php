@@ -323,7 +323,7 @@ final class CharsetProcessor implements CharsetProcessorInterface
 
         // Fast return.
         if (empty($samples)) {
-            return self::ENCODING_ISO;
+            return self::ENCODING_UTF8;
         }
 
         // Fast path: single sample (default behavior)
