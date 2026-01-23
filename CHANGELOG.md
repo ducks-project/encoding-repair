@@ -94,7 +94,7 @@ safeJsonEncode & safeJsonDecode should return a JsonException.
 - [`CharsetHelper`] now uses lazy initialization for the processor instance
 - 100% backward compatible
 
-## <a name="v101"></a>[1.0.2] - 2026-01-23
+## <a name="v102"></a>[1.0.2] - 2026-01-23
 
 ### Fixed
 
@@ -186,9 +186,12 @@ safeJsonEncode & safeJsonDecode should return a JsonException.
 [`PropertyMapperInterface`]: /assets/documentation/classes/PropertyMapperInterface.md
 [unreleased]: https://github.com/ducks-project/encoding-repair/compare/v1.1.0...HEAD
 [1.2.0]: https://github.com/ducks-project/encoding-repair/compare/v1.2.0...v1.1.0
+[1.1.2]: https://github.com/ducks-project/encoding-repair/compare/v1.1.2...v1.1.1
 [1.1.1]: https://github.com/ducks-project/encoding-repair/compare/v1.1.1...v1.1.0
 [1.1.0]: https://github.com/ducks-project/encoding-repair/compare/v1.1.0...v1.0.0
+[1.0.2]: https://github.com/ducks-project/encoding-repair/compare/v1.0.2...v1.0.1
 [1.0.1]: https://github.com/ducks-project/encoding-repair/compare/v1.0.1...v1.0.0
 [1.0.0]: https://github.com/ducks-project/encoding-repair/compare/v1.0.0...v0.1.0
-[0.1.1]: https://github.com/ducks-project/encoding-repair/releases/tag/v0.1.1
+[0.1.2]: https://github.com/ducks-project/encoding-repair/releases/tag/v0.1.2...v0.1.1
+[0.1.1]: https://github.com/ducks-project/encoding-repair/releases/tag/v0.1.1...v0.1.0
 [0.1.0]: https://github.com/ducks-project/encoding-repair/releases/tag/v0.1.0
