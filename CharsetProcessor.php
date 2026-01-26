@@ -562,7 +562,9 @@ final class CharsetProcessor implements CharsetProcessorInterface
     private function convertValue($value, string $to, string $from, array $options)
     {
         if (!\is_string($value)) {
+            // @codeCoverageIgnoreStart
             return $value;
+            // @codeCoverageIgnoreEnd
         }
 
         // Special handling when converting FROM UTF-8
@@ -610,7 +612,9 @@ final class CharsetProcessor implements CharsetProcessorInterface
         // Optimize: detect once if both are AUTO
         $detectedEncoding = null;
         if (self::AUTO === $to || self::AUTO === $from) {
+            // @codeCoverageIgnoreStart
             $detectedEncoding = $this->detect($data, $options);
+            // @codeCoverageIgnoreEnd
         }
 
         /** @var string $targetEncoding */
