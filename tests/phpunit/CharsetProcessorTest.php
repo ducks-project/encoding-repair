@@ -17,6 +17,9 @@ use Ducks\Component\EncodingRepair\CharsetProcessor;
 use Ducks\Component\EncodingRepair\Transcoder\IconvTranscoder;
 use Ducks\Component\EncodingRepair\Transcoder\MbStringTranscoder;
 use Ducks\Component\EncodingRepair\Detector\MbStringDetector;
+use Ducks\Component\EncodingRepair\Interpreter\InterpreterChain;
+use Ducks\Component\EncodingRepair\Interpreter\PropertyMapperInterface;
+use Ducks\Component\EncodingRepair\Interpreter\TypeInterpreterInterface;
 use PHPUnit\Framework\TestCase;
 
 final class CharsetProcessorTest extends TestCase
@@ -370,7 +373,7 @@ final class CharsetProcessorTest extends TestCase
     public function testRegisterInterpreter(): void
     {
         $processor = new CharsetProcessor();
-        $interpreter = $this->createMock(\Ducks\Component\EncodingRepair\Interpreter\TypeInterpreterInterface::class);
+        $interpreter = $this->createMock(TypeInterpreterInterface::class);
         $interpreter->method('getPriority')->willReturn(50);
         $interpreter->method('supports')->willReturn(false);
 
@@ -383,7 +386,7 @@ final class CharsetProcessorTest extends TestCase
     public function testRegisterPropertyMapper(): void
     {
         $processor = new CharsetProcessor();
-        $mapper = $this->createMock(\Ducks\Component\EncodingRepair\Interpreter\PropertyMapperInterface::class);
+        $mapper = $this->createMock(PropertyMapperInterface::class);
 
         $processor->registerPropertyMapper(\stdClass::class, $mapper);
         $result = $processor->toUtf8('test');
@@ -439,7 +442,7 @@ final class CharsetProcessorTest extends TestCase
     public function testUnregisterInterpreter(): void
     {
         $processor = new CharsetProcessor();
-        $interpreter = $this->createMock(\Ducks\Component\EncodingRepair\Interpreter\TypeInterpreterInterface::class);
+        $interpreter = $this->createMock(TypeInterpreterInterface::class);
         $interpreter->method('getPriority')->willReturn(50);
 
         $processor->registerInterpreter($interpreter, 50);
@@ -539,10 +542,10 @@ final class CharsetProcessorTest extends TestCase
         $property = $reflectionClass->getProperty('interpreterChain');
         $property->setAccessible(true);
 
-        $emptyChain = new \Ducks\Component\EncodingRepair\Interpreter\InterpreterChain();
+        $emptyChain = new InterpreterChain();
         $property->setValue($processor, $emptyChain);
 
-        $mapper = $this->createMock(\Ducks\Component\EncodingRepair\Interpreter\PropertyMapperInterface::class);
+        $mapper = $this->createMock(PropertyMapperInterface::class);
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('ObjectInterpreter not registered in chain');

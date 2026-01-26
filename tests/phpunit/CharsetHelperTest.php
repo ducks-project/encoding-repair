@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Ducks\Component\EncodingRepair\Tests\phpunit;
 
 use Ducks\Component\EncodingRepair\CharsetHelper;
+use Ducks\Component\EncodingRepair\Detector\DetectorInterface;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use JsonException;
@@ -471,7 +472,7 @@ final class CharsetHelperTest extends TestCase
 
     public function testRegisterDetectorWithInterface(): void
     {
-        $detector = $this->createMock(\Ducks\Component\EncodingRepair\Detector\DetectorInterface::class);
+        $detector = $this->createMock(DetectorInterface::class);
         $detector->method('getPriority')->willReturn(100);
         $detector->method('isAvailable')->willReturn(true);
         $detector->method('detect')->willReturn('UTF-8');
@@ -557,9 +558,9 @@ final class CharsetHelperTest extends TestCase
     public function testDetectBatch(): void
     {
         $items = ['Café', 'Thé', 'test'];
-        
+
         $encoding = CharsetHelper::detectBatch($items);
-        
+
         $this->assertSame('UTF-8', $encoding);
     }
 }
