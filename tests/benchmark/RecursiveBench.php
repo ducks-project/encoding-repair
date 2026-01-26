@@ -14,6 +14,8 @@ declare(strict_types=1);
 namespace Ducks\Component\EncodingRepair\Tests\benchmark;
 
 use Ducks\Component\EncodingRepair\CharsetHelper;
+use Ducks\Component\EncodingRepair\Tests\common\ObjUtf8;
+use Ducks\Component\EncodingRepair\Tests\common\Word;
 use stdClass;
 
 /**
@@ -52,19 +54,14 @@ final class RecursiveBench
 
     public function __construct()
     {
-        $this->shallowArray = [
-            'name' => 'José García',
-            'city' => 'São Paulo',
-            'country' => 'Brésil',
-        ];
+        $obj = new ObjUtf8();
+
+        $this->shallowArray = $obj->__toArray();
 
         $this->deepArray = [
             'level1' => [
                 'level2' => [
-                    'level3' => [
-                        'name' => 'José García',
-                        'city' => 'São Paulo',
-                    ],
+                    'level3' => $obj->__toArray(),
                 ],
             ],
         ];
@@ -75,9 +72,7 @@ final class RecursiveBench
                     'l3' => [
                         'l4' => [
                             'l5' => [
-                                'l6' => [
-                                    'name' => 'José García',
-                                ],
+                                'l6' => $obj->__toArray(),
                             ],
                         ],
                     ],
@@ -85,21 +80,16 @@ final class RecursiveBench
             ],
         ];
 
-        $this->shallowObject = new stdClass();
-        $this->shallowObject->name = 'José García';
-        $this->shallowObject->city = 'São Paulo';
+        $this->shallowObject = (object) $obj->__toArray();
 
         $this->deepObject = new stdClass();
         $this->deepObject->level1 = new stdClass();
-        $this->deepObject->level1->level2 = new stdClass();
-        $this->deepObject->level1->level2->name = 'José García';
+        $this->deepObject->level1->level2 = $obj->__toArray();
 
-        $obj = new stdClass();
-        $obj->name = 'José García';
         $this->mixedStructure = [
             'data' => [
-                'user' => $obj,
-                'items' => ['Café', 'Thé', 'Chocolat'],
+                'user' => (object) $obj->__toArray(),
+                'items' => Word::getGoodUtf8Word(),
             ],
         ];
     }

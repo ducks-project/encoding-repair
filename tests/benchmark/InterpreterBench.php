@@ -15,6 +15,10 @@ namespace Ducks\Component\EncodingRepair\Tests\benchmark;
 
 use Ducks\Component\EncodingRepair\CharsetProcessor;
 use Ducks\Component\EncodingRepair\Interpreter\PropertyMapperInterface;
+use Ducks\Component\EncodingRepair\Tests\common\ObjBadUtf8;
+use Ducks\Component\EncodingRepair\Tests\common\ObjIso;
+use Ducks\Component\EncodingRepair\Tests\common\Phrase;
+use Ducks\Component\EncodingRepair\Tests\common\Word;
 
 /**
  * Benchmark for type interpreter performance.
@@ -23,7 +27,14 @@ final class InterpreterBench
 {
     private CharsetProcessor $processor;
     private CharsetProcessor $processorWithMapper;
+
+    private string $simpleText;
+
     private object $largeObject;
+
+    private object $simpleObject;
+
+    private array $simpleArray;
 
     public function __construct()
     {
@@ -44,11 +55,14 @@ final class InterpreterBench
 
         $this->processorWithMapper->registerPropertyMapper(\stdClass::class, $mapper);
 
-        // Create object with 50 properties (only 2 need conversion)
-        $this->largeObject = new \stdClass();
-        $this->largeObject->name = \mb_convert_encoding('José', 'ISO-8859-1', 'UTF-8');
-        $this->largeObject->email = \mb_convert_encoding('josé@example.com', 'ISO-8859-1', 'UTF-8');
+        $this->simpleText = \mb_convert_encoding(Word::getGoodUtf8Word(), 'ISO-8859-1', 'UTF-8');
 
+        $this->simpleObject = ObjIso::getValue();
+
+        $this->simpleArray = (array) $this->simpleObject;
+
+        // Create object with 50 properties (only 2 need conversion)
+        $this->largeObject = ObjBadUtf8::getValue();
         for ($i = 0; $i < 48; $i++) {
             $prop = "prop{$i}";
             $this->largeObject->$prop = "value{$i}"; // Already UTF-8, no conversion needed
@@ -82,8 +96,7 @@ final class InterpreterBench
      */
     public function benchSimpleString(): void
     {
-        $iso = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
-        $this->processor->toUtf8($iso, CharsetProcessor::ENCODING_ISO);
+        $this->processor->toUtf8($this->simpleText, CharsetProcessor::ENCODING_ISO);
     }
 
     /**
@@ -93,10 +106,6 @@ final class InterpreterBench
      */
     public function benchSimpleArray(): void
     {
-        $data = [
-            'name' => \mb_convert_encoding('José', 'ISO-8859-1', 'UTF-8'),
-            'city' => \mb_convert_encoding('São Paulo', 'ISO-8859-1', 'UTF-8'),
-        ];
-        $this->processor->toUtf8($data, CharsetProcessor::ENCODING_ISO);
+        $this->processor->toUtf8($this->simpleArray, CharsetProcessor::ENCODING_ISO);
     }
 }

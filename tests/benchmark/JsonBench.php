@@ -14,6 +14,8 @@ declare(strict_types=1);
 namespace Ducks\Component\EncodingRepair\Tests\benchmark;
 
 use Ducks\Component\EncodingRepair\CharsetHelper;
+use Ducks\Component\EncodingRepair\Tests\common\ObjUtf8;
+use Ducks\Component\EncodingRepair\Tests\common\Phrase;
 
 /**
  * @Groups({"json"})
@@ -31,6 +33,8 @@ final class JsonBench
      */
     private array $data;
 
+    private string $utf8String;
+
     private string $json;
 
     /**
@@ -40,17 +44,15 @@ final class JsonBench
 
     public function __construct()
     {
-        $this->data = [
-            'name' => 'Gérard',
-            'city' => 'São Paulo',
-            'description' => 'Développeur',
-        ];
+        $obj = new ObjUtf8();
 
-        $this->json = '{"name":"Gérard","city":"São Paulo","description":"Développeur"}';
+        $this->utf8String = Phrase::getValue();
+        $this->data = $obj->__toArray();
+        $this->json = \json_encode($this->data);
 
         $this->largeData = [];
         for ($i = 0; $i < 100; $i++) {
-            $this->largeData["field_{$i}"] = "Café résumé {$i}";
+            $this->largeData["field_{$i}"] = "{$this->utf8String} {$i}";
         }
     }
 

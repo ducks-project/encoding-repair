@@ -14,6 +14,8 @@ declare(strict_types=1);
 namespace Ducks\Component\EncodingRepair\Tests\benchmark;
 
 use Ducks\Component\EncodingRepair\CharsetProcessor;
+use Ducks\Component\EncodingRepair\Tests\common\ObjUtf8;
+use Ducks\Component\EncodingRepair\Tests\common\Phrase;
 
 /**
  * @Groups({"processor"})
@@ -27,17 +29,18 @@ use Ducks\Component\EncodingRepair\CharsetProcessor;
 final class ProcessorBench
 {
     private CharsetProcessor $processor;
-    private string $utf8String = 'Café résumé avec des accents éèêë';
+    private string $utf8String;
     private array $testArray;
 
     public function __construct()
     {
         $this->processor = new CharsetProcessor();
-        $this->testArray = [
-            'name' => 'José García',
-            'city' => 'São Paulo',
-            'nested' => ['field' => 'Café résumé'],
-        ];
+
+        $this->utf8String = Phrase::getValue();
+
+        $obj = new ObjUtf8();
+        $this->testArray = $obj->__toArray();
+        $this->testArray['nested'] = ['field' => $this->utf8String];
     }
 
     /**

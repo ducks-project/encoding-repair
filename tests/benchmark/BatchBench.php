@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Ducks\Component\EncodingRepair\Tests\benchmark;
 
 use Ducks\Component\EncodingRepair\CharsetHelper;
+use Ducks\Component\EncodingRepair\Tests\common\Phrase;
 
 /**
  * @Groups({"batch"})
@@ -43,9 +44,11 @@ final class BatchBench
 
     public function __construct()
     {
-        $this->smallBatch = array_fill(0, 10, 'Café résumé');
-        $this->mediumBatch = array_fill(0, 100, 'Café résumé');
-        $this->largeBatch = array_fill(0, 1000, 'Café résumé');
+        $phrase = Phrase::VALUE;
+
+        $this->smallBatch = array_fill(0, 10, $phrase);
+        $this->mediumBatch = array_fill(0, 100, $phrase);
+        $this->largeBatch = array_fill(0, 1000, $phrase);
     }
 
     /**

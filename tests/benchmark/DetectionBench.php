@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Ducks\Component\EncodingRepair\Tests\benchmark;
 
 use Ducks\Component\EncodingRepair\CharsetHelper;
+use Ducks\Component\EncodingRepair\Tests\common\Phrase;
 
 /**
  * @Groups({"detection"})
@@ -26,11 +27,15 @@ use Ducks\Component\EncodingRepair\CharsetHelper;
  */
 final class DetectionBench
 {
-    private string $utf8String = 'Café résumé avec des accents éèêë';
-    private string $mixedString = 'Simple ASCII text';
+    private string $utf8String;
+    private string $mixedString;
 
     public function __construct()
     {
+        $phrase = new Phrase();
+
+        $this->utf8String = (string) $phrase;
+        $this->mixedString = $phrase->getAscii();
     }
 
     /**

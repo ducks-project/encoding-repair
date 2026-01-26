@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Ducks\Component\EncodingRepair\Tests\benchmark;
 
 use Ducks\Component\EncodingRepair\CharsetHelper;
+use Ducks\Component\EncodingRepair\Tests\common\Phrase;
 
 /**
  * @Groups({"normalization"})
@@ -26,7 +27,7 @@ use Ducks\Component\EncodingRepair\CharsetHelper;
  */
 final class NormalizationBench
 {
-    private string $shortString = 'Café résumé';
+    private string $shortString;
     private string $longString;
 
     /**
@@ -36,8 +37,9 @@ final class NormalizationBench
 
     public function __construct()
     {
-        $this->longString = str_repeat('Café résumé avec des accents éèêë ', 100);
-        $this->dataArray = array_fill(0, 50, 'Café résumé');
+        $this->shortString = Phrase::getValue();
+        $this->longString = \str_repeat($this->shortString . ' ', 100);
+        $this->dataArray = \array_fill(0, 50, $this->shortString);
     }
 
     /**

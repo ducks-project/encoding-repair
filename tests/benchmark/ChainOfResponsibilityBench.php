@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair\Tests\benchmark;
 
+use Ducks\Component\EncodingRepair\Tests\common\Phrase;
 use Ducks\Component\EncodingRepair\Transcoder\IconvTranscoder;
 use Ducks\Component\EncodingRepair\Transcoder\MbStringTranscoder;
 use Ducks\Component\EncodingRepair\Transcoder\TranscoderChain;
@@ -32,10 +33,12 @@ final class ChainOfResponsibilityBench
     private IconvTranscoder $iconv;
     private MbStringTranscoder $mbstring;
     private UConverterTranscoder $uconverter;
-    private string $testString = 'Café résumé';
+    private string $testString;
 
     public function __construct()
     {
+        $this->testString = Phrase::VALUE;
+
         $this->iconv = new IconvTranscoder();
         $this->mbstring = new MbStringTranscoder();
         $this->uconverter = new UConverterTranscoder();

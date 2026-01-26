@@ -16,6 +16,7 @@ namespace Ducks\Component\EncodingRepair\Tests\benchmark;
 use Ducks\Component\EncodingRepair\Detector\CachedDetector;
 use Ducks\Component\EncodingRepair\Detector\FileInfoDetector;
 use Ducks\Component\EncodingRepair\Detector\MbStringDetector;
+use Ducks\Component\EncodingRepair\Tests\common\Phrase;
 
 /**
  * @Groups({"detector"})
@@ -28,7 +29,7 @@ use Ducks\Component\EncodingRepair\Detector\MbStringDetector;
  */
 final class DetectorBench
 {
-    private string $utf8String = 'Café résumé avec des accents éèêë';
+    private string $utf8String;
 
     private MbStringDetector $mbDetector;
     private FileInfoDetector $fileInfoDetector;
@@ -36,6 +37,9 @@ final class DetectorBench
 
     public function __construct()
     {
+        $phrase = new Phrase();
+
+        $this->utf8String = (string) $phrase;
         $this->mbDetector = new MbStringDetector();
         $this->fileInfoDetector = new FileInfoDetector();
         $this->cachedDetector = new CachedDetector($this->mbDetector);

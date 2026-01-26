@@ -14,6 +14,8 @@ declare(strict_types=1);
 namespace Ducks\Component\EncodingRepair\Tests\benchmark;
 
 use Ducks\Component\EncodingRepair\CharsetHelper;
+use Ducks\Component\EncodingRepair\Tests\common\ObjUtf8;
+use Ducks\Component\EncodingRepair\Tests\common\Phrase;
 use stdClass;
 
 /**
@@ -27,7 +29,10 @@ use stdClass;
  */
 final class ConversionBench
 {
-    private string $utf8String = 'Café résumé avec des accents éèêë';
+    /**
+     * @var string
+     */
+    private string $utf8String;
 
     /**
      * @var array<string, string>
@@ -39,24 +44,26 @@ final class ConversionBench
      */
     private array $largeArray;
 
+    /**
+     * @var object
+     * @psalm-var \stdClass&object{name: string, password: string} $object
+     */
     private object $object;
 
     public function __construct()
     {
-        $this->smallArray = [
-            'name' => 'José García',
-            'city' => 'São Paulo',
-            'country' => 'Brésil',
-        ];
+        $obj = new ObjUtf8();
+
+        $this->utf8String = Phrase::VALUE;
+
+        $this->smallArray = $obj->__toArray();
 
         $this->largeArray = [];
         for ($i = 0; $i < 100; $i++) {
-            $this->largeArray["field_{$i}"] = "Café résumé {$i}";
+            $this->largeArray["field_{$i}"] = "{$this->utf8String} {$i}";
         }
 
-        $this->object = new stdClass();
-        $this->object->name = 'José García';
-        $this->object->email = 'test@example.com';
+        $this->object = (object) $this->smallArray;
     }
 
     /**

@@ -14,6 +14,8 @@ declare(strict_types=1);
 namespace Ducks\Component\EncodingRepair\Tests\benchmark;
 
 use Ducks\Component\EncodingRepair\CharsetHelper;
+use Ducks\Component\EncodingRepair\Tests\common\ObjBadUtf8;
+use Ducks\Component\EncodingRepair\Tests\common\Phrase;
 
 /**
  * @Groups({"repair"})
@@ -27,16 +29,15 @@ use Ducks\Component\EncodingRepair\CharsetHelper;
 final class RepairBench
 {
     private string $doubleEncoded = "Caf\xC3\x83\xC2\xA9"; // Double-encoded Café
-    private string $validUtf8 = 'Café résumé';
+    private string $validUtf8;
     private array $doubleEncodedArray;
 
     public function __construct()
     {
-        $this->doubleEncodedArray = [
-            'name' => $this->doubleEncoded,
-            'city' => $this->doubleEncoded,
-            'country' => $this->doubleEncoded,
-        ];
+        $obj = new ObjBadUtf8();
+
+        $this->validUtf8 = Phrase::getValue();
+        $this->doubleEncodedArray = $obj->__toArray();
     }
 
     /**
@@ -68,8 +69,13 @@ final class RepairBench
      */
     public function benchRepairWithMaxDepth(): void
     {
-        CharsetHelper::repair($this->doubleEncoded, CharsetHelper::ENCODING_UTF8, CharsetHelper::ENCODING_ISO, [
-            'maxDepth' => 10,
-        ]);
+        CharsetHelper::repair(
+            $this->doubleEncoded,
+            CharsetHelper::ENCODING_UTF8,
+            CharsetHelper::ENCODING_ISO,
+            [
+                'maxDepth' => 10,
+            ]
+        );
     }
 }
