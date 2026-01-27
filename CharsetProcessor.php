@@ -576,6 +576,7 @@ final class CharsetProcessor implements CharsetProcessorInterface
 
         // Check if already in target encoding
         if (\mb_check_encoding($value, $to)) {
+            // normalize will just return $value on non-utf8.
             return $this->normalize($value, $to, $options);
         }
 
@@ -726,6 +727,8 @@ final class CharsetProcessor implements CharsetProcessorInterface
 
     /**
      * Normalizes UTF-8 string if needed.
+     *
+     * It will return the value as it on non-utf8 string.
      *
      * @param string $value String to normalize
      * @param string $to Target encoding
