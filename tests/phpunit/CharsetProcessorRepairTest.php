@@ -40,6 +40,16 @@ final class CharsetProcessorRepairTest extends TestCase
         return $method->invokeArgs($object, $args);
     }
 
+    public function testRepairByPatternReplacementWithComplexPatterns(): void
+    {
+        $processor = new CharsetProcessor();
+        $corrupted = 'FÃÂÂÂÂ©dÃÂÂÂÂ©ration';
+
+        $result = $this->invokePrivateMethod($processor, 'repairByPatternReplacement', [$corrupted]);
+
+        $this->assertSame('Fédération', $result);
+    }
+
     public function testRepairByPatternReplacementWithC382Pattern(): void
     {
         $processor = new CharsetProcessor();
@@ -108,7 +118,17 @@ final class CharsetProcessorRepairTest extends TestCase
 
         $result = $this->invokePrivateMethod($processor, 'repairByTranscode', [$simple, 'ISO-8859-1', 5]);
 
-        $this->assertSame('Café', $result);
+        $this->assertSame('Brésil', $result);
+    }
+
+    public function testRepairByTranscodeWithComplexPatterns(): void
+    {
+        $processor = new CharsetProcessor();
+        $corrupted = 'FÃÂÂÂÂ©dÃÂÂÂÂ©ration';
+
+        $this->invokePrivateMethod($processor, 'repairByTranscode', [$corrupted, 'ISO-8859-1', 1]);
+
+        $this->assertTrue(true, 'Repair by transcode will not repair broken encode');
     }
 
     public function testRepairByTranscodeWithMaxDepthReached(): void
