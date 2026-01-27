@@ -94,7 +94,7 @@
         }
     },
     "scripts": {
-        "bench": "./vendor/bin/phpbench run tests/benchmark/ --report=aggregate --retry-threshold=5",
+        "bench": "./vendor/bin/phpbench run tests/Benchmark/ --report=aggregate --retry-threshold=5",
         "phpcs": "./vendor/bin/phpcs --standard=phpcs.xml.dist .",
         "phpcsfixer-check": "./vendor/bin/php-cs-fixer fix --dry-run --diff",
         "phpmd": "./vendor/bin/phpmd . github phpmd.xml.dist --exclude 'tests/*,vendor/*,.history/*'",
@@ -105,7 +105,7 @@
             "@unittest",
             "@bench"
         ],
-        "unittest": "@php -d xdebug.mode=coverage ./vendor/bin/phpunit tests/phpunit --process-isolation -c phpunit.xml.dist"
+        "unittest": "@php -d xdebug.mode=coverage ./vendor/bin/phpunit tests/Phpunit --process-isolation -c phpunit.xml.dist"
     },
     "scripts-descriptions": {
         "test": "Run all tests!"

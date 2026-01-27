@@ -3,7 +3,7 @@ parameters:
     paths:
         - .
     excludePaths:
-        - tests/benchmark
+        - tests/Benchmark
         - examples/*
         - rector.php
         - vendor/*

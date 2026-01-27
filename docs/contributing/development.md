@@ -65,8 +65,8 @@ composer ci
 encoding-repair/
 ├── CharsetHelper.php        # Main library class
 ├── tests/
-│   ├── phpunit/            # Unit tests
-│   └── benchmark/          # Performance benchmarks
+│   ├── Phpunit/            # Unit tests
+│   └── Benchmark/          # Performance benchmarks
 ├── docs/                   # Documentation
 ├── composer.json           # Dependencies
 └── .github/workflows/      # CI/CD

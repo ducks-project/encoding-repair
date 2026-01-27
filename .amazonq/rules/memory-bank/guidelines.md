@@ -45,7 +45,7 @@ Subnamespaces for organization:
 
 - `Ducks\Component\EncodingRepair\Transcoder\` - Encoding conversion strategies
 - `Ducks\Component\EncodingRepair\Detector\` - Encoding detection strategies
-- `Ducks\Component\EncodingRepair\Tests\phpunit\` - Unit tests
+- `Ducks\Component\EncodingRepair\Tests\Phpunit\` - Unit tests
 
 ### Class Finality
 

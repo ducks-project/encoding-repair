@@ -19,12 +19,12 @@ encoding-repair/
 │   ├── FileInfoDetector.php       # finfo detection (priority: 50)
 │   └── CallableDetector.php       # Wrapper for custom callables
 ├── tests/
-│   ├── phpunit/                   # Unit tests (PHPUnit)
+│   ├── Phpunit/                   # Unit tests (PHPUnit)
 │   │   ├── CharsetHelperTest.php
 │   │   ├── CallableTranscoderTest.php
 │   │   ├── CallableDetectorTest.php
 │   │   └── *Test.php              # Individual component tests
-│   └── benchmark/                 # Performance benchmarks (PHPBench)
+│   └── Benchmark/                 # Performance benchmarks (PHPBench)
 │       ├── ConversionBench.php
 │       ├── DetectionBench.php
 │       ├── JsonBench.php
@@ -132,14 +132,14 @@ Returns detected encoding or null
 
 ### 4. Testing Infrastructure
 
-**Unit Tests** (`tests/phpunit/`):
+**Unit Tests** (`tests/Phpunit/`):
 
 - 100% code coverage target
 - Tests for each component and edge cases
 - Separate edge case test files for complex scenarios
 - Process isolation for PHPUnit runs
 
-**Benchmarks** (`tests/benchmark/`):
+**Benchmarks** (`tests/Benchmark/`):
 
 - PHPBench performance tests
 - Measures conversion, detection, JSON, and repair operations
