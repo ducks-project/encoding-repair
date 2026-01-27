@@ -137,7 +137,8 @@ back to `été`.
 - **Secure:** Whitelisted encodings to prevent injection.
 - **Extensible:** Register your own transcoders, detectors, interpreters, or cache providers without modifying
  the core.
-- **Modern Standards:** PSR-12 compliant, strictly typed, SOLID architecture.
+- **Modern Standards:** PSR-12 compliant, strictly typed, SOLID architecture, yoda style,
+DRY (Don't Repeat Yourself) philosophy.
 
 ## 📋 Requirements
 
