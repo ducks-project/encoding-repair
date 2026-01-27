@@ -681,6 +681,28 @@ final class CharsetProcessor implements CharsetProcessorInterface
             return $value;
         }
 
+        // Try transcode repair
+        $fixed = $this->repairByTranscode($value, $from, $maxDepth);
+
+        // Try pattern-based repair (ForceUTF8 approach)
+        if ($fixed === $value || false !== \strpos($fixed, "\xC3\x82")) {
+            $fixed = $this->repairByPatternReplacement($fixed);
+        }
+
+        return $fixed;
+    }
+
+    /**
+     * Repairs UTF-8 strings using trancoding approch.
+     *
+     * @param string $value String to repair
+     * @param string $from Encoding to reverse
+     * @param int $maxDepth Maximum iterations
+     *
+     * @return string Repaired string
+     */
+    private function repairByTranscode(string $value, string $from, int $maxDepth): string
+    {
         $fixed = $value;
         $iterations = 0;
         $options = ['normalize' => false, 'translit' => false, 'ignore' => false];
@@ -695,14 +717,13 @@ final class CharsetProcessor implements CharsetProcessorInterface
                 break;
             }
 
-            // If conversion worked AND result is still valid UTF-8 AND result is different
+            // If conversion worked
+            // AND result is still valid UTF-8
+            // AND result is different
+            // AND result is shorter,
+            // it's a progress.
             $fixed = $test;
             $iterations++;
-        }
-
-        // Try pattern-based repair (ForceUTF8 approach)
-        if ($fixed === $value || false !== \strpos($fixed, "\xC3\x82")) {
-            $fixed = $this->repairByPatternReplacement($fixed);
         }
 
         return $fixed;
