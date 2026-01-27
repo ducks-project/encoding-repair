@@ -51,6 +51,10 @@ nav:
       - FileInfoDetector: api/FileInfoDetector.md
       - CallableDetector: api/CallableDetector.md
       - DetectorChain: api/DetectorChain.md
+      - CachedDetector: api/CachedDetector.md
+    - Cache:
+      - InternalArrayCache: api/InternalArrayCache.md
+      - ArrayCache: api/ArrayCache.md
     - Traits:
       - CallableAdapterTrait: api/CallableAdapterTrait.md
       - ChainOfResponsibilityTrait: api/ChainOfResponsibilityTrait.md

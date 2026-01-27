@@ -14,12 +14,14 @@ declare(strict_types=1);
 namespace Ducks\Component\EncodingRepair\Tests\phpunit;
 
 use Ducks\Component\EncodingRepair\CharsetProcessor;
+use Ducks\Component\EncodingRepair\CharsetProcessorInterface;
 use Ducks\Component\EncodingRepair\Transcoder\IconvTranscoder;
 use Ducks\Component\EncodingRepair\Transcoder\MbStringTranscoder;
 use Ducks\Component\EncodingRepair\Detector\MbStringDetector;
 use Ducks\Component\EncodingRepair\Interpreter\InterpreterChain;
 use Ducks\Component\EncodingRepair\Interpreter\PropertyMapperInterface;
 use Ducks\Component\EncodingRepair\Interpreter\TypeInterpreterInterface;
+use Ducks\Component\EncodingRepair\Tests\common\Word;
 use PHPUnit\Framework\TestCase;
 
 final class CharsetProcessorTest extends TestCase
@@ -107,20 +109,14 @@ final class CharsetProcessorTest extends TestCase
     {
         $processor = new CharsetProcessor();
 
-        /** @var string|false $corrupted */
-        $corrupted = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
-        if (false === $corrupted) {
-            $this->fail('mb_convert_encoding failed');
-        }
+        $result = $processor->repair(
+            Word::getBadUtf8Word(),
+            'UTF-8',
+            'ISO-8859-1',
+            ['maxDepth' => 'invalid']
+        );
 
-        /** @var string|false $doubleEncoded */
-        $doubleEncoded = \mb_convert_encoding($corrupted, 'UTF-8', 'ISO-8859-1');
-        if (false === $doubleEncoded) {
-            $this->fail('mb_convert_encoding failed');
-        }
-
-        $result = $processor->repair($doubleEncoded, 'UTF-8', 'ISO-8859-1', ['maxDepth' => 'invalid']);
-        $this->assertSame('Café', $result);
+        $this->assertSame(Word::getGoodUtf8Word(), $result);
     }
 
     public function testRemoveMultipleEncodings(): void
@@ -158,8 +154,9 @@ final class CharsetProcessorTest extends TestCase
         $processor->resetDetectors();
         $processor->queueDetectors($detector1, $detector2);
 
-        $encoding = $processor->detect('Café');
-        $this->assertSame('UTF-8', $encoding);
+        $encoding = $processor->detect(Word::getGoodUtf8Word());
+
+        $this->assertSame(CharsetProcessorInterface::ENCODING_UTF8, $encoding);
     }
 
     public function testResetEncodings(): void
@@ -186,7 +183,12 @@ final class CharsetProcessorTest extends TestCase
         $processor = new CharsetProcessor();
         $nfd = "e\u{0301}";
 
-        $result = $processor->toCharset($nfd, 'UTF-8', 'UTF-8', ['normalize' => true]);
+        $result = $processor->toCharset(
+            $nfd,
+            CharsetProcessorInterface::ENCODING_UTF8,
+            CharsetProcessorInterface::ENCODING_UTF8,
+            ['normalize' => true]
+        );
         $expected = "\u{00E9}";
 
         $this->assertSame($expected, $result);
@@ -202,7 +204,12 @@ final class CharsetProcessorTest extends TestCase
         $processor = new CharsetProcessor();
         $nfd = "e\u{0301}";
 
-        $result = $processor->toCharset($nfd, 'UTF-8', 'UTF-8', ['normalize' => false]);
+        $result = $processor->toCharset(
+            $nfd,
+            CharsetProcessorInterface::ENCODING_UTF8,
+            CharsetProcessorInterface::ENCODING_UTF8,
+            ['normalize' => false]
+        );
 
         $this->assertSame($nfd, $result);
         $this->assertSame(3, strlen($result));
@@ -217,9 +224,15 @@ final class CharsetProcessorTest extends TestCase
         $processor = new CharsetProcessor();
         $nfd = "e\u{0301}";
 
-        $result = $processor->toCharset($nfd, 'ISO-8859-1', 'UTF-8', ['normalize' => true]);
+        $result = $processor->toCharset(
+            $nfd,
+            CharsetProcessorInterface::ENCODING_ISO,
+            CharsetProcessorInterface::ENCODING_UTF8,
+            ['normalize' => true]
+        );
 
         $this->assertIsString($result);
+        $this->assertSame(2, strlen($result));
     }
 
     public function testNormalizationWithRealWorldExample(): void
@@ -231,7 +244,11 @@ final class CharsetProcessorTest extends TestCase
         $processor = new CharsetProcessor();
         $nfd = "Cafe\u{0301}";
 
-        $result = $processor->toUtf8($nfd, 'UTF-8', ['normalize' => true]);
+        $result = $processor->toUtf8(
+            $nfd,
+            CharsetProcessorInterface::ENCODING_UTF8,
+            ['normalize' => true]
+        );
         $expected = "Caf\u{00E9}";
 
         $this->assertSame($expected, $result);
@@ -246,7 +263,7 @@ final class CharsetProcessorTest extends TestCase
         $processor = new CharsetProcessor();
         $nfd = "e\u{0301}";
 
-        $result = $processor->toUtf8($nfd, 'UTF-8');
+        $result = $processor->toUtf8($nfd, CharsetProcessorInterface::ENCODING_UTF8);
         $expected = "\u{00E9}";
 
         $this->assertSame($expected, $result);
@@ -262,13 +279,21 @@ final class CharsetProcessorTest extends TestCase
         $nfd = "e\u{0301}";
         $expected = "\u{00E9}";
 
-        $result = $processor->toUtf8($nfd, 'UTF-8', ['normalize' => false]);
+        $result = $processor->toUtf8(
+            $nfd,
+            CharsetProcessorInterface::ENCODING_UTF8,
+            ['normalize' => false]
+        );
         $this->assertSame($nfd, $result);
 
         $falsyValues = [0, '0', '', null];
 
         foreach ($falsyValues as $falsyValue) {
-            $result = $processor->toUtf8($nfd, 'UTF-8', ['normalize' => $falsyValue]);
+            $result = $processor->toUtf8(
+                $nfd,
+                CharsetProcessorInterface::ENCODING_UTF8,
+                ['normalize' => $falsyValue]
+            );
             $this->assertSame($expected, $result);
         }
     }
@@ -290,33 +315,33 @@ final class CharsetProcessorTest extends TestCase
 
         $encoding = $processor->detect('Café');
 
-        $this->assertSame('UTF-8', $encoding);
+        $this->assertSame(CharsetProcessorInterface::ENCODING_UTF8, $encoding);
     }
 
     public function testDetectBatch(): void
     {
         $processor = new CharsetProcessor();
 
-        $items = ['Café', 'Thé', 'test'];
+        $items = Word::GOOD;
         $encoding = $processor->detectBatch($items);
 
-        $this->assertSame('UTF-8', $encoding);
+        $this->assertSame(CharsetProcessorInterface::ENCODING_UTF8, $encoding);
     }
 
     public function testDetectBatchWithInvalidMaxSamples(): void
     {
         $processor = new CharsetProcessor();
 
-        $items = ['Café', 'Thé', 'test'];
+        $items = Word::GOOD;
         $encoding = $processor->detectBatch($items, ['maxSamples' => -1]);
 
-        $this->assertSame('UTF-8', $encoding);
+        $this->assertSame(CharsetProcessorInterface::ENCODING_UTF8, $encoding);
 
         $encoding = $processor->detectBatch($items, ['maxSamples' => 0]);
-        $this->assertSame('UTF-8', $encoding);
+        $this->assertSame(CharsetProcessorInterface::ENCODING_UTF8, $encoding);
 
         $encoding = $processor->detectBatch($items, ['maxSamples' => 'invalid']);
-        $this->assertSame('UTF-8', $encoding);
+        $this->assertSame(CharsetProcessorInterface::ENCODING_UTF8, $encoding);
     }
 
     public function testDetectBatchReturnsUtf8WhenNoSamples(): void
@@ -324,28 +349,27 @@ final class CharsetProcessorTest extends TestCase
         $processor = new CharsetProcessor();
 
         $encoding = $processor->detectBatch([]);
-        $this->assertSame('UTF-8', $encoding);
+        $this->assertSame(CharsetProcessorInterface::ENCODING_UTF8, $encoding);
 
         $encoding = $processor->detectBatch(['', '', '']);
-        $this->assertSame('UTF-8', $encoding);
+        $this->assertSame(CharsetProcessorInterface::ENCODING_UTF8, $encoding);
 
         $encoding = $processor->detectBatch([123, null, []]);
-        $this->assertSame('UTF-8', $encoding);
+        $this->assertSame(CharsetProcessorInterface::ENCODING_UTF8, $encoding);
     }
 
     public function testDetectBatchWithMultipleSamplesReturnsLongest(): void
     {
         $processor = new CharsetProcessor();
 
-        $iso = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
         $items = [
             'short',
-            $iso ?: '',
+            Word::getBadUtf8Word(),
             'This is a much longer string that should be selected for detection',
         ];
 
         $encoding = $processor->detectBatch($items, ['maxSamples' => 3]);
-        $this->assertSame('UTF-8', $encoding);
+        $this->assertSame(CharsetProcessorInterface::ENCODING_UTF8, $encoding);
     }
 
     public function testRegisterTranscoder(): void
@@ -398,13 +422,9 @@ final class CharsetProcessorTest extends TestCase
     {
         $processor = new CharsetProcessor();
 
-        $original = 'Café';
-        $iso = \mb_convert_encoding($original, 'ISO-8859-1', 'UTF-8');
-        $doubleEncoded = \mb_convert_encoding($iso ?: '', 'UTF-8', 'ISO-8859-1');
+        $result = $processor->repair(Word::getBadUtf8Word());
 
-        $result = $processor->repair($doubleEncoded ?: '');
-
-        $this->assertSame('Café', $result);
+        $this->assertSame(Word::getGoodUtf8Word(), $result);
     }
 
     public function testResetTranscoders(): void

@@ -17,7 +17,6 @@
       <directory name="Resources/stubs" />
       <directory name="tests" />
       <directory name="examples" />
-      <directory name="vendor" />
       <directory name=".history" />
     </ignoreFiles>
   </projectFiles>

@@ -13,8 +13,14 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair\Detector;
 
+use Ducks\Component\EncodingRepair\Cache\InternalArrayCache;
+use Psr\SimpleCache\CacheInterface;
+
 /**
- * Cached detector decorator with LRU-like eviction.
+ * Cached detector decorator with PSR-16 support.
+ *
+ * Uses InternalArrayCache by default for optimal performance.
+ * Supports any PSR-16 cache implementation (Redis, Memcached, APCu, etc.).
  *
  * @final
  *
@@ -22,7 +28,9 @@ namespace Ducks\Component\EncodingRepair\Detector;
  */
 final class CachedDetector implements DetectorInterface
 {
-    private const MAX_SIZE = 1000;
+    private const HASH = 'sha256';
+
+    private const DEFAULT_TTL = 3600;
 
     /**
      * @var DetectorInterface
@@ -30,16 +38,28 @@ final class CachedDetector implements DetectorInterface
     private DetectorInterface $detector;
 
     /**
-     * @var array<string, string>
+     * @var CacheInterface
      */
-    private array $cache = [];
+    private CacheInterface $cache;
+
+    /**
+     * @var int
+     */
+    private int $ttl;
 
     /**
      * @param DetectorInterface $detector Wrapped detector
+     * @param CacheInterface|null $cache PSR-16 cache (default: InternalArrayCache)
+     * @param int $ttl Cache TTL in seconds (default: 3600)
      */
-    public function __construct(DetectorInterface $detector)
-    {
+    public function __construct(
+        DetectorInterface $detector,
+        ?CacheInterface $cache = null,
+        int $ttl = self::DEFAULT_TTL
+    ) {
         $this->detector = $detector;
+        $this->cache = $cache ?? new InternalArrayCache(1000);
+        $this->ttl = $ttl;
     }
 
     /**
@@ -47,30 +67,22 @@ final class CachedDetector implements DetectorInterface
      */
     public function detect(string $string, ?array $options = null): ?string
     {
-        /**
-         * xxh64 does not exits.
-         *
-         * @phan-var string|false $key
-         */
-        $key = \hash('sha256', $string);
+        $key = $this->generateKey($string);
 
-        if (false !== $key && isset($this->cache[$key])) {
-            return $this->cache[$key];
+        /** @var mixed $cached */
+        $cached = $this->cache->get($key);
+        if (\is_string($cached)) {
+            return $cached;
         }
 
         $result = $this->detector->detect($string, $options);
 
-        if (null !== $result) {
-            if (\count($this->cache) >= self::MAX_SIZE) {
-                // LRU eviction: remove oldest entry
-                \array_shift($this->cache);
-            }
-            if (false !== $key) {
-                $this->cache[$key] = $result;
-            }
+        if (\is_string($result)) {
+            $this->cache->set($key, $result, $this->ttl);
+            return $result;
         }
 
-        return $result;
+        return null;
     }
 
     /**
@@ -98,21 +110,42 @@ final class CachedDetector implements DetectorInterface
      */
     public function clearCache(): void
     {
-        $this->cache = [];
+        $this->cache->clear();
     }
 
     /**
      * Get cache statistics.
      *
-     * @return array{size: int, maxSize: int}
+     * @return array{size: int, maxSize: int, class: string}
      *
      * @psalm-api
      */
     public function getCacheStats(): array
     {
+        $size = 0;
+        $maxSize = 1000;
+
+        if ($this->cache instanceof InternalArrayCache) {
+            $size = $this->cache->getSize();
+            $maxSize = $this->cache->getMaxSize();
+        }
+
         return [
-            'size' => \count($this->cache),
-            'maxSize' => self::MAX_SIZE,
+            'size' => $size,
+            'maxSize' => $maxSize,
+            'class' => \get_class($this->cache),
         ];
+    }
+
+    /**
+     * Generate cache key from string.
+     *
+     * @param string $string Input string
+     *
+     * @return string Cache key
+     */
+    private function generateKey(string $string): string
+    {
+        return 'encoding_detect_' . \hash(self::HASH, $string);
     }
 }

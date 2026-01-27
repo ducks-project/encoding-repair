@@ -190,6 +190,26 @@ UConverter (intl) → iconv → mbstring
 
 ## Performance Optimization
 
+### PSR-16 Cache for Detection (New in v1.2)
+
+```php
+use Ducks\Component\EncodingRepair\Cache\ArrayCache;
+use Ducks\Component\EncodingRepair\Detector\CachedDetector;
+use Ducks\Component\EncodingRepair\Detector\MbStringDetector;
+use Ducks\Component\EncodingRepair\CharsetProcessor;
+
+// Use built-in ArrayCache
+$cache = new ArrayCache();
+$detector = new CachedDetector(new MbStringDetector(), $cache, 3600);
+
+$processor = new CharsetProcessor();
+$processor->registerDetector($detector, 200);
+
+// Or use Redis/Memcached for distributed caching
+// $redis = new \Symfony\Component\Cache\Psr16Cache($redisAdapter);
+// $detector = new CachedDetector(new MbStringDetector(), $redis, 7200);
+```
+
 ### Cache Detection Results
 
 ```php

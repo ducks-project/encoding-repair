@@ -7,9 +7,63 @@
 
 Advanced charset encoding converter with **Chain of Responsibility** pattern, auto-detection, double-encoding repair, and JSON safety.
 
-## What's New in v1.1
+## What's New in v1.2
 
-### Service-Based Architecture
+### PSR-16 Cache Support
+
+Optional external cache integration for improved performance:
+
+```php
+// Use built-in ArrayCache (PSR-16)
+use Ducks\Component\EncodingRepair\Cache\ArrayCache;
+use Ducks\Component\EncodingRepair\Detector\CachedDetector;
+use Ducks\Component\EncodingRepair\Detector\MbStringDetector;
+
+$cache = new ArrayCache();
+$detector = new CachedDetector(new MbStringDetector(), $cache, 3600);
+
+// Or use any PSR-16 implementation (Redis, Memcached, APCu)
+// $redis = new \Symfony\Component\Cache\Psr16Cache($redisAdapter);
+// $detector = new CachedDetector(new MbStringDetector(), $redis, 7200);
+```
+
+### Type Interpreter System
+
+New optimized type-specific processing with Strategy + Visitor pattern:
+
+```php
+// Custom property mapper for selective processing (60% faster!)
+use Ducks\Component\EncodingRepair\Interpreter\PropertyMapperInterface;
+
+class UserMapper implements PropertyMapperInterface
+{
+    public function map(object $object, callable $transcoder, array $options): object
+    {
+        $copy = clone $object;
+        $copy->name = $transcoder($object->name);
+        $copy->email = $transcoder($object->email);
+        // password NOT transcoded (security)
+        return $copy;
+    }
+}
+
+$processor = new CharsetProcessor();
+$processor->registerPropertyMapper(User::class, new UserMapper());
+```
+
+### Batch Processing API
+
+New optimized batch processing methods:
+
+```php
+// Batch conversion with single encoding detection (40-60% faster!)
+$rows = $db->query("SELECT * FROM users")->fetchAll();
+$utf8Rows = CharsetHelper::toCharsetBatch($rows, 'UTF-8', CharsetHelper::AUTO);
+```
+
+See [Type Interpreters](guide/type-interpreters.md) for details.
+
+### Service-Based Architecture (v1.1)
 
 CharsetHelper now uses a service-based architecture following SOLID principles:
 
@@ -35,23 +89,29 @@ See [Service Architecture](guide/service-architecture.md) for details.
 Unlike existing libraries, CharsetHelper provides:
 
 - ✅ **Extensible architecture** with Chain of Responsibility pattern
+- ✅ **PSR-16 cache support** for Redis, Memcached, APCu (NEW in v1.2)
+- ✅ **Type-specific interpreters** for optimized processing (NEW in v1.2)
+- ✅ **Custom property mappers** for selective object conversion (NEW in v1.2)
 - ✅ **Multiple fallback strategies** (UConverter → iconv → mbstring)
 - ✅ **Smart auto-detection** with multiple detection methods
 - ✅ **Double-encoding repair** for corrupted legacy data
 - ✅ **Recursive conversion** for arrays AND objects (not just arrays!)
 - ✅ **Safe JSON encoding/decoding** with automatic charset handling
 - ✅ **Modern PHP** with strict typing (PHP 7.4+)
-- ✅ **Zero dependencies** (only optional extensions for better performance)
+- ✅ **Minimal dependencies** (only PSR-16 interface for optional caching)
 
 ## Features
 
 - **Robust Transcoding:** Implements a Chain of Responsibility pattern trying best providers first (`Intl/UConverter` -> `Iconv` -> `MbString`)
+- **PSR-16 Cache Support:** Optional external cache (Redis, Memcached, APCu) for detection results (NEW in v1.2)
+- **Type-Specific Interpreters:** Optimized processing strategies per data type (NEW in v1.2)
+- **Custom Property Mappers:** Selective object property conversion for security and performance (NEW in v1.2)
 - **Double-Encoding Repair:** Automatically detects and fixes strings like `Ã©tÃ©` back to `été`
 - **Recursive Processing:** Handles `string`, `array`, and `object` recursively
 - **Immutable:** Objects are cloned before modification to prevent side effects
 - **Safe JSON Wrappers:** Prevents `json_encode` from returning `false` on bad charsets
 - **Secure:** Whitelisted encodings to prevent injection
-- **Extensible:** Register your own transcoders or detectors without modifying the core
+- **Extensible:** Register your own transcoders, detectors, interpreters, or cache providers without modifying the core
 - **Modern Standards:** PSR-12 compliant, strictly typed, SOLID architecture
 
 ## Quick Start

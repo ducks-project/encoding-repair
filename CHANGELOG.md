@@ -32,6 +32,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Static facade methods in `CharsetHelper`: `toCharsetBatch()`, `toUtf8Batch()`, `toIsoBatch()`, `detectBatch()`
 - Performance improvement: 40-60% faster for batch processing with AUTO detection on arrays > 100 items
 - New benchmarks with phpbench
+- PSR-16 (Simple Cache) support in [`CachedDetector`] via optional dependency injection
+- [`InternalArrayCache`] - Optimized PSR-16 implementation without TTL overhead for CachedDetector (namespace: `Ducks\Component\EncodingRepair\Cache`)
+- [`ArrayCache`] - Full-featured PSR-16 implementation with TTL support for external use (namespace: `Ducks\Component\EncodingRepair\Cache`)
+- Optional `CacheInterface` parameter in [`CachedDetector`] constructor (default: InternalArrayCache)
+- Configurable TTL parameter in [`CachedDetector`] constructor (default: 3600 seconds)
+- Support for any PSR-16 implementation (Redis, Memcached, APCu, etc.)
+- `psr/simple-cache` dependency (^1.0 || ^2.0 || ^3.0) - interface only, minimal implementation dependency
 
 ### Fixed
 
@@ -46,6 +53,12 @@ safeJsonEncode & safeJsonDecode should return a JsonException.
 - Interface `CharsetProcessorInterface` kept minimal with core methods only
 - Convenience methods (`toUtf8()`, `toIso()`, `toUtf8Batch()`, `toIsoBatch()`) remain in concrete implementation only
 - `toCharsetBatch()` now uses `detectBatch()` internally for cleaner code and better maintainability
+- [`CachedDetector`] now uses InternalArrayCache as default fallback (automatic instantiation)
+- [`CachedDetector`] simplified with unified cache handling (no more if/else for internal vs PSR-16)
+- `getCacheStats()` now returns cache class name instead of type string for better clarity
+- `clearCache()` delegates to PSR-16 cache interface (unified behavior)
+- Cache key generation now uses prefixed hash ('encoding_detect_' prefix) for better namespace isolation
+- 100% backward compatible - existing code works unchanged
 
 ## <a name="v112"></a>[1.1.2] - 2026-01-23
 
@@ -177,6 +190,8 @@ safeJsonEncode & safeJsonDecode should return a JsonException.
 [`CallableDetector`]: /assets/documentation/classes/CallableDetector.md
 [`DetectorChain`]: /assets/documentation/classes/DetectorChain.md
 [`CachedDetector`]: /assets/documentation/classes/CachedDetector.md
+[`ArrayCache`]: /assets/documentation/classes/ArrayCache.md
+[`InternalArrayCache`]: /assets/documentation/classes/InternalArrayCache.md
 [`TypeInterpreterInterface`]: /assets/documentation/classes/TypeInterpreterInterface.md
 [`InterpreterChain`]: /assets/documentation/classes/InterpreterChain.md
 [`StringInterpreter`]: /assets/documentation/classes/StringInterpreter.md

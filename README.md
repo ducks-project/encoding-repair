@@ -83,11 +83,35 @@ $utf8 = $processor->toUtf8($data);
 $utf8 = CharsetHelper::toUtf8($data);
 ```
 
+### PSR-16 Cache Support
+
+Optional external cache integration for improved performance:
+
+```php
+// Use built-in InternalArrayCache (default, optimized)
+use Ducks\Component\EncodingRepair\Detector\CachedDetector;
+use Ducks\Component\EncodingRepair\Detector\MbStringDetector;
+
+$detector = new CachedDetector(new MbStringDetector());
+// InternalArrayCache used automatically (no TTL overhead)
+
+// Or use ArrayCache for TTL support
+use Ducks\Component\EncodingRepair\Cache\ArrayCache;
+
+$cache = new ArrayCache();
+$detector = new CachedDetector(new MbStringDetector(), $cache, 3600);
+
+// Or use any PSR-16 implementation (Redis, Memcached, APCu)
+// $redis = new \Symfony\Component\Cache\Psr16Cache($redisAdapter);
+// $detector = new CachedDetector(new MbStringDetector(), $redis, 7200);
+```
+
 ## 🌟 Why CharsetHelper?
 
 Unlike existing libraries, CharsetHelper provides:
 
 - ✅ **Extensible architecture** with Chain of Responsibility pattern
+- ✅ **PSR-16 cache support** for Redis, Memcached, APCu (NEW in v1.2)
 - ✅ **Type-specific interpreters** for optimized processing (NEW in v1.2)
 - ✅ **Custom property mappers** for selective object conversion (NEW in v1.2)
 - ✅ **Multiple fallback strategies** (UConverter → iconv → mbstring)
@@ -96,12 +120,13 @@ Unlike existing libraries, CharsetHelper provides:
 - ✅ **Recursive conversion** for arrays AND objects (not just arrays!)
 - ✅ **Safe JSON encoding/decoding** with automatic charset handling
 - ✅ **Modern PHP** with strict typing (PHP 7.4+)
-- ✅ **Zero dependencies** (only optional extensions for better performance)
+- ✅ **Minimal dependencies** (only PSR-16 interface for optional caching)
 
 ## 📖 Features
 
 - **Robust Transcoding:** Implements a Chain of Responsibility pattern
 trying best providers first (`Intl/UConverter` -> `Iconv` -> `MbString`).
+- **PSR-16 Cache Support:** Optional external cache (Redis, Memcached, APCu) for detection results (NEW in v1.2).
 - **Type-Specific Interpreters:** Optimized processing strategies per data type (NEW in v1.2).
 - **Custom Property Mappers:** Selective object property conversion for security and performance (NEW in v1.2).
 - **Double-Encoding Repair:** Automatically detects and fixes strings like `Ã©tÃ©`
@@ -110,7 +135,7 @@ back to `été`.
 - **Immutable:** Objects are cloned before modification to prevent side effects.
 - **Safe JSON Wrappers:** Prevents `json_encode` from returning `false` on bad charsets.
 - **Secure:** Whitelisted encodings to prevent injection.
-- **Extensible:** Register your own transcoders, detectors, or interpreters without modifying
+- **Extensible:** Register your own transcoders, detectors, interpreters, or cache providers without modifying
  the core.
 - **Modern Standards:** PSR-12 compliant, strictly typed, SOLID architecture.
 
@@ -614,11 +639,29 @@ Higher values execute first.
 
 **Detector priorities:**
 
-1. **MbStringDetector** (priority: 100, requires `ext-mbstring`): Fast and reliable using mb_detect_encoding
-2. **FileInfoDetector** (priority: 50, requires `ext-fileinfo`): Fallback using finfo class
+1. **CachedDetector** (priority: 200, wraps MbStringDetector): Caches detection results
+2. **MbStringDetector** (priority: 100, requires `ext-mbstring`): Fast and reliable using mb_detect_encoding
+3. **FileInfoDetector** (priority: 50, requires `ext-fileinfo`): Fallback using finfo class
 
 **Custom detectors** can be registered with any priority value.
 Higher values execute first.
+
+**Cache Support (New in v1.2):**
+
+CachedDetector supports PSR-16 cache for persistent detection results:
+
+```php
+// Default: InternalArrayCache (optimized, no TTL overhead)
+$detector = new CachedDetector(new MbStringDetector());
+
+// With TTL: ArrayCache
+$cache = new ArrayCache();
+$detector = new CachedDetector(new MbStringDetector(), $cache, 3600);
+
+// External: Redis, Memcached, APCu, etc.
+// $redis = new \Symfony\Component\Cache\Psr16Cache($redisAdapter);
+// $detector = new CachedDetector(new MbStringDetector(), $redis, 7200);
+```
 
 ## 📊 Performance
 
@@ -778,6 +821,8 @@ composer phpcsfixer-check
 - [`CallableAdapterTrait`]
 - [`ChainOfResponsibilityTrait`]
 - [`CachedDetector`]
+- [`InternalArrayCache`]
+- [`ArrayCache`]
 
 ## 🤝 Contributing
 
@@ -865,6 +910,8 @@ Made with ❤️ by the Duck Project Team
 [`CallableAdapterTrait`]: /assets/documentation/classes/CallableAdapterTrait.md
 [`ChainOfResponsibilityTrait`]: /assets/documentation/classes/ChainOfResponsibilityTrait.md
 [`CachedDetector`]: /assets/documentation/classes/CachedDetector.md
+[`InternalArrayCache`]: /assets/documentation/classes/InternalArrayCache.md
+[`ArrayCache`]: /assets/documentation/classes/ArrayCache.md
 [How To]: /assets/documentation/HowTo.md
 [About Middleware Pattern]: /assets/documentation/AboutMiddleware.md
 [Type Interpreter System]: /assets/documentation/INTERPRETER_SYSTEM.md

@@ -13,10 +13,12 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair\Tests\phpunit;
 
+use Ducks\Component\EncodingRepair\Cache\ArrayCache;
 use Ducks\Component\EncodingRepair\Detector\CachedDetector;
 use Ducks\Component\EncodingRepair\Detector\DetectorInterface;
 use Ducks\Component\EncodingRepair\Detector\MbStringDetector;
 use PHPUnit\Framework\TestCase;
+use Psr\SimpleCache\CacheInterface;
 
 final class CachedDetectorTest extends TestCase
 {
@@ -90,8 +92,10 @@ final class CachedDetectorTest extends TestCase
         $this->assertIsArray($stats);
         $this->assertArrayHasKey('size', $stats);
         $this->assertArrayHasKey('maxSize', $stats);
+        $this->assertArrayHasKey('class', $stats);
         $this->assertSame(1, $stats['size']);
         $this->assertSame(1000, $stats['maxSize']);
+        $this->assertSame('Ducks\\Component\\EncodingRepair\\Cache\\InternalArrayCache', $stats['class']);
     }
 
     public function testIntegrationWithMbStringDetector(): void
@@ -124,6 +128,47 @@ final class CachedDetectorTest extends TestCase
 
         $cached->detect('string1', []);
         $this->assertSame(3, $callCount);
+    }
+
+    public function testWithPsr16Cache(): void
+    {
+        $callCount = 0;
+        $mockDetector = $this->createMockDetector('UTF-8', $callCount);
+        $psr16Cache = new ArrayCache();
+        $cached = new CachedDetector($mockDetector, $psr16Cache);
+
+        $result1 = $cached->detect('test string', []);
+        $result2 = $cached->detect('test string', []);
+
+        $this->assertSame('UTF-8', $result1);
+        $this->assertSame('UTF-8', $result2);
+        $this->assertSame(1, $callCount);
+        $this->assertSame('Ducks\\Component\\EncodingRepair\\Cache\\ArrayCache', $cached->getCacheStats()['class']);
+    }
+
+    public function testPsr16CacheClear(): void
+    {
+        $callCount = 0;
+        $mockDetector = $this->createMockDetector('UTF-8', $callCount);
+        $psr16Cache = new ArrayCache();
+        $cached = new CachedDetector($mockDetector, $psr16Cache);
+
+        $cached->detect('test', []);
+        $this->assertSame(1, $callCount);
+
+        $cached->clearCache();
+        $cached->detect('test', []);
+        $this->assertSame(2, $callCount);
+    }
+
+    public function testCustomTtl(): void
+    {
+        $mockDetector = $this->createMockDetector('UTF-8');
+        $psr16Cache = new ArrayCache();
+        $cached = new CachedDetector($mockDetector, $psr16Cache, 7200);
+
+        $cached->detect('test', []);
+        $this->assertSame('UTF-8', $cached->detect('test', []));
     }
 
     /**

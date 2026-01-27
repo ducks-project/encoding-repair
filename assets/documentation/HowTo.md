@@ -807,29 +807,40 @@ $result = CharsetHelper::toCharset($data, 'ASCII', 'UTF-8', [
 ### Issue: Performance Problems
 
 ```php
-// Use CachedDetector for batch processing (enabled by default in v1.1+)
+// Use PSR-16 cache for detection (New in v1.2)
+use Ducks\Component\EncodingRepair\Detector\CachedDetector;
+use Ducks\Component\EncodingRepair\Detector\MbStringDetector;
 use Ducks\Component\EncodingRepair\CharsetProcessor;
 
+// Default: InternalArrayCache (optimized, automatic)
+$detector = new CachedDetector(new MbStringDetector());
+// InternalArrayCache used automatically (no TTL overhead, pure O(1))
+
 $processor = new CharsetProcessor();
-// CachedDetector is automatically used
+$processor->registerDetector($detector, 200);
+
+foreach ($largeDataset as $item) {
+    $result = $processor->toUtf8($item);
+    // Repeated strings benefit from InternalArrayCache
+}
+
+// With TTL: ArrayCache
+use Ducks\Component\EncodingRepair\Cache\ArrayCache;
+
+$cache = new ArrayCache();
+$detector = new CachedDetector(new MbStringDetector(), $cache, 3600);
+
+// Or use Redis/Memcached for distributed caching
+// $redis = new \Symfony\Component\Cache\Psr16Cache($redisAdapter);
+// $detector = new CachedDetector(new MbStringDetector(), $redis, 7200);
+
+// Legacy: CachedDetector is enabled by default in CharsetProcessor (v1.1+)
+$processor = new CharsetProcessor();
+// CachedDetector with InternalArrayCache is automatically used
 
 foreach ($largeDataset as $item) {
     $result = $processor->toUtf8($item);
     // Repeated strings benefit from cache (50-80% faster)
-}
-
-// Or manually cache detection results
-$cache = [];
-function convertWithCache(string $data): string
-{
-    static $cache = [];
-    $hash = md5($data);
-    
-    if (!isset($cache[$hash])) {
-        $cache[$hash] = CharsetHelper::toUtf8($data);
-    }
-    
-    return $cache[$hash];
 }
 ```
 
@@ -930,6 +941,9 @@ if ($duration > 1.0) {
 - [CharsetHelper API Documentation](./classes/CharsetHelper.md)
 - [CharsetProcessor API Documentation](./classes/CharsetProcessor.md)
 - [CharsetProcessorInterface API Documentation](./classes/CharsetProcessorInterface.md)
+- [CachedDetector API Documentation](./classes/CachedDetector.md)
+- [InternalArrayCache API Documentation](./classes/InternalArrayCache.md)
+- [ArrayCache API Documentation](./classes/ArrayCache.md)
 - [Type Interpreter System](./INTERPRETER_SYSTEM.md)
 - [TypeInterpreterInterface API](./classes/TypeInterpreterInterface.md)
 - [PropertyMapperInterface API](./classes/PropertyMapperInterface.md)
