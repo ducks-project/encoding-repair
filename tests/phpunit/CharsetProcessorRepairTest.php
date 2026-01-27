@@ -201,4 +201,50 @@ final class CharsetProcessorRepairTest extends TestCase
 
         $this->assertIsString($result);
     }
+
+    public function testPeelEncodingLayersFallsBackToPatternReplacement(): void
+    {
+        $processor = new CharsetProcessor();
+        // String with \xC3\x82 pattern that repairByTranscode cannot fix
+        $corrupted = "Caf\xC3\x82\xC3\xA9";
+
+        $result = $this->invokePrivateMethod($processor, 'peelEncodingLayers', [$corrupted, 'ISO-8859-1', 5]);
+
+        // Should be repaired by repairByPatternReplacement
+        $this->assertSame("Caf\xC3\xA9", $result);
+    }
+
+    public function testPeelEncodingLayersSkipsPatternReplacementWhenTranscodeSucceeds(): void
+    {
+        $processor = new CharsetProcessor();
+        // Simple double-encoded string that repairByTranscode can fix
+        $doubleEncoded = 'BrÃ©sil';
+
+        $result = $this->invokePrivateMethod($processor, 'peelEncodingLayers', [$doubleEncoded, 'ISO-8859-1', 5]);
+
+        // Should be repaired by repairByTranscode
+        $this->assertSame('Brésil', $result);
+    }
+
+    public function testPeelEncodingLayersReturnsAsIsWhenNoCorruptionPatterns(): void
+    {
+        $processor = new CharsetProcessor();
+        $clean = 'Simple text without corruption patterns';
+
+        $result = $this->invokePrivateMethod($processor, 'peelEncodingLayers', [$clean, 'ISO-8859-1', 5]);
+
+        $this->assertSame($clean, $result);
+    }
+
+    public function testPeelEncodingLayersAppliesMbScrubFirst(): void
+    {
+        $processor = new CharsetProcessor();
+        // Malformed UTF-8 with \xC3\x82 pattern after scrubbing
+        $malformed = "Test\xC3\x82\xC3\xA9";
+
+        $result = $this->invokePrivateMethod($processor, 'peelEncodingLayers', [$malformed, 'ISO-8859-1', 5]);
+
+        // Should be scrubbed and repaired
+        $this->assertSame("Test\xC3\xA9", $result);
+    }
 }
