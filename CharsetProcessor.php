@@ -13,11 +13,12 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair;
 
-use Ducks\Component\EncodingRepair\Detector\CachedDetector;
+use Ducks\Component\EncodingRepair\Detector\BomDetector;
 use Ducks\Component\EncodingRepair\Detector\DetectorChain;
 use Ducks\Component\EncodingRepair\Detector\DetectorInterface;
 use Ducks\Component\EncodingRepair\Detector\FileInfoDetector;
 use Ducks\Component\EncodingRepair\Detector\MbStringDetector;
+use Ducks\Component\EncodingRepair\Detector\PregMatchDetector;
 use Ducks\Component\EncodingRepair\Interpreter\ArrayInterpreter;
 use Ducks\Component\EncodingRepair\Interpreter\InterpreterChain;
 use Ducks\Component\EncodingRepair\Interpreter\ObjectInterpreter;
@@ -31,6 +32,7 @@ use Ducks\Component\EncodingRepair\Transcoder\TranscoderInterface;
 use Ducks\Component\EncodingRepair\Transcoder\UConverterTranscoder;
 use InvalidArgumentException;
 use Normalizer;
+use Psr\SimpleCache\CacheInterface;
 use RuntimeException;
 
 /**
@@ -174,10 +176,65 @@ final class CharsetProcessor implements CharsetProcessorInterface
     public function resetDetectors(): self
     {
         $this->detectorChain = new DetectorChain();
-        $mbDetector = new MbStringDetector();
-        $cachedDetector = new CachedDetector($mbDetector);
-        $this->detectorChain->register($cachedDetector);
+
+        // BomDetector: 100% accurate when BOM present (priority: 160)
+        $this->detectorChain->register(new BomDetector());
+
+        // PregMatchDetector: Fast ASCII/UTF-8 detection (priority: 150)
+        $this->detectorChain->register(new PregMatchDetector());
+
+        // MbStringDetector: Statistical detection (priority: 100)
+        $this->detectorChain->register(new MbStringDetector());
+
+        // FileInfoDetector: Fallback (priority: 50)
         $this->detectorChain->register(new FileInfoDetector());
+
+        return $this;
+    }
+
+    /**
+     * Enable detection caching for improved performance.
+     *
+     * @param CacheInterface|null $cache PSR-16 cache (default: InternalArrayCache)
+     * @param int $ttl Cache TTL in seconds (default: 3600)
+     *
+     * @return self
+     *
+     * @psalm-api
+     */
+    public function enableDetectionCache(
+        ?CacheInterface $cache = null,
+        int $ttl = 3600
+    ): self {
+        $this->detectorChain->enableCache($cache, $ttl);
+
+        return $this;
+    }
+
+    /**
+     * Disable detection caching.
+     *
+     * @return self
+     *
+     * @psalm-api
+     */
+    public function disableDetectionCache(): self
+    {
+        $this->detectorChain->disableCache();
+
+        return $this;
+    }
+
+    /**
+     * Clear detection cache.
+     *
+     * @return self
+     *
+     * @psalm-api
+     */
+    public function clearDetectionCache(): self
+    {
+        $this->detectorChain->clearCache();
 
         return $this;
     }

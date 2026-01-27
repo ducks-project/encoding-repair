@@ -47,6 +47,7 @@ nav:
       - CallableTranscoder: api/CallableTranscoder.md
     - Detectors:
       - DetectorInterface: api/DetectorInterface.md
+      - BomDetector: api/BomDetector.md
       - PregMatchDetector: api/PregMatchDetector.md
       - MbStringDetector: api/MbStringDetector.md
       - FileInfoDetector: api/FileInfoDetector.md

@@ -9,11 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- [`BomDetector`] - BOM (Byte Order Mark) detector for UTF encodings (priority: 160)
+- Support for UTF-8, UTF-16 LE/BE, UTF-32 LE/BE BOM detection with 100% accuracy
 - [`PregMatchDetector`] - Fast encoding detector using preg_match for ASCII and UTF-8 detection (priority: 150)
 - Performance improvement: ~70% faster than mb_detect_encoding for ASCII/UTF-8 detection
+- **Integrated caching in DetectorChain** - Cache now wraps the entire detector chain
+- `enableDetectionCache()`, `disableDetectionCache()`, `clearDetectionCache()` methods in CharsetProcessor
+- Optional PSR-16 cache support directly in DetectorChain constructor
+- `DetectionCacheTrait` - Shared caching logic for detectors (DRY principle)
 
 ### Changed
 
+- **Default detector chain now includes BomDetector and PregMatchDetector for better performance**
+- BomDetector (priority 160) provides 100% accurate BOM detection
+- PregMatchDetector (priority 150) provides 70% faster ASCII/UTF-8 detection
+- **CachedDetector removed from default chain** (users can add it manually if needed)
+- **Refactored caching logic** - CachedDetector and DetectorChain now share DetectionCacheTrait (~100 lines code reduction)
+- Detection chain order: BomDetector (160) → PregMatchDetector (150) → MbStringDetector (100) → FileInfoDetector (50)
 - new tests structures.
 
 ## <a name="v120"></a>[1.2.0] - 2026-01-23
@@ -213,6 +225,7 @@ safeJsonEncode & safeJsonDecode should return a JsonException.
 [`PrioritizedHandlerInterface`]: /assets/documentation/classes/PrioritizedHandlerInterface.md
 [`PropertyMapperInterface`]: /assets/documentation/classes/PropertyMapperInterface.md
 [`PregMatchDetector`]: /assets/documentation/classes/PregMatchDetector.md
+[`BomDetector`]: /assets/documentation/classes/BomDetector.md
 [unreleased]: https://github.com/ducks-project/encoding-repair/compare/v1.1.0...HEAD
 [1.2.0]: https://github.com/ducks-project/encoding-repair/compare/v1.2.0...v1.1.0
 [1.1.2]: https://github.com/ducks-project/encoding-repair/compare/v1.1.2...v1.1.1

@@ -597,6 +597,24 @@ $result = CharsetHelper::toCharset($ebcdicData, 'UTF-8', 'EBCDIC');
 
 ### 3. Custom Detector
 
+#### BOM Detection for 100% Accuracy (New in v1.2)
+
+```php
+use Ducks\Component\EncodingRepair\CharsetHelper;
+use Ducks\Component\EncodingRepair\Detector\BomDetector;
+
+// Register BomDetector for 100% accurate BOM detection
+CharsetHelper::registerDetector(new BomDetector());
+
+$utf8Bom = "\xEF\xBB\xBF" . 'Hello World';
+$utf16Le = "\xFF\xFE" . 'Hello';
+$noBom = 'Hello World';
+
+echo CharsetHelper::detect($utf8Bom);  // 'UTF-8' (BOM detected)
+echo CharsetHelper::detect($utf16Le);  // 'UTF-16LE' (BOM detected)
+echo CharsetHelper::detect($noBom);    // Falls back to PregMatchDetector/MbStringDetector
+```
+
 #### Fast ASCII/UTF-8 Detection with PregMatchDetector (New in v1.2)
 
 ```php
@@ -825,41 +843,32 @@ $result = CharsetHelper::toCharset($data, 'ASCII', 'UTF-8', [
 ### Issue: Performance Problems
 
 ```php
-// Use PSR-16 cache for detection (New in v1.2)
-use Ducks\Component\EncodingRepair\Detector\CachedDetector;
-use Ducks\Component\EncodingRepair\Detector\MbStringDetector;
-use Ducks\Component\EncodingRepair\CharsetProcessor;
-
-// Default: InternalArrayCache (optimized, automatic)
-$detector = new CachedDetector(new MbStringDetector());
-// InternalArrayCache used automatically (no TTL overhead, pure O(1))
-
+// Option 1: Enable cache for entire detector chain (recommended)
 $processor = new CharsetProcessor();
-$processor->registerDetector($detector, 200);
-
-foreach ($largeDataset as $item) {
-    $result = $processor->toUtf8($item);
-    // Repeated strings benefit from InternalArrayCache
-}
-
-// With TTL: ArrayCache
-use Ducks\Component\EncodingRepair\Cache\ArrayCache;
-
-$cache = new ArrayCache();
-$detector = new CachedDetector(new MbStringDetector(), $cache, 3600);
-
-// Or use Redis/Memcached for distributed caching
-// $redis = new \Symfony\Component\Cache\Psr16Cache($redisAdapter);
-// $detector = new CachedDetector(new MbStringDetector(), $redis, 7200);
-
-// Legacy: CachedDetector is enabled by default in CharsetProcessor (v1.1+)
-$processor = new CharsetProcessor();
-// CachedDetector with InternalArrayCache is automatically used
+$processor->enableDetectionCache(); // InternalArrayCache by default
 
 foreach ($largeDataset as $item) {
     $result = $processor->toUtf8($item);
     // Repeated strings benefit from cache (50-80% faster)
 }
+
+// Option 2: Cache specific expensive detector
+use Ducks\Component\EncodingRepair\Detector\CachedDetector;
+use Ducks\Component\EncodingRepair\Detector\FileInfoDetector;
+
+$fileInfo = new FileInfoDetector();
+$cached = new CachedDetector($fileInfo); // Cache only this detector
+
+$processor = new CharsetProcessor();
+$processor->resetDetectors();
+$processor->registerDetector(new BomDetector());
+$processor->registerDetector(new PregMatchDetector());
+$processor->registerDetector(new MbStringDetector());
+$processor->registerDetector($cached); // Only FileInfo is cached
+
+// Option 3: External cache (Redis, Memcached, APCu)
+// $redis = new \Symfony\Component\Cache\Psr16Cache($redisAdapter);
+// $processor->enableDetectionCache($redis, 7200);
 ```
 
 ---
@@ -960,7 +969,9 @@ if ($duration > 1.0) {
 - [CharsetProcessor API Documentation](./classes/CharsetProcessor.md)
 - [CharsetProcessorInterface API Documentation](./classes/CharsetProcessorInterface.md)
 - [CachedDetector API Documentation](./classes/CachedDetector.md)
+- [BomDetector API Documentation](./classes/BomDetector.md)
 - [PregMatchDetector API Documentation](./classes/PregMatchDetector.md)
+- [DetectionCacheTrait API Documentation](./classes/DetectionCacheTrait.md)
 - [InternalArrayCache API Documentation](./classes/InternalArrayCache.md)
 - [ArrayCache API Documentation](./classes/ArrayCache.md)
 - [Type Interpreter System](./INTERPRETER_SYSTEM.md)

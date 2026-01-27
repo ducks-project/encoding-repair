@@ -204,30 +204,33 @@ UConverter (intl) → iconv → mbstring
 **Detector priorities:**
 
 1. **CachedDetector** (priority: 200): Caches detection results
-2. **PregMatchDetector** (priority: 150): Fast ASCII/UTF-8 detection (~70% faster)
-3. **MbStringDetector** (priority: 100): Fast and reliable for common encodings
-4. **FileInfoDetector** (priority: 50): Fallback for difficult cases
+2. **BomDetector** (priority: 160): BOM detection with 100% accuracy
+3. **PregMatchDetector** (priority: 150): Fast ASCII/UTF-8 detection (~70% faster)
+4. **MbStringDetector** (priority: 100): Fast and reliable for common encodings
+5. **FileInfoDetector** (priority: 50): Fallback for difficult cases
 
 ## Performance Optimization
 
 ### PSR-16 Cache for Detection (New in v1.2)
 
 ```php
-use Ducks\Component\EncodingRepair\Cache\ArrayCache;
-use Ducks\Component\EncodingRepair\Detector\CachedDetector;
-use Ducks\Component\EncodingRepair\Detector\MbStringDetector;
 use Ducks\Component\EncodingRepair\CharsetProcessor;
 
-// Use built-in ArrayCache
-$cache = new ArrayCache();
-$detector = new CachedDetector(new MbStringDetector(), $cache, 3600);
-
+// Option 1: Cache entire detector chain (recommended)
 $processor = new CharsetProcessor();
-$processor->registerDetector($detector, 200);
+$processor->enableDetectionCache(); // Uses InternalArrayCache
 
-// Or use Redis/Memcached for distributed caching
+// Option 2: External cache (Redis, Memcached, APCu)
 // $redis = new \Symfony\Component\Cache\Psr16Cache($redisAdapter);
-// $detector = new CachedDetector(new MbStringDetector(), $redis, 7200);
+// $processor->enableDetectionCache($redis, 7200);
+
+// Option 3: Cache specific detector (fine-grained control)
+use Ducks\Component\EncodingRepair\Detector\CachedDetector;
+use Ducks\Component\EncodingRepair\Detector\FileInfoDetector;
+
+$fileInfo = new FileInfoDetector();
+$cached = new CachedDetector($fileInfo); // Cache only this detector
+$processor->registerDetector($cached);
 ```
 
 ### Cache Detection Results

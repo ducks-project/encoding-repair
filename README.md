@@ -640,10 +640,12 @@ Higher values execute first.
 
 **Detector priorities:**
 
-1. **CachedDetector** (priority: 200, wraps MbStringDetector): Caches detection results
-2. **PregMatchDetector** (priority: 150): Fast ASCII/UTF-8 detection using preg_match (~70% faster)
+1. **BomDetector** (priority: 160): BOM detection with 100% accuracy
+2. **PregMatchDetector** (priority: 150): Fast ASCII/UTF-8 detection (~70% faster)
 3. **MbStringDetector** (priority: 100, requires `ext-mbstring`): Fast and reliable using mb_detect_encoding
 4. **FileInfoDetector** (priority: 50, requires `ext-fileinfo`): Fallback using finfo class
+
+**Note:** `CachedDetector` is not included by default. Users can add it manually if needed.
 
 **Custom detectors** can be registered with any priority value.
 Higher values execute first.
@@ -653,16 +655,18 @@ Higher values execute first.
 CachedDetector supports PSR-16 cache for persistent detection results:
 
 ```php
-// Default: InternalArrayCache (optimized, no TTL overhead)
-$detector = new CachedDetector(new MbStringDetector());
+// Option 1: Cache entire detector chain (recommended)
+$processor = new CharsetProcessor();
+$processor->enableDetectionCache(); // Uses InternalArrayCache
 
-// With TTL: ArrayCache
-$cache = new ArrayCache();
-$detector = new CachedDetector(new MbStringDetector(), $cache, 3600);
+// Option 2: Cache specific detector (fine-grained control)
+$fileInfo = new FileInfoDetector();
+$cached = new CachedDetector($fileInfo);
+$processor->registerDetector($cached);
 
-// External: Redis, Memcached, APCu, etc.
+// External cache (Redis, Memcached, APCu)
 // $redis = new \Symfony\Component\Cache\Psr16Cache($redisAdapter);
-// $detector = new CachedDetector(new MbStringDetector(), $redis, 7200);
+// $processor->enableDetectionCache($redis, 7200);
 ```
 
 ## 📊 Performance
@@ -818,6 +822,7 @@ composer phpcsfixer-check
 - [`UConverterTranscoder`]
 - [`DetectorInterface`]
 - [`CallableDetector`]
+- [`BomDetector`]
 - [`PregMatchDetector`]
 - [`MbStringDetector`]
 - [`FileInfoDetector`]
@@ -908,6 +913,7 @@ Made with ❤️ by the Duck Project Team
 [`UconverterTranscoder`]: /assets/documentation/classes/UconverterTranscoder.md
 [`DetectorInterface`]: /assets/documentation/classes/DetectorInterface.md
 [`CallableDetector`]: /assets/documentation/classes/CallableDetector.md
+[`BomDetector`]: /assets/documentation/classes/BomDetector.md
 [`PregMatchDetector`]: /assets/documentation/classes/PregMatchDetector.md
 [`MbStringDetector`]: /assets/documentation/classes/MbStringDetector.md
 [`FileInfoDetector`]: /assets/documentation/classes/FileInfoDetector.md

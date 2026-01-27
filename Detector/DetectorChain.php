@@ -14,13 +14,15 @@ declare(strict_types=1);
 namespace Ducks\Component\EncodingRepair\Detector;
 
 use Ducks\Component\EncodingRepair\Traits\ChainOfResponsibilityTrait;
+use Ducks\Component\EncodingRepair\Traits\DetectionCacheTrait;
+use Psr\SimpleCache\CacheInterface;
 
 /**
- * Chain of Responsibility for detectors with priority management.
+ * Chain of Responsibility for detectors with priority management and optional caching.
  *
  * @final
  */
-final class DetectorChain
+final class DetectorChain implements DetectionCacheableInterface
 {
     /**
      * @use ChainOfResponsibilityTrait<DetectorInterface>
@@ -28,6 +30,20 @@ final class DetectorChain
     use ChainOfResponsibilityTrait {
         ChainOfResponsibilityTrait::register as chainRegister;
         ChainOfResponsibilityTrait::unregister as chainUnregister;
+    }
+    use DetectionCacheTrait;
+
+    /**
+     * @param CacheInterface|null $cache Optional PSR-16 cache
+     * @param int $ttl Cache TTL in seconds
+     */
+    public function __construct(
+        ?CacheInterface $cache = null,
+        int $ttl = 3600
+    ) {
+        if (null !== $cache) {
+            $this->enableCache($cache, $ttl);
+        }
     }
 
     /**
@@ -56,7 +72,7 @@ final class DetectorChain
     }
 
     /**
-     * Execute detection using chain of responsibility.
+     * Execute detection using chain of responsibility with optional caching.
      *
      * @param string $string String to analyze
      * @param array<string, mixed> $options Detection options
@@ -65,16 +81,45 @@ final class DetectorChain
      */
     public function detect(string $string, array $options): ?string
     {
-        // Clone the queue to avoid consuming it (more efficient than rebuildQueue)
+        // Check cache
+        $cached = $this->getCachedDetection($string);
+        if (null !== $cached) {
+            return $cached;
+        }
+
+        // Execute chain
+        $result = $this->executeChain($string, $options);
+
+        // Store in cache
+        if (null !== $result) {
+            $this->setCachedDetection($string, $result);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Execute the detector chain without caching.
+     *
+     * @param string $string String to analyze
+     * @param array<string, mixed> $options Detection options
+     *
+     * @return string|null Detected encoding or null if all failed
+     */
+    private function executeChain(string $string, array $options): ?string
+    {
+        // Clone the queue to avoid consuming it
         $queue = clone $this->getSplPriorityQueue();
 
         foreach ($queue as $detector) {
+            /** @disregard P1013 Undefined method */
             if (!$detector->isAvailable()) {
                 // @codeCoverageIgnoreStart
                 continue;
                 // @codeCoverageIgnoreEnd
             }
 
+            /** @disregard P1013 Undefined method */
             $result = $detector->detect($string, $options);
 
             if (null !== $result) {

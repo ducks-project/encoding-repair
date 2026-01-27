@@ -9,8 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `BomDetector` - BOM (Byte Order Mark) detector for UTF encodings (priority: 160)
+- Support for UTF-8, UTF-16 LE/BE, UTF-32 LE/BE BOM detection with 100% accuracy
 - `PregMatchDetector` - Fast encoding detector using preg_match for ASCII and UTF-8 detection (priority: 150)
 - Performance improvement: ~70% faster than mb_detect_encoding for ASCII/UTF-8 detection
+- **Integrated caching in DetectorChain** - Cache now wraps the entire detector chain
+- `enableDetectionCache()`, `disableDetectionCache()`, `clearDetectionCache()` methods in CharsetProcessor
+- `DetectionCacheTrait` - Shared caching logic for detectors (DRY principle)
 - `CharsetProcessorInterface` - Service contract for charset processing
 - `CharsetProcessor` - Service implementation with fluent API
 - `CallableAdapterTrait` - Common functionality for callable adapters
@@ -25,6 +30,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Default detector chain now includes BomDetector and PregMatchDetector for better performance**
+- BomDetector (priority 160) provides 100% accurate BOM detection
+- PregMatchDetector (priority 150) provides 70% faster ASCII/UTF-8 detection
+- **Refactored caching logic** - CachedDetector and DetectorChain now share DetectionCacheTrait (~100 lines code reduction)
+- Detection chain order: BomDetector (160) → PregMatchDetector (150) → MbStringDetector (100) → FileInfoDetector (50)
 - new tests structures
 - Refactored code to use traits for better maintainability and DRY principles
 - Extracted common functionality from `CallableDetector` and `CallableTranscoder` into `CallableAdapterTrait`

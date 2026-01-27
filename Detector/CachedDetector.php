@@ -14,38 +14,34 @@ declare(strict_types=1);
 namespace Ducks\Component\EncodingRepair\Detector;
 
 use Ducks\Component\EncodingRepair\Cache\InternalArrayCache;
+use Ducks\Component\EncodingRepair\Traits\DetectionCacheTrait;
 use Psr\SimpleCache\CacheInterface;
 
 /**
  * Cached detector decorator with PSR-16 support.
  *
  * Uses InternalArrayCache by default for optimal performance.
- * Supports any PSR-16 cache implementation (Redis, Memcached, APCu, etc.).
+ * Supports any PSR-16 cache implementation (Redis, Memcached, APCu, etc.).s
+ *
+ * Wraps a single detector to cache its results. Useful for:
+ * - Caching expensive detectors (e.g., FileInfoDetector)
+ * - Per-detector cache configuration
+ * - Fine-grained cache control
+ *
+ * For caching the entire detector chain, use DetectorChain::enableCache() instead.
  *
  * @final
  *
  * @psalm-api
  */
-final class CachedDetector implements DetectorInterface
+final class CachedDetector implements DetectorInterface, DetectionCacheableInterface
 {
-    private const HASH = 'sha256';
-
-    private const DEFAULT_TTL = 3600;
+    use DetectionCacheTrait;
 
     /**
      * @var DetectorInterface
      */
     private DetectorInterface $detector;
-
-    /**
-     * @var CacheInterface
-     */
-    private CacheInterface $cache;
-
-    /**
-     * @var int
-     */
-    private int $ttl;
 
     /**
      * @param DetectorInterface $detector Wrapped detector
@@ -55,11 +51,10 @@ final class CachedDetector implements DetectorInterface
     public function __construct(
         DetectorInterface $detector,
         ?CacheInterface $cache = null,
-        int $ttl = self::DEFAULT_TTL
+        int $ttl = 3600
     ) {
         $this->detector = $detector;
-        $this->cache = $cache ?? new InternalArrayCache(1000);
-        $this->ttl = $ttl;
+        $this->enableCache($cache, $ttl);
     }
 
     /**
@@ -67,22 +62,21 @@ final class CachedDetector implements DetectorInterface
      */
     public function detect(string $string, ?array $options = null): ?string
     {
-        $key = $this->generateKey($string);
-
-        /** @var mixed $cached */
-        $cached = $this->cache->get($key);
-        if (\is_string($cached)) {
+        // Check cache
+        $cached = $this->getCachedDetection($string);
+        if (null !== $cached) {
             return $cached;
         }
 
+        // Execute detector
         $result = $this->detector->detect($string, $options);
 
-        if (\is_string($result)) {
-            $this->cache->set($key, $result, $this->ttl);
-            return $result;
+        // Store in cache
+        if (null !== $result) {
+            $this->setCachedDetection($string, $result);
         }
 
-        return null;
+        return $result;
     }
 
     /**
@@ -102,21 +96,9 @@ final class CachedDetector implements DetectorInterface
     }
 
     /**
-     * Clear cache entries.
-     *
-     * @return void
-     *
-     * @psalm-api
-     */
-    public function clearCache(): void
-    {
-        $this->cache->clear();
-    }
-
-    /**
      * Get cache statistics.
      *
-     * @return array{size: int, maxSize: int, class: string}
+     * @return array{size: int, maxSize: int, class: class-string|class-string<\Psr\SimpleCache\CacheInterface>|false}
      *
      * @psalm-api
      */
@@ -125,27 +107,17 @@ final class CachedDetector implements DetectorInterface
         $size = 0;
         $maxSize = 1000;
 
-        if ($this->cache instanceof InternalArrayCache) {
-            $size = $this->cache->getSize();
-            $maxSize = $this->cache->getMaxSize();
+        $detectionCache = $this->getDetectionCache();
+
+        if ($detectionCache instanceof InternalArrayCache) {
+            $size = $detectionCache->getSize();
+            $maxSize = $detectionCache->getMaxSize();
         }
 
         return [
             'size' => $size,
             'maxSize' => $maxSize,
-            'class' => \get_class($this->cache),
+            'class' => \get_class($detectionCache),
         ];
-    }
-
-    /**
-     * Generate cache key from string.
-     *
-     * @param string $string Input string
-     *
-     * @return string Cache key
-     */
-    private function generateKey(string $string): string
-    {
-        return 'encoding_detect_' . \hash(self::HASH, $string);
     }
 }
