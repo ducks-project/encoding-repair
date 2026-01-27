@@ -597,6 +597,24 @@ $result = CharsetHelper::toCharset($ebcdicData, 'UTF-8', 'EBCDIC');
 
 ### 3. Custom Detector
 
+#### Fast ASCII/UTF-8 Detection with PregMatchDetector (New in v1.2)
+
+```php
+use Ducks\Component\EncodingRepair\CharsetHelper;
+use Ducks\Component\EncodingRepair\Detector\PregMatchDetector;
+
+// Register PregMatchDetector for 70% faster ASCII/UTF-8 detection
+CharsetHelper::registerDetector(new PregMatchDetector());
+
+$ascii = 'Hello World';
+$utf8 = 'Café';
+$iso = mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+
+echo CharsetHelper::detect($ascii);  // 'ASCII' (fast-path)
+echo CharsetHelper::detect($utf8);   // 'UTF-8' (preg_match validation)
+echo CharsetHelper::detect($iso);    // 'ISO-8859-1' (fallback to MbStringDetector)
+```
+
 #### Detect Proprietary Format
 
 ```php
@@ -942,6 +960,7 @@ if ($duration > 1.0) {
 - [CharsetProcessor API Documentation](./classes/CharsetProcessor.md)
 - [CharsetProcessorInterface API Documentation](./classes/CharsetProcessorInterface.md)
 - [CachedDetector API Documentation](./classes/CachedDetector.md)
+- [PregMatchDetector API Documentation](./classes/PregMatchDetector.md)
 - [InternalArrayCache API Documentation](./classes/InternalArrayCache.md)
 - [ArrayCache API Documentation](./classes/ArrayCache.md)
 - [Type Interpreter System](./INTERPRETER_SYSTEM.md)

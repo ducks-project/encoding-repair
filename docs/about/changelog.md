@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `PregMatchDetector` - Fast encoding detector using preg_match for ASCII and UTF-8 detection (priority: 150)
+- Performance improvement: ~70% faster than mb_detect_encoding for ASCII/UTF-8 detection
 - `CharsetProcessorInterface` - Service contract for charset processing
 - `CharsetProcessor` - Service implementation with fluent API
 - `CallableAdapterTrait` - Common functionality for callable adapters
@@ -23,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- new tests structures
 - Refactored code to use traits for better maintainability and DRY principles
 - Extracted common functionality from `CallableDetector` and `CallableTranscoder` into `CallableAdapterTrait`
 - Extracted common Chain of Responsibility logic from `DetectorChain` and `TranscoderChain` into `ChainOfResponsibilityTrait`

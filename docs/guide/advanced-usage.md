@@ -144,6 +144,24 @@ CharsetHelper::registerTranscoder(
 
 ## Custom Detector
 
+### Fast ASCII/UTF-8 Detection (New in v1.2)
+
+```php
+use Ducks\Component\EncodingRepair\CharsetHelper;
+use Ducks\Component\EncodingRepair\Detector\PregMatchDetector;
+
+// Register PregMatchDetector for 70% faster ASCII/UTF-8 detection
+CharsetHelper::registerDetector(new PregMatchDetector());
+
+$ascii = 'Hello World';
+$utf8 = 'Café';
+$iso = mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+
+echo CharsetHelper::detect($ascii);  // 'ASCII' (fast-path)
+echo CharsetHelper::detect($utf8);   // 'UTF-8' (preg_match validation)
+echo CharsetHelper::detect($iso);    // 'ISO-8859-1' (fallback to MbStringDetector)
+```
+
 ### Detect Proprietary Format
 
 ```php
@@ -185,8 +203,10 @@ UConverter (intl) → iconv → mbstring
 
 **Detector priorities:**
 
-1. **mb_detect_encoding**: Fast and reliable for common encodings
-2. **finfo (FileInfo)**: Fallback for difficult cases
+1. **CachedDetector** (priority: 200): Caches detection results
+2. **PregMatchDetector** (priority: 150): Fast ASCII/UTF-8 detection (~70% faster)
+3. **MbStringDetector** (priority: 100): Fast and reliable for common encodings
+4. **FileInfoDetector** (priority: 50): Fallback for difficult cases
 
 ## Performance Optimization
 

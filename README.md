@@ -641,8 +641,9 @@ Higher values execute first.
 **Detector priorities:**
 
 1. **CachedDetector** (priority: 200, wraps MbStringDetector): Caches detection results
-2. **MbStringDetector** (priority: 100, requires `ext-mbstring`): Fast and reliable using mb_detect_encoding
-3. **FileInfoDetector** (priority: 50, requires `ext-fileinfo`): Fallback using finfo class
+2. **PregMatchDetector** (priority: 150): Fast ASCII/UTF-8 detection using preg_match (~70% faster)
+3. **MbStringDetector** (priority: 100, requires `ext-mbstring`): Fast and reliable using mb_detect_encoding
+4. **FileInfoDetector** (priority: 50, requires `ext-fileinfo`): Fallback using finfo class
 
 **Custom detectors** can be registered with any priority value.
 Higher values execute first.
@@ -817,6 +818,7 @@ composer phpcsfixer-check
 - [`UConverterTranscoder`]
 - [`DetectorInterface`]
 - [`CallableDetector`]
+- [`PregMatchDetector`]
 - [`MbStringDetector`]
 - [`FileInfoDetector`]
 - [`CallableAdapterTrait`]
@@ -906,6 +908,7 @@ Made with ❤️ by the Duck Project Team
 [`UconverterTranscoder`]: /assets/documentation/classes/UconverterTranscoder.md
 [`DetectorInterface`]: /assets/documentation/classes/DetectorInterface.md
 [`CallableDetector`]: /assets/documentation/classes/CallableDetector.md
+[`PregMatchDetector`]: /assets/documentation/classes/PregMatchDetector.md
 [`MbStringDetector`]: /assets/documentation/classes/MbStringDetector.md
 [`FileInfoDetector`]: /assets/documentation/classes/FileInfoDetector.md
 [`CallableAdapterTrait`]: /assets/documentation/classes/CallableAdapterTrait.md

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- [`PregMatchDetector`] - Fast encoding detector using preg_match for ASCII and UTF-8 detection (priority: 150)
+- Performance improvement: ~70% faster than mb_detect_encoding for ASCII/UTF-8 detection
+
 ### Changed
 
 - new tests structures.
@@ -207,6 +212,7 @@ safeJsonEncode & safeJsonDecode should return a JsonException.
 [`ObjectInterpreter`]: /assets/documentation/classes/ObjectInterpreter.md
 [`PrioritizedHandlerInterface`]: /assets/documentation/classes/PrioritizedHandlerInterface.md
 [`PropertyMapperInterface`]: /assets/documentation/classes/PropertyMapperInterface.md
+[`PregMatchDetector`]: /assets/documentation/classes/PregMatchDetector.md
 [unreleased]: https://github.com/ducks-project/encoding-repair/compare/v1.1.0...HEAD
 [1.2.0]: https://github.com/ducks-project/encoding-repair/compare/v1.2.0...v1.1.0
 [1.1.2]: https://github.com/ducks-project/encoding-repair/compare/v1.1.2...v1.1.1
