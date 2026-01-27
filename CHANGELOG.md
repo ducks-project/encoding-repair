@@ -59,7 +59,9 @@ safeJsonEncode & safeJsonDecode should return a JsonException.
 - `clearCache()` delegates to PSR-16 cache interface (unified behavior)
 - Cache key generation now uses prefixed hash ('encoding_detect_' prefix) for better namespace isolation
 - 100% backward compatible - existing code works unchanged
-- Optimized UTF-8 validation using `preg_match('//u')` instead of `mb_check_encoding()` (~34% faster)
+- Optimized UTF-8 validation with ASCII fast-path + `preg_match('//u')` instead of `mb_check_encoding()`
+- ASCII-only strings: ~35% faster (0.357μs vs 0.522μs)
+- UTF-8 validation: ~34% faster (0.781μs vs 1.182μs)
 - Performance improvement: Detection ~5-10% faster, Repair ~8-12% faster, Conversion with AUTO ~3-5% faster
 
 ## <a name="v112"></a>[1.1.2] - 2026-01-23

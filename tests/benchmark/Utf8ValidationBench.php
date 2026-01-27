@@ -33,11 +33,13 @@ final class Utf8ValidationBench
 {
     private string $validUtf8;
     private string $invalidUtf8;
+    private string $asciiOnly;
 
     public function __construct()
     {
         $this->validUtf8 = 'Café, thé, crème brûlée, São Paulo, Москва, 北京, 🚀';
         $this->invalidUtf8 = "\xC3\x28"; // Invalid UTF-8 sequence
+        $this->asciiOnly = 'Hello World 123 ABC';
     }
 
     public function benchPregMatchValid(): void
@@ -58,5 +60,28 @@ final class Utf8ValidationBench
     public function benchMbCheckEncodingInvalid(): void
     {
         \mb_check_encoding($this->invalidUtf8, 'UTF-8');
+    }
+
+    public function benchAsciiCheckPregMatch(): void
+    {
+        !\preg_match('/[\x80-\xFF]/', $this->asciiOnly);
+    }
+
+    public function benchAsciiCheckMbCheckEncoding(): void
+    {
+        \mb_check_encoding($this->asciiOnly, 'ASCII');
+    }
+
+    public function benchAsciiThenUtf8(): void
+    {
+        if (!\preg_match('/[\x80-\xFF]/', $this->asciiOnly)) {
+            return; // ASCII is valid UTF-8
+        }
+        false !== @\preg_match('//u', $this->asciiOnly);
+    }
+
+    public function benchUtf8Only(): void
+    {
+        false !== @\preg_match('//u', $this->asciiOnly);
     }
 }
