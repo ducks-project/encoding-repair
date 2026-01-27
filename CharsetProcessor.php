@@ -673,15 +673,7 @@ final class CharsetProcessor implements CharsetProcessorInterface
     private function peelEncodingLayers(string $value, string $from, int $maxDepth): string
     {
         // Clean invalid UTF-8 sequences first (edge case: malformed bytes like \xC2\x88)
-        if (\function_exists('mb_scrub')) {
-            $clean = \mb_scrub($value, 'UTF-8');
-        } else {
-            $clean = \mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-        }
-
-        if (false !== $clean) {
-            $value = $clean;
-        }
+        $value = \mb_scrub($value, 'UTF-8');
 
         // Quick check: if no corruption patterns, return as-is
         if (false === \strpos($value, "\xC3\x82") && false === \strpos($value, "\xC3\x83")) {
