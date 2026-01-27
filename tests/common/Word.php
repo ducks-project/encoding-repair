@@ -29,7 +29,7 @@ final class Word
     ];
 
     /**
-     * Utf8 based opened with WP1252
+     * Utf8 based opened with WP1252.
      *
      * @var list<string>
      */
@@ -37,10 +37,10 @@ final class Word
         'CafÃ©',
         'ThÃ©',
         'Ã‰toile',
-        'dÃ©jÃ ',
+        "dÃ©jÃ\u{a0}",
         'liÃ¨vre',
         'euro â‚¬',
-        'test'
+        'test',
     ];
 
     public static function getBadUtf8Word(): string

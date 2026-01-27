@@ -17,7 +17,6 @@ use Ducks\Component\EncodingRepair\CharsetProcessor;
 use Ducks\Component\EncodingRepair\Interpreter\PropertyMapperInterface;
 use Ducks\Component\EncodingRepair\Tests\common\ObjBadUtf8;
 use Ducks\Component\EncodingRepair\Tests\common\ObjIso;
-use Ducks\Component\EncodingRepair\Tests\common\Phrase;
 use Ducks\Component\EncodingRepair\Tests\common\Word;
 
 /**

@@ -674,9 +674,13 @@ final class CharsetProcessor implements CharsetProcessorInterface
     {
         // Clean invalid UTF-8 sequences first (edge case: malformed bytes like \xC2\x88)
         if (\function_exists('mb_scrub')) {
-            $value = \mb_scrub($value, 'UTF-8');
+            $clean = \mb_scrub($value, 'UTF-8');
         } else {
-            $value = \mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+            $clean = \mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+        }
+
+        if (false !== $clean) {
+            $value = $clean;
         }
 
         // Quick check: if no corruption patterns, return as-is
@@ -727,7 +731,6 @@ final class CharsetProcessor implements CharsetProcessorInterface
             $value
         ) ?? $value;
     }
-
 
     /**
      * Normalizes UTF-8 string if needed.

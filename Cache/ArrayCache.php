@@ -96,7 +96,7 @@ final class ArrayCache implements CacheInterface
      * @param mixed $default Default value to return for keys that do not exist.
      *
      * @return array<array-key, mixed> A list of key => value pairs.
-     * Cache keys that do not exist or are stale will have $default as value.
+     *                                 Cache keys that do not exist or are stale will have $default as value.
      */
     public function getMultiple($keys, $default = null)
     {

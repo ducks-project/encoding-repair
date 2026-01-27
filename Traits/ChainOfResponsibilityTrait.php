@@ -80,6 +80,8 @@ trait ChainOfResponsibilityTrait
      * Rebuild queue from registered handlers.
      *
      * @return void
+     *
+     * @psalm-suppress UnusedMethod
      */
     private function rebuildQueue(): void
     {

@@ -13,19 +13,12 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair\Tests\common;
 
-final class ObjUtf8 extends Obj
-{
-    use ObjTrait;
-    use ReadOnlyPropertiesTrait;
+use Ducks\Component\EncodingRepair\CharsetProcessorInterface;
 
-    public function __construct()
+final class ObjUtf8 extends ObjEncoded
+{
+    public function getObjectEncoding(): string
     {
-        parent::__construct(
-            'José García',
-            'josé@example.com',
-            'Brésil',
-            'São Paulo',
-            'password'
-        );
+        return CharsetProcessorInterface::ENCODING_UTF8;
     }
 }

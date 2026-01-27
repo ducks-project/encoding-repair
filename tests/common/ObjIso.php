@@ -15,21 +15,10 @@ namespace Ducks\Component\EncodingRepair\Tests\common;
 
 use Ducks\Component\EncodingRepair\CharsetProcessorInterface;
 
-final class ObjIso extends Obj
+final class ObjIso extends ObjEncoded
 {
-    use ObjTrait;
-    use ReadOnlyPropertiesTrait;
-
-    public function __construct()
+    public function getObjectEncoding(): string
     {
-        // phpcs:disable Generic.Files.LineLength
-        parent::__construct(
-            \mb_convert_encoding('José García', CharsetProcessorInterface::ENCODING_ISO, CharsetProcessorInterface::ENCODING_UTF8),
-            \mb_convert_encoding('josé@example.com', CharsetProcessorInterface::ENCODING_ISO, CharsetProcessorInterface::ENCODING_UTF8),
-            \mb_convert_encoding('Brésil', CharsetProcessorInterface::ENCODING_ISO, CharsetProcessorInterface::ENCODING_UTF8),
-            \mb_convert_encoding('São Paulo', CharsetProcessorInterface::ENCODING_ISO, CharsetProcessorInterface::ENCODING_UTF8),
-            \mb_convert_encoding('password', CharsetProcessorInterface::ENCODING_ISO, CharsetProcessorInterface::ENCODING_UTF8)
-        );
-        // phpcs:enable Generic.Files.LineLength
+        return CharsetProcessorInterface::ENCODING_ISO;
     }
 }

@@ -18,7 +18,6 @@ use Ducks\Component\EncodingRepair\Detector\CachedDetector;
 use Ducks\Component\EncodingRepair\Detector\DetectorInterface;
 use Ducks\Component\EncodingRepair\Detector\MbStringDetector;
 use PHPUnit\Framework\TestCase;
-use Psr\SimpleCache\CacheInterface;
 
 final class CachedDetectorTest extends TestCase
 {

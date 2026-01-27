@@ -13,17 +13,20 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair\Tests\common;
 
+use stdClass;
+
 trait ObjTrait
 {
     /**
      * @return object
-     * @psalm-return \stdClass&object{name: string, email:string, secret: string}
+     *
+     * @psalm-return stdClass&object{name: string, email:string, secret: string}
      */
     public static function getValue(): object
     {
         $instance = new self();
 
-        /** @var \stdClass&object{name: string, email:string, secret: string} $object */
+        /** @var stdClass&object{name: string, email:string, secret: string} $object */
         $object = (object) $instance->__toArray();
 
         return $object;

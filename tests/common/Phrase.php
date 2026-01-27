@@ -37,7 +37,7 @@ final class Phrase
             $this->value,
             CharsetProcessorInterface::WINDOWS_1252,
             CharsetProcessorInterface::ENCODING_UTF8
-        );
+        ) ?: $this->value;
     }
 
     public function getIso(): string
@@ -46,7 +46,7 @@ final class Phrase
             $this->value,
             CharsetProcessorInterface::ENCODING_ISO,
             CharsetProcessorInterface::ENCODING_UTF8
-        );
+        ) ?: $this->value;
     }
 
     public function getAscii(): string
@@ -56,7 +56,7 @@ final class Phrase
 
     public function __toString(): string
     {
-        return  $this->value;
+        return $this->value;
     }
 
     public static function getValue(): string

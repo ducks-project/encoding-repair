@@ -46,7 +46,8 @@ final class ConversionBench
 
     /**
      * @var object
-     * @psalm-var \stdClass&object{name: string, password: string} $object
+     *
+     * @psalm-var stdClass&object{name: string, password: string} $object
      */
     private object $object;
 

@@ -17,7 +17,14 @@
       <directory name="Resources/stubs" />
       <directory name="tests" />
       <directory name="examples" />
+      <directory name="vendor" />
       <directory name=".history" />
     </ignoreFiles>
   </projectFiles>
+  <extraFiles>
+    <directory name="vendor" />
+    <ignoreFiles allowMissingFiles="true">
+      <directory name="vendor/symfony/polyfill*" />
+    </ignoreFiles>
+  </extraFiles>
 </psalm>

@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair\Tests\common;
 
+use stdClass;
+
 /**
  * @property-read string $name
  * @property-read string $email
@@ -20,7 +22,7 @@ namespace Ducks\Component\EncodingRepair\Tests\common;
  * @property-read string $city
  * @property-read string $secret
  */
-abstract class Obj
+class Obj
 {
     use ReadOnlyPropertiesTrait;
 
@@ -53,7 +55,7 @@ abstract class Obj
     }
 
     /**
-     * Return object as a string
+     * Return object as an array.
      *
      * @return array<string, string>
      */
@@ -70,8 +72,35 @@ abstract class Obj
     }
 
     /**
-     * @return object
-     * @psalm-return \stdClass&object{name: string, email:string, secret: string}
+     * Return expected values ordered by attempts in constructor.
+     *
+     * @return array<string,string>
      */
-    abstract public static function getValue(): object;
+    public static function getExpected(): array
+    {
+        return [
+            'name' => 'José García',
+            'email' => 'josé@example.com',
+            'country' => 'Brésil',
+            'city' => 'São Paulo',
+            'secret' => 'passwörd!',
+            'description' => 'Description en français',
+        ];
+    }
+
+    /**
+     * @return object
+     *
+     * @psalm-return stdClass&object{name: string, email:string, secret: string}
+     */
+    public static function getValue(): object
+    {
+        $args = \array_values(static::getExpected());
+        $instance = new self(...$args);
+
+        /** @var stdClass&object{name: string, email:string, secret: string} $object */
+        $object = (object) $instance->__toArray();
+
+        return $object;
+    }
 }

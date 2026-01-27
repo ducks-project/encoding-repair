@@ -37,6 +37,7 @@
         "psr/simple-cache": "^1.0"
     },
     "require-dev": {
+        "ducks-project/encoding-repair-subpackage-replace": "1.0.0",
         "ergebnis/composer-normalize": "^2.48",
         "friendsofphp/php-cs-fixer": "^3.0",
         "phpbench/phpbench": "^1.2",
@@ -52,6 +53,18 @@
         "ext-iconv": "For iconv conversion with transliteration support",
         "ext-intl": "For UConverter support (best performance and precision [30% faster])"
     },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "./packages/replace",
+            "options": {
+                "reference": "none",
+                "versions": {
+                    "ducks-project/encoding-repair-subpackage-replace": "1.0.0"
+                }
+            }
+        }
+    ],
     "minimum-stability": "stable",
     "prefer-stable": true,
     "autoload": {
@@ -72,8 +85,8 @@
             "composer/package-versions-deprecated": true,
             "ergebnis/composer-normalize": true
         },
-        "sort-packages": true,
-        "optimize-autoloader": true
+        "optimize-autoloader": true,
+        "sort-packages": true
     },
     "extra": {
         "duck": {

@@ -1,0 +1,28 @@
+{
+    "name": "ducks-project/encoding-repair-subpackage-replace",
+    "description": "Sub package in order to remove useless polyffil installed by composer, because we do not want polyfill for testing purpose.",
+    "license": "MIT",
+    "type": "metapackage",
+    "authors": [
+        {
+            "name": "Adrien Loyant",
+            "email": "donald_duck@team-df.org",
+            "homepage": "http://adrien.loyant.net",
+            "role": "Owner"
+        }
+    ],
+    "homepage": "https://github.com/ducks-project/encoding-repair/",
+    "support": {
+        "email": "adrien.loyant@gmail.com"
+    },
+    "replace": {
+        "symfony/polyfill-php54": "*",
+        "symfony/polyfill-php55": "*",
+        "symfony/polyfill-php56": "*",
+        "symfony/polyfill-php70": "*",
+        "symfony/polyfill-php71": "*",
+        "symfony/polyfill-php72": "*",
+        "symfony/polyfill-php73": "*",
+        "symfony/polyfill-php74": "*"
+    }
+}
