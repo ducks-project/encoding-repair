@@ -563,4 +563,39 @@ final class CharsetHelperTest extends TestCase
 
         $this->assertSame('UTF-8', $encoding);
     }
+
+    public function testIsReturnsTrueForMatchingEncoding(): void
+    {
+        $this->assertTrue(CharsetHelper::is('Café', 'UTF-8'));
+        $this->assertTrue(CharsetHelper::is('test', 'UTF-8'));
+    }
+
+    public function testIsReturnsFalseForNonMatchingEncoding(): void
+    {
+        $iso = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+
+        $this->assertFalse(CharsetHelper::is($iso, 'UTF-8'));
+    }
+
+    public function testIsHandlesEncodingAliases(): void
+    {
+        $iso = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+
+        $this->assertTrue(CharsetHelper::is($iso, 'CP1252'));
+        $this->assertTrue(CharsetHelper::is($iso, 'ISO-8859-1'));
+    }
+
+    public function testIsNormalizesEncodingCase(): void
+    {
+        $this->assertTrue(CharsetHelper::is('test', 'utf-8'));
+        $this->assertTrue(CharsetHelper::is('test', 'UTF-8'));
+    }
+
+    public function testIsThrowsExceptionForInvalidEncoding(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid target encoding');
+
+        CharsetHelper::is('test', 'INVALID-ENCODING');
+    }
 }

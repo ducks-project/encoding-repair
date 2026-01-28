@@ -138,6 +138,23 @@ final class CharsetHelper
     }
 
     /**
+     * Checks if a string is encoded in the specified encoding.
+     *
+     * @param string $string String to check
+     * @param string $encoding Expected encoding
+     * @param array<string, mixed> $options Detection options
+     *                                      - 'encodings': array of encodings to test
+     *
+     * @return bool True if string matches the encoding
+     *
+     * @throws InvalidArgumentException If encoding is invalid
+     */
+    public static function is(string $string, string $encoding, array $options = []): bool
+    {
+        return self::getProcessor()->is($string, $encoding, $options);
+    }
+
+    /**
      * Detects the charset encoding of a string.
      *
      * @param string $string String to analyze

@@ -29,6 +29,8 @@ final class CharsetHelper {
     public const string ENCODING_ASCII = 'ASCII';
 
     /* Methods */
+    public static is(string $string, string $encoding, array $options = []): bool
+
     public static toCharset(
         mixed $data,
         string $to = CharsetHelper::ENCODING_UTF8,
@@ -146,7 +148,32 @@ without modifying core
 
 ## [Examples](#examples)
 
-### Example #1 Basic UTF-8 conversion
+### Example #1 Encoding validation
+
+```php
+<?php
+
+use Ducks\Component\Component\EncodingRepair\CharsetHelper;
+
+// Check if string is UTF-8
+$data = 'Café résumé';
+if (CharsetHelper::is($data, 'UTF-8')) {
+    echo "String is valid UTF-8";
+}
+
+// Avoid unnecessary conversion
+if (!CharsetHelper::is($data, 'UTF-8')) {
+    $data = CharsetHelper::toUtf8($data, CharsetHelper::AUTO);
+}
+
+// Validate before database insert
+$userInput = 'Gérard Müller';
+if (CharsetHelper::is($userInput, 'UTF-8')) {
+    $db->insert('users', ['name' => $userInput]);
+}
+```
+
+### Example #2 Basic UTF-8 conversion
 
 ```php
 <?php
@@ -161,7 +188,7 @@ $utf8String = CharsetHelper::toUtf8($latinString, CharsetHelper::ENCODING_ISO);
 echo $utf8String; // Café résumé (valid UTF-8)
 ```
 
-### Example #2 Automatic encoding detection
+### Example #3 Automatic encoding detection
 
 ```php
 <?php
@@ -182,7 +209,7 @@ $encoding = CharsetHelper::detect($unknownData);
 echo "Detected encoding: {$encoding}";
 ```
 
-### Example #3 Recursive array conversion
+### Example #4 Recursive array conversion
 
 ```php
 <?php
@@ -219,7 +246,7 @@ The above example will output:
 > )
 > ```
 
-### Example #4 Repairing double-encoded strings
+### Example #5 Repairing double-encoded strings
 
 ```php
 <?php
@@ -244,7 +271,7 @@ $fixed = CharsetHelper::repair(
 );
 ```
 
-### Example #5 Safe JSON encoding
+### Example #6 Safe JSON encoding
 
 ```php
 <?php
@@ -266,7 +293,7 @@ $decoded = CharsetHelper::safeJsonDecode($json, true);
 print_r($decoded);
 ```
 
-### Example #6 Registering custom transcoder
+### Example #7 Registering custom transcoder
 
 ```php
 <?php
@@ -313,7 +340,7 @@ CharsetHelper::registerTranscoder(
 );
 ```
 
-### Example #7 Database migration
+### Example #8 Database migration
 
 ```php
 <?php
@@ -329,7 +356,7 @@ foreach ($users as $user) {
 }
 ```
 
-### Example #8 Conversion options
+### Example #9 Conversion options
 
 ```php
 <?php
@@ -409,6 +436,7 @@ Benchmarks on 10,000 conversions (PHP 8.2, i7-12700K):
 
 ## [Table of Contents](#table-of-contents)
 
+- [CharsetHelper::is] — Check if string matches specified encoding
 - [CharsetHelper::toCharset] — Convert data from one encoding to another
 - [CharsetHelper::toCharsetBatch] — Batch convert array items with optimized detection
 - [CharsetHelper::toUtf8] — Convert data to UTF-8
@@ -436,6 +464,7 @@ Benchmarks on 10,000 conversions (PHP 8.2, i7-12700K):
 - [json_encode()] — Returns the JSON representation of a value
 - [Normalizer::normalize()] — Normalizes the input provided
 
+[CharsetHelper::is]: ./CharsetHelper.is.md#charsethelper__is
 [CharsetHelper::toCharset]: ./CharsetHelper.toCharset.md#charsethelper__tocharset
 [CharsetHelper::toCharsetBatch]: ./CharsetHelper.toCharsetBatch.md#charsethelper__tocharsetbatch
 [CharsetHelper::toUtf8]: ./CharsetHelper.toUtf8.md#charsethelper__toutf8

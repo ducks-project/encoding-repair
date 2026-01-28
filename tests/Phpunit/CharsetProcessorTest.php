@@ -572,4 +572,47 @@ final class CharsetProcessorTest extends TestCase
 
         $processor->registerPropertyMapper(\stdClass::class, $mapper);
     }
+
+    public function testIsReturnsTrueForMatchingEncoding(): void
+    {
+        $processor = new CharsetProcessor();
+
+        $this->assertTrue($processor->is('Café', 'UTF-8'));
+        $this->assertTrue($processor->is('test', 'UTF-8'));
+    }
+
+    public function testIsReturnsFalseForNonMatchingEncoding(): void
+    {
+        $processor = new CharsetProcessor();
+        $iso = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+
+        $this->assertFalse($processor->is($iso, 'UTF-8'));
+    }
+
+    public function testIsHandlesEncodingAliases(): void
+    {
+        $processor = new CharsetProcessor();
+        $iso = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+
+        $this->assertTrue($processor->is($iso, 'CP1252'));
+        $this->assertTrue($processor->is($iso, 'ISO-8859-1'));
+    }
+
+    public function testIsNormalizesEncodingCase(): void
+    {
+        $processor = new CharsetProcessor();
+
+        $this->assertTrue($processor->is('test', 'utf-8'));
+        $this->assertTrue($processor->is('test', 'UTF-8'));
+    }
+
+    public function testIsThrowsExceptionForInvalidEncoding(): void
+    {
+        $processor = new CharsetProcessor();
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid target encoding');
+
+        $processor->is('test', 'INVALID-ENCODING');
+    }
 }

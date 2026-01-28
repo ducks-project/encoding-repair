@@ -176,6 +176,7 @@ final class CharsetProcessor implements CharsetProcessorInterface
     public function resetDetectors(): self
     {
         $this->detectorChain = new DetectorChain();
+        $this->detectorChain->enableCache();
 
         // BomDetector: 100% accurate when BOM present (priority: 160)
         $this->detectorChain->register(new BomDetector());
@@ -338,6 +339,38 @@ final class CharsetProcessor implements CharsetProcessorInterface
         $this->interpreterChain->register(new ObjectInterpreter($this->interpreterChain), 30);
 
         return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function is(string $string, string $encoding, array $options = []): bool
+    {
+        $this->validateEncoding($encoding, 'target');
+
+        $detected = $this->detect($string, $options);
+        $normalized = \strtoupper($encoding);
+
+        // Direct match
+        if ($detected === $encoding || $detected === $normalized) {
+            return true;
+        }
+
+        // Handle aliases: CP1252 = Windows-1252 = ISO-8859-1
+        $aliases = [
+            self::WINDOWS_1252 => [self::ENCODING_ISO, 'WINDOWS-1252'],
+            self::ENCODING_ISO => [self::WINDOWS_1252, 'WINDOWS-1252'],
+        ];
+
+        if (isset($aliases[$encoding])) {
+            return \in_array($detected, $aliases[$encoding], true);
+        }
+
+        if (isset($aliases[$normalized])) {
+            return \in_array($detected, $aliases[$normalized], true);
+        }
+
+        return false;
     }
 
     /**

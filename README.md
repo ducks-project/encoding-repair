@@ -181,6 +181,11 @@ use Ducks\Component\Component\EncodingRepair\CharsetHelper;
 // Simple UTF-8 conversion
 $utf8String = CharsetHelper::toUtf8($latinString);
 
+// Check encoding before conversion
+if (!CharsetHelper::is($data, 'UTF-8')) {
+    $data = CharsetHelper::toUtf8($data, CharsetHelper::AUTO);
+}
+
 // Automatic encoding detection
 $data = CharsetHelper::toCharset($mixedData, 'UTF-8', CharsetHelper::AUTO);
 

@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `is()` method in `CharsetProcessorInterface` and `CharsetProcessor` for encoding validation
+- `is()` static method in `CharsetHelper` facade for encoding validation
+- Encoding validation with automatic detection using DetectorChain
+- Support for encoding aliases (CP1252 = ISO-8859-1 = Windows-1252)
+- Case-insensitive encoding name comparison
+- Example file demonstrating encoding validation usage (`examples/encoding-validation-usage.php`)
+- Documentation for `CharsetHelper::is()` method (`assets/documentation/classes/CharsetHelper.is.md`)
+- Performance optimization: Skip unnecessary conversions by checking encoding first
 - [`BomDetector`] - BOM (Byte Order Mark) detector for UTF encodings (priority: 160)
 - Support for UTF-8, UTF-16 LE/BE, UTF-32 LE/BE BOM detection with 100% accuracy
 - [`PregMatchDetector`] - Fast encoding detector using preg_match for ASCII and UTF-8 detection (priority: 150)

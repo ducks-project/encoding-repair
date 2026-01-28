@@ -16,6 +16,30 @@ Complete guide with practical examples and use cases for CharsetHelper.
 
 ## Basic Usage
 
+### Encoding Validation (New)
+
+```php
+use Ducks\Component\EncodingRepair\CharsetHelper;
+
+// Check if string is UTF-8
+if (CharsetHelper::is($data, 'UTF-8')) {
+    echo "Already UTF-8, no conversion needed";
+} else {
+    $data = CharsetHelper::toUtf8($data, CharsetHelper::AUTO);
+}
+
+// Validate before database insert
+$userInput = 'Gérard Müller';
+if (CharsetHelper::is($userInput, 'UTF-8')) {
+    $db->insert('users', ['name' => $userInput]);
+}
+
+// Check with encoding aliases
+$iso = mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+CharsetHelper::is($iso, 'CP1252');      // true (alias)
+CharsetHelper::is($iso, 'ISO-8859-1');  // true
+```
+
 ### Simple String Conversion
 
 ```php
@@ -910,6 +934,11 @@ $results = CharsetHelper::toCharsetBatch($items, 'UTF-8', $encoding);
 ### 3. Use Specific Encodings When Known
 
 ```php
+// Good: Check encoding first to avoid unnecessary conversion
+if (!CharsetHelper::is($data, 'UTF-8')) {
+    $data = CharsetHelper::toUtf8($data, CharsetHelper::WINDOWS_1252);
+}
+
 // Good: Specific encoding
 $result = CharsetHelper::toUtf8($data, CharsetHelper::WINDOWS_1252);
 
