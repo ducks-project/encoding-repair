@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair\Cleaner;
 
+use Ducks\Component\EncodingRepair\Traits\CleanerTrait;
+
 /**
  * Cleaner that removes BOM (Byte Order Mark) from strings.
  *
@@ -20,18 +22,25 @@ namespace Ducks\Component\EncodingRepair\Cleaner;
  */
 final class BomCleaner implements CleanerInterface
 {
+    use CleanerTrait;
+
     private const BOM_UTF8 = "\xEF\xBB\xBF";
     private const BOM_UTF16_BE = "\xFE\xFF";
     private const BOM_UTF16_LE = "\xFF\xFE";
     private const BOM_UTF32_BE = "\x00\x00\xFE\xFF";
     private const BOM_UTF32_LE = "\xFF\xFE\x00\x00";
 
-    public function clean(string $data, string $encoding, array $options): ?string
+    /**
+     * Cleans invalid sequences from string.
+     *
+     * @param string $data String to clean
+     * @param string $encoding Target encoding for validation
+     * @param array<string, mixed> $options Cleaning options
+     *
+     * @return ?string Cleaned string or null if cleaner cannot handle
+     */
+    protected function doClean(string $data, string $encoding, array $options): ?string
     {
-        if ('' === $data) {
-            return $data;
-        }
-
         // Check UTF-32 BOMs first (4 bytes)
         if (\strlen($data) >= 4) {
             if (0 === \strpos($data, self::BOM_UTF32_BE) || 0 === \strpos($data, self::BOM_UTF32_LE)) {

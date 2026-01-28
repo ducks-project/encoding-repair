@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair\Cleaner;
 
+use Ducks\Component\EncodingRepair\Traits\CleanerTrait;
+
 /**
  * Cleaner that normalizes whitespace characters.
  *
@@ -20,7 +22,18 @@ namespace Ducks\Component\EncodingRepair\Cleaner;
  */
 final class WhitespaceCleaner implements CleanerInterface
 {
-    public function clean(string $data, string $encoding, array $options): ?string
+    use CleanerTrait;
+
+    /**
+     * Cleans invalid sequences from string.
+     *
+     * @param string $data String to clean
+     * @param string $encoding Target encoding for validation
+     * @param array<string, mixed> $options Cleaning options
+     *
+     * @return ?string Cleaned string or null if cleaner cannot handle
+     */
+    protected function doClean(string $data, string $encoding, array $options): ?string
     {
         // Replace multiple spaces, tabs, NBSP with single space
         $cleaned = \preg_replace('/[\s\xC2\xA0]+/u', ' ', $data);

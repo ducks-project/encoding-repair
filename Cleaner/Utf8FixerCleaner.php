@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair\Cleaner;
 
+use Ducks\Component\EncodingRepair\Traits\CleanerTrait;
+
 /**
  * Cleaner that repairs light UTF-8 corruption (ForceUTF8 approach).
  *
@@ -20,7 +22,18 @@ namespace Ducks\Component\EncodingRepair\Cleaner;
  */
 final class Utf8FixerCleaner implements CleanerInterface
 {
-    public function clean(string $data, string $encoding, array $options): ?string
+    use CleanerTrait;
+
+    /**
+     * Cleans invalid sequences from string.
+     *
+     * @param string $data String to clean
+     * @param string $encoding Target encoding for validation
+     * @param array<string, mixed> $options Cleaning options
+     *
+     * @return ?string Cleaned string or null if cleaner cannot handle
+     */
+    protected function doClean(string $data, string $encoding, array $options): ?string
     {
         if ('UTF-8' !== \strtoupper($encoding)) {
             return null;
