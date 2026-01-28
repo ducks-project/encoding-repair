@@ -13,10 +13,13 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair;
 
+use Ducks\Component\EncodingRepair\Cleaner\BomCleaner;
 use Ducks\Component\EncodingRepair\Cleaner\CleanerChain;
 use Ducks\Component\EncodingRepair\Cleaner\CleanerInterface;
+use Ducks\Component\EncodingRepair\Cleaner\HtmlEntityCleaner;
 use Ducks\Component\EncodingRepair\Cleaner\IconvCleaner;
 use Ducks\Component\EncodingRepair\Cleaner\MbScrubCleaner;
+use Ducks\Component\EncodingRepair\Cleaner\NormalizerCleaner;
 use Ducks\Component\EncodingRepair\Cleaner\PregMatchCleaner;
 use Ducks\Component\EncodingRepair\Detector\BomDetector;
 use Ducks\Component\EncodingRepair\Detector\DetectorChain;
@@ -278,7 +281,10 @@ final class CharsetProcessor implements CharsetProcessorInterface
     public function resetCleaners(): self
     {
         $this->cleanerChain = new CleanerChain();
+        $this->cleanerChain->register(new BomCleaner());
         $this->cleanerChain->register(new MbScrubCleaner());
+        $this->cleanerChain->register(new NormalizerCleaner());
+        $this->cleanerChain->register(new HtmlEntityCleaner());
         $this->cleanerChain->register(new PregMatchCleaner());
         $this->cleanerChain->register(new IconvCleaner());
 
@@ -797,7 +803,9 @@ final class CharsetProcessor implements CharsetProcessorInterface
         }
 
         // Enable cleaning by default for repair
-        $options['clean'] = $options['clean'] ?? true;
+        if (!isset($options['clean'])) {
+            $options['clean'] = true;
+        }
 
         $fixed = $this->peelEncodingLayers($value, $from, $maxDepth, $options);
         $detectedEncoding = $this->isValidUtf8($fixed) ? self::ENCODING_UTF8 : $from;

@@ -560,11 +560,45 @@ $processor->registerCleaner(new CustomCleaner());
 $result = $processor->toUtf8($data, 'ISO-8859-1', ['clean' => true]);
 ```
 
+### Registering Additional Built-in Cleaners
+
+Some cleaners are available but not registered by default:
+
+```php
+use Ducks\Component\EncodingRepair\CharsetProcessor;
+use Ducks\Component\EncodingRepair\Cleaner\BomCleaner;
+use Ducks\Component\EncodingRepair\Cleaner\Utf8FixerCleaner;
+use Ducks\Component\EncodingRepair\Cleaner\WhitespaceCleaner;
+
+$processor = new CharsetProcessor();
+
+// Add BOM removal
+$processor->registerCleaner(new BomCleaner());
+
+// Add UTF-8 corruption repair
+$processor->registerCleaner(new Utf8FixerCleaner());
+
+// Add whitespace normalization
+$processor->registerCleaner(new WhitespaceCleaner());
+
+// Use with clean option
+$result = $processor->toUtf8($data, 'ISO-8859-1', ['clean' => true]);
+```
+
 **Built-in cleaners:**
 
 - **MbScrubCleaner** (priority: 100) - Uses mb_scrub() for best quality
 - **PregMatchCleaner** (priority: 50) - Fastest (~0.9μs), removes control characters
 - **IconvCleaner** (priority: 10) - Universal fallback with //IGNORE
+
+**Additional cleaners available (not registered by default):**
+
+- **BomCleaner** (priority: 150) - Removes BOM (Byte Order Mark)
+- **NormalizerCleaner** (priority: 90) - Normalizes Unicode characters (NFC)
+- **Utf8FixerCleaner** (priority: 80) - Repairs light UTF-8 corruption
+- **HtmlEntityCleaner** (priority: 60) - Decodes HTML entities
+- **WhitespaceCleaner** (priority: 40) - Normalizes whitespace
+- **TransliterationCleaner** (priority: 30) - Transliterates to ASCII
 
 **Note:** Cleaners are disabled by default (`clean: false`), but enabled in `repair()` method.
 
@@ -882,6 +916,12 @@ composer phpcsfixer-check
 - [`MbScrubCleaner`]
 - [`PregMatchCleaner`]
 - [`IconvCleaner`]
+- [`BomCleaner`]
+- [`NormalizerCleaner`]
+- [`Utf8FixerCleaner`]
+- [`HtmlEntityCleaner`]
+- [`WhitespaceCleaner`]
+- [`TransliterationCleaner`]
 
 ## 🤝 Contributing
 
@@ -978,6 +1018,12 @@ Made with ❤️ by the Duck Project Team
 [`MbScrubCleaner`]: /assets/documentation/classes/MbScrubCleaner.md
 [`PregMatchCleaner`]: /assets/documentation/classes/PregMatchCleaner.md
 [`IconvCleaner`]: /assets/documentation/classes/IconvCleaner.md
+[`BomCleaner`]: /assets/documentation/classes/BomCleaner.md
+[`NormalizerCleaner`]: /assets/documentation/classes/NormalizerCleaner.md
+[`Utf8FixerCleaner`]: /assets/documentation/classes/Utf8FixerCleaner.md
+[`HtmlEntityCleaner`]: /assets/documentation/classes/HtmlEntityCleaner.md
+[`WhitespaceCleaner`]: /assets/documentation/classes/WhitespaceCleaner.md
+[`TransliterationCleaner`]: /assets/documentation/classes/TransliterationCleaner.md
 [How To]: /assets/documentation/HowTo.md
 [About Middleware Pattern]: /assets/documentation/AboutMiddleware.md
 [Type Interpreter System]: /assets/documentation/INTERPRETER_SYSTEM.md

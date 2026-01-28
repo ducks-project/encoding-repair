@@ -8,6 +8,25 @@ Cleaners are executed in priority order and stop at the first successful result.
 
 ## Built-in Cleaners
 
+### BomCleaner (Priority: 150)
+
+Removes BOM (Byte Order Mark) from strings.
+
+**Performance:**
+- With BOM: ~0.7μs
+- Without BOM: ~0.6μs (fast-path)
+- Stability: ±0.5%
+
+**Supported BOMs:** UTF-8, UTF-16 LE/BE, UTF-32 LE/BE
+
+```php
+use Ducks\Component\EncodingRepair\Cleaner\BomCleaner;
+
+$cleaner = new BomCleaner();
+$cleaned = $cleaner->clean("\xEF\xBB\xBFCafé", 'UTF-8', []);
+// Result: "Café"
+```
+
 ### MbScrubCleaner (Priority: 100)
 
 Uses PHP's `mb_scrub()` function for best cleaning quality.
@@ -42,6 +61,43 @@ use Ducks\Component\EncodingRepair\Cleaner\PregMatchCleaner;
 
 $cleaner = new PregMatchCleaner();
 $cleaned = $cleaner->clean("Text\x00\x1F", 'UTF-8', []);
+```
+
+### NormalizerCleaner (Priority: 90)
+
+Normalizes Unicode characters using NFC (Canonical Composition).
+
+**Performance:**
+- Decomposed: ~1.1μs
+- Already normalized: ~1.0μs
+- Stability: ±1.2%
+
+**Requirements:** ext-intl
+
+```php
+use Ducks\Component\EncodingRepair\Cleaner\NormalizerCleaner;
+
+$cleaner = new NormalizerCleaner();
+// e + combining acute accent → é
+$cleaned = $cleaner->clean("Cafe\u{0301}", 'UTF-8', []);
+// Result: "Café"
+```
+
+### HtmlEntityCleaner (Priority: 60)
+
+Decodes HTML entities to their character equivalents.
+
+**Performance:**
+- With entities: ~1.2μs
+- Without entities: ~0.8μs (fast-path)
+- Stability: ±1.5%
+
+```php
+use Ducks\Component\EncodingRepair\Cleaner\HtmlEntityCleaner;
+
+$cleaner = new HtmlEntityCleaner();
+$cleaned = $cleaner->clean('Caf&eacute; &amp; R&eacute;sum&eacute;', 'UTF-8', []);
+// Result: "Café & Résumé"
 ```
 
 ### IconvCleaner (Priority: 10)
@@ -170,17 +226,23 @@ $cleaned = $chain->clean($corruptedString, 'UTF-8', []);
 
 | Cleaner | Corrupted Data | Valid Data | Stability |
 |---------|----------------|------------|-----------|
+| **BomCleaner** | 0.7μs | 0.6μs | ±0.5% |
 | **PregMatchCleaner** | 0.896μs | 0.866μs | ±0.74% |
 | MbScrubCleaner | 1.020μs | 1.051μs | ±0.92% |
+| NormalizerCleaner | 1.1μs | 1.0μs | ±1.2% |
+| HtmlEntityCleaner | 1.2μs | 0.8μs | ±1.5% |
 | IconvCleaner | 1.589μs | 1.634μs | ±2.09% |
 | CleanerChain | 1.709μs | 1.906μs | ±2.50% |
 
-**Recommendation:** Default configuration (MbScrub → PregMatch → Iconv) prioritizes quality over speed.
+**Recommendation:** Default configuration (Bom → MbScrub → Normalizer → HtmlEntity → PregMatch → Iconv) prioritizes quality and versatility.
 
 ## API Reference
 
 - [CleanerInterface](../api/CleanerInterface.md)
 - [CleanerChain](../api/CleanerChain.md)
+- [BomCleaner](../api/BomCleaner.md)
 - [MbScrubCleaner](../api/MbScrubCleaner.md)
+- [NormalizerCleaner](../api/NormalizerCleaner.md)
+- [HtmlEntityCleaner](../api/HtmlEntityCleaner.md)
 - [PregMatchCleaner](../api/PregMatchCleaner.md)
 - [IconvCleaner](../api/IconvCleaner.md)

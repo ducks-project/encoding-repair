@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [`MbScrubCleaner`] - Cleaner using mb_scrub() to remove invalid sequences (priority: 100)
 - [`PregMatchCleaner`] - Cleaner using preg_replace() for UTF-8 control characters (priority: 50)
 - [`IconvCleaner`] - Cleaner using iconv() with //IGNORE flag (priority: 10)
+- [`BomCleaner`] - Cleaner that removes BOM (Byte Order Mark) from strings (priority: 150)
+- [`NormalizerCleaner`] - Cleaner using Normalizer to normalize Unicode characters NFC (priority: 90)
+- [`HtmlEntityCleaner`] - Cleaner that decodes HTML entities (priority: 60)
+- [`Utf8FixerCleaner`] - Cleaner that repairs light UTF-8 corruption (priority: 80)
+- [`WhitespaceCleaner`] - Cleaner that normalizes whitespace characters (priority: 40)
+- [`TransliterationCleaner`] - Cleaner that transliterates non-ASCII to ASCII (priority: 30)
 - `registerCleaner()` method in `CharsetProcessor` for custom cleaners
 - `unregisterCleaner()` method in `CharsetProcessor` for removing cleaners
 - `resetCleaners()` method in `CharsetProcessor` to restore default cleaners
@@ -250,6 +256,12 @@ safeJsonEncode & safeJsonDecode should return a JsonException.
 [`MbScrubCleaner`]: /assets/documentation/classes/MbScrubCleaner.md
 [`PregMatchCleaner`]: /assets/documentation/classes/PregMatchCleaner.md
 [`IconvCleaner`]: /assets/documentation/classes/IconvCleaner.md
+[`BomCleaner`]: /assets/documentation/classes/BomCleaner.md
+[`NormalizerCleaner`]: /assets/documentation/classes/NormalizerCleaner.md
+[`HtmlEntityCleaner`]: /assets/documentation/classes/HtmlEntityCleaner.md
+[`Utf8FixerCleaner`]: /assets/documentation/classes/Utf8FixerCleaner.md
+[`WhitespaceCleaner`]: /assets/documentation/classes/WhitespaceCleaner.md
+[`TransliterationCleaner`]: /assets/documentation/classes/TransliterationCleaner.md
 [unreleased]: https://github.com/ducks-project/encoding-repair/compare/v1.1.0...HEAD
 [1.2.0]: https://github.com/ducks-project/encoding-repair/compare/v1.2.0...v1.1.0
 [1.1.2]: https://github.com/ducks-project/encoding-repair/compare/v1.1.2...v1.1.1
