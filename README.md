@@ -527,6 +527,47 @@ $resource = fopen('data.txt', 'r');
 $convertedResource = $processor->toUtf8($resource);
 ```
 
+### Custom Cleaners (New in v1.3)
+
+Register custom string cleaners to remove invalid sequences before transcoding:
+
+```php
+use Ducks\Component\EncodingRepair\Cleaner\CleanerInterface;
+
+class CustomCleaner implements CleanerInterface
+{
+    public function clean(string $data, string $encoding, array $options): ?string
+    {
+        // Custom cleaning logic
+        return preg_replace('/[^\x20-\x7E]/', '', $data);
+    }
+
+    public function getPriority(): int
+    {
+        return 75;
+    }
+
+    public function isAvailable(): bool
+    {
+        return true;
+    }
+}
+
+$processor = new CharsetProcessor();
+$processor->registerCleaner(new CustomCleaner());
+
+// Use clean option to enable cleaners
+$result = $processor->toUtf8($data, 'ISO-8859-1', ['clean' => true]);
+```
+
+**Built-in cleaners:**
+
+- **MbScrubCleaner** (priority: 100) - Uses mb_scrub() for best quality
+- **PregMatchCleaner** (priority: 50) - Fastest (~0.9μs), removes control characters
+- **IconvCleaner** (priority: 10) - Universal fallback with //IGNORE
+
+**Note:** Cleaners are disabled by default (`clean: false`), but enabled in `repair()` method.
+
 ### Registering Custom Transcoders
 
 Extend CharsetHelper with your own conversion strategies using the TranscoderInterface:
@@ -836,6 +877,11 @@ composer phpcsfixer-check
 - [`CachedDetector`]
 - [`InternalArrayCache`]
 - [`ArrayCache`]
+- [`CleanerInterface`]
+- [`CleanerChain`]
+- [`MbScrubCleaner`]
+- [`PregMatchCleaner`]
+- [`IconvCleaner`]
 
 ## 🤝 Contributing
 
@@ -927,6 +973,11 @@ Made with ❤️ by the Duck Project Team
 [`CachedDetector`]: /assets/documentation/classes/CachedDetector.md
 [`InternalArrayCache`]: /assets/documentation/classes/InternalArrayCache.md
 [`ArrayCache`]: /assets/documentation/classes/ArrayCache.md
+[`CleanerInterface`]: /assets/documentation/classes/CleanerInterface.md
+[`CleanerChain`]: /assets/documentation/classes/CleanerChain.md
+[`MbScrubCleaner`]: /assets/documentation/classes/MbScrubCleaner.md
+[`PregMatchCleaner`]: /assets/documentation/classes/PregMatchCleaner.md
+[`IconvCleaner`]: /assets/documentation/classes/IconvCleaner.md
 [How To]: /assets/documentation/HowTo.md
 [About Middleware Pattern]: /assets/documentation/AboutMiddleware.md
 [Type Interpreter System]: /assets/documentation/INTERPRETER_SYSTEM.md

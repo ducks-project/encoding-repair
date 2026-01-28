@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair;
 
+use Ducks\Component\EncodingRepair\Cleaner\CleanerInterface;
 use Ducks\Component\EncodingRepair\Detector\DetectorInterface;
 use Ducks\Component\EncodingRepair\Interpreter\PropertyMapperInterface;
 use Ducks\Component\EncodingRepair\Interpreter\TypeInterpreterInterface;
@@ -106,6 +107,32 @@ interface CharsetProcessorInterface
     public function resetDetectors(): self;
 
     /**
+     * Register a cleaner with optional priority.
+     *
+     * @param CleanerInterface $cleaner Cleaner instance
+     * @param int|null $priority Priority override (null = use cleaner's default)
+     *
+     * @return self
+     */
+    public function registerCleaner(CleanerInterface $cleaner, ?int $priority = null): self;
+
+    /**
+     * Unregister a cleaner.
+     *
+     * @param CleanerInterface $cleaner
+     *
+     * @return self
+     */
+    public function unregisterCleaner(CleanerInterface $cleaner): self;
+
+    /**
+     * Reset all cleaners to defaults.
+     *
+     * @return self
+     */
+    public function resetCleaners(): self;
+
+    /**
      * Add allowed encodings.
      *
      * @param string ...$encodings encodings name
@@ -183,6 +210,7 @@ interface CharsetProcessorInterface
      *                                      - 'normalize': bool (default: true)
      *                                      - 'translit': bool (default: true)
      *                                      - 'ignore': bool (default: true)
+     *                                      - 'clean': bool (default: false)
      *
      * @return mixed The data transcoded in the target encoding
      *
@@ -268,6 +296,7 @@ interface CharsetProcessorInterface
      *                                     - 'translit': bool (default: true)
      *                                     - 'ignore': bool (default: true)
      *                                     - 'maxDepth' : int (default: 5)
+     *                                     - 'clean': bool (default: true)
      *
      * @return mixed
      *

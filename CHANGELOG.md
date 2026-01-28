@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Cleaner system** - Chain of Responsibility pattern for string cleaning before transcoding
+- [`CleanerInterface`] - Contract for string cleaning strategies
+- [`CleanerChain`] - Chain of Responsibility coordinator for cleaners
+- [`MbScrubCleaner`] - Cleaner using mb_scrub() to remove invalid sequences (priority: 100)
+- [`PregMatchCleaner`] - Cleaner using preg_replace() for UTF-8 control characters (priority: 50)
+- [`IconvCleaner`] - Cleaner using iconv() with //IGNORE flag (priority: 10)
+- `registerCleaner()` method in `CharsetProcessor` for custom cleaners
+- `unregisterCleaner()` method in `CharsetProcessor` for removing cleaners
+- `resetCleaners()` method in `CharsetProcessor` to restore default cleaners
+- `clean` option in conversion methods (default: false, true in repair())
+- Performance benchmarks for cleaners (PregMatchCleaner fastest at ~0.9μs)
 - `is()` method in `CharsetProcessorInterface` and `CharsetProcessor` for encoding validation
 - `is()` static method in `CharsetHelper` facade for encoding validation
 - Encoding validation with automatic detection using DetectorChain
@@ -234,6 +245,11 @@ safeJsonEncode & safeJsonDecode should return a JsonException.
 [`PropertyMapperInterface`]: /assets/documentation/classes/PropertyMapperInterface.md
 [`PregMatchDetector`]: /assets/documentation/classes/PregMatchDetector.md
 [`BomDetector`]: /assets/documentation/classes/BomDetector.md
+[`CleanerInterface`]: /assets/documentation/classes/CleanerInterface.md
+[`CleanerChain`]: /assets/documentation/classes/CleanerChain.md
+[`MbScrubCleaner`]: /assets/documentation/classes/MbScrubCleaner.md
+[`PregMatchCleaner`]: /assets/documentation/classes/PregMatchCleaner.md
+[`IconvCleaner`]: /assets/documentation/classes/IconvCleaner.md
 [unreleased]: https://github.com/ducks-project/encoding-repair/compare/v1.1.0...HEAD
 [1.2.0]: https://github.com/ducks-project/encoding-repair/compare/v1.2.0...v1.1.0
 [1.1.2]: https://github.com/ducks-project/encoding-repair/compare/v1.1.2...v1.1.1

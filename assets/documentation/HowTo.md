@@ -6,6 +6,7 @@ Complete guide with practical examples and use cases for CharsetHelper.
 
 - [Basic Usage](#basic-usage)
 - [Service-Based Usage (New in v1.1)](#service-based-usage-new-in-v11)
+- [String Cleaners (New in v1.3)](#string-cleaners-new-in-v13)
 - [Common Use Cases](#common-use-cases)
 - [Advanced Scenarios](#advanced-scenarios)
 - [Integration Examples](#integration-examples)
@@ -276,6 +277,94 @@ $processor->registerInterpreter(new ResourceInterpreter(), 80);
 
 $resource = fopen('data.txt', 'r');
 $convertedResource = $processor->toUtf8($resource);
+```
+
+---
+
+## String Cleaners (New in v1.3)
+
+### Using Built-in Cleaners
+
+```php
+use Ducks\Component\EncodingRepair\CharsetHelper;
+
+// Cleaners are disabled by default
+$result = CharsetHelper::toUtf8($data, 'ISO-8859-1');
+
+// Enable with clean option
+$result = CharsetHelper::toUtf8($data, 'ISO-8859-1', ['clean' => true]);
+
+// Automatically enabled in repair()
+$fixed = CharsetHelper::repair($corruptedData);
+```
+
+### Custom Cleaner Implementation
+
+```php
+use Ducks\Component\EncodingRepair\Cleaner\CleanerInterface;
+use Ducks\Component\EncodingRepair\CharsetProcessor;
+
+class CustomCleaner implements CleanerInterface
+{
+    public function clean(string $data, string $encoding, array $options): ?string
+    {
+        // Only handle UTF-8
+        if ('UTF-8' !== strtoupper($encoding)) {
+            return null;
+        }
+
+        // Remove non-printable characters
+        return preg_replace('/[^\x20-\x7E]/', '', $data);
+    }
+
+    public function getPriority(): int
+    {
+        return 75; // Between PregMatch (50) and MbScrub (100)
+    }
+
+    public function isAvailable(): bool
+    {
+        return true;
+    }
+}
+
+$processor = new CharsetProcessor();
+$processor->registerCleaner(new CustomCleaner());
+
+// Use with clean option
+$result = $processor->toUtf8($data, 'ISO-8859-1', ['clean' => true]);
+```
+
+### Managing Cleaners
+
+```php
+use Ducks\Component\EncodingRepair\CharsetProcessor;
+
+$processor = new CharsetProcessor();
+
+// Reset to defaults (MbScrub, PregMatch, Iconv)
+$processor->resetCleaners();
+
+// Register custom cleaner
+$cleaner = new CustomCleaner();
+$processor->registerCleaner($cleaner);
+
+// Unregister specific cleaner
+$processor->unregisterCleaner($cleaner);
+```
+
+### Performance Comparison
+
+```php
+// Built-in cleaners performance (benchmarked on 10,000 iterations):
+// - PregMatchCleaner: ~0.9μs (fastest, UTF-8 only)
+// - MbScrubCleaner: ~1.0μs (best quality)
+// - IconvCleaner: ~1.6μs (universal fallback)
+
+// Use clean option for corrupted data
+$corruptedData = "Caf\xC3\xA9 \xC2\x88 invalid \x00 bytes";
+$cleaned = CharsetHelper::toUtf8($corruptedData, 'UTF-8', ['clean' => true]);
+// Result: "Café " (invalid bytes removed)
 ```
 
 ---
@@ -1003,6 +1092,11 @@ if ($duration > 1.0) {
 - [DetectionCacheTrait API Documentation](./classes/DetectionCacheTrait.md)
 - [InternalArrayCache API Documentation](./classes/InternalArrayCache.md)
 - [ArrayCache API Documentation](./classes/ArrayCache.md)
+- [CleanerInterface API Documentation](./classes/CleanerInterface.md)
+- [CleanerChain API Documentation](./classes/CleanerChain.md)
+- [MbScrubCleaner API Documentation](./classes/MbScrubCleaner.md)
+- [PregMatchCleaner API Documentation](./classes/PregMatchCleaner.md)
+- [IconvCleaner API Documentation](./classes/IconvCleaner.md)
 - [Type Interpreter System](./INTERPRETER_SYSTEM.md)
 - [TypeInterpreterInterface API](./classes/TypeInterpreterInterface.md)
 - [PropertyMapperInterface API](./classes/PropertyMapperInterface.md)

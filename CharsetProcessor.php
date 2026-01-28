@@ -13,6 +13,11 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair;
 
+use Ducks\Component\EncodingRepair\Cleaner\CleanerChain;
+use Ducks\Component\EncodingRepair\Cleaner\CleanerInterface;
+use Ducks\Component\EncodingRepair\Cleaner\IconvCleaner;
+use Ducks\Component\EncodingRepair\Cleaner\MbScrubCleaner;
+use Ducks\Component\EncodingRepair\Cleaner\PregMatchCleaner;
 use Ducks\Component\EncodingRepair\Detector\BomDetector;
 use Ducks\Component\EncodingRepair\Detector\DetectorChain;
 use Ducks\Component\EncodingRepair\Detector\DetectorInterface;
@@ -64,6 +69,11 @@ final class CharsetProcessor implements CharsetProcessorInterface
     private DetectorChain $detectorChain;
 
     /**
+     * @var CleanerChain
+     */
+    private CleanerChain $cleanerChain;
+
+    /**
      * @var InterpreterChain
      */
     private InterpreterChain $interpreterChain;
@@ -77,6 +87,7 @@ final class CharsetProcessor implements CharsetProcessorInterface
     {
         $this->transcoderChain = new TranscoderChain();
         $this->detectorChain = new DetectorChain();
+        $this->cleanerChain = new CleanerChain();
         $this->interpreterChain = new InterpreterChain();
         $this->allowedEncodings = [
             self::AUTO,
@@ -90,6 +101,7 @@ final class CharsetProcessor implements CharsetProcessorInterface
 
         $this->resetTranscoders();
         $this->resetDetectors();
+        $this->resetCleaners();
         $this->resetInterpreters();
     }
 
@@ -236,6 +248,39 @@ final class CharsetProcessor implements CharsetProcessorInterface
     public function clearDetectionCache(): self
     {
         $this->detectorChain->clearCache();
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function registerCleaner(CleanerInterface $cleaner, ?int $priority = null): self
+    {
+        $this->cleanerChain->register($cleaner, $priority);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function unregisterCleaner(CleanerInterface $cleaner): self
+    {
+        $this->cleanerChain->unregister($cleaner);
+
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function resetCleaners(): self
+    {
+        $this->cleanerChain = new CleanerChain();
+        $this->cleanerChain->register(new MbScrubCleaner());
+        $this->cleanerChain->register(new PregMatchCleaner());
+        $this->cleanerChain->register(new IconvCleaner());
 
         return $this;
     }
@@ -685,6 +730,11 @@ final class CharsetProcessor implements CharsetProcessorInterface
      */
     private function convertString(string $data, string $to, string $from, array $options): string
     {
+        if (true === ($options['clean'] ?? false)) {
+            $cleaned = $this->cleanerChain->clean($data, $to, $options);
+            $data = $cleaned ?? $data;
+        }
+
         return $this->transcodeString($data, $to, $from, $options) ?? $data;
     }
 
@@ -746,7 +796,10 @@ final class CharsetProcessor implements CharsetProcessorInterface
             $maxDepth = self::MAX_REPAIR_DEPTH;
         }
 
-        $fixed = $this->peelEncodingLayers($value, $from, $maxDepth);
+        // Enable cleaning by default for repair
+        $options['clean'] = $options['clean'] ?? true;
+
+        $fixed = $this->peelEncodingLayers($value, $from, $maxDepth, $options);
         $detectedEncoding = $this->isValidUtf8($fixed) ? self::ENCODING_UTF8 : $from;
 
         return $this->toCharset($fixed, $to, $detectedEncoding, $options);
@@ -758,13 +811,17 @@ final class CharsetProcessor implements CharsetProcessorInterface
      * @param string $value String to repair
      * @param string $from Encoding to reverse
      * @param int $maxDepth Maximum iterations
+     * @param array<string, mixed> $options Configuration
      *
      * @return string Repaired string
      */
-    private function peelEncodingLayers(string $value, string $from, int $maxDepth): string
+    private function peelEncodingLayers(string $value, string $from, int $maxDepth, array $options): string
     {
-        // Clean invalid UTF-8 sequences first (edge case: malformed bytes like \xC2\x88)
-        $value = \mb_scrub($value, 'UTF-8');
+        // Clean invalid sequences if enabled
+        if (true === ($options['clean'] ?? true)) {
+            $cleaned = $this->cleanerChain->clean($value, self::ENCODING_UTF8, $options);
+            $value = $cleaned ?? $value;
+        }
 
         // Quick check: if no corruption patterns, return as-is
         if (false === \strpos($value, "\xC3\x82") && false === \strpos($value, "\xC3\x83")) {
@@ -943,7 +1000,13 @@ final class CharsetProcessor implements CharsetProcessorInterface
         $replacements[] = $options;
 
         return \array_replace(
-            ['normalize' => true, 'translit' => true, 'ignore' => true, 'encodings' => self::DEFAULT_ENCODINGS],
+            [
+                'normalize' => true,
+                'translit' => true,
+                'ignore' => true,
+                'clean' => false,
+                'encodings' => self::DEFAULT_ENCODINGS,
+            ],
             ...$replacements
         );
     }

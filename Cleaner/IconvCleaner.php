@@ -1,0 +1,39 @@
+<?php
+
+/**
+ * Part of EncodingRepair package.
+ *
+ * (c) Adrien Loyant <donald_duck@team-df.org>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+declare(strict_types=1);
+
+namespace Ducks\Component\EncodingRepair\Cleaner;
+
+/**
+ * Cleaner using iconv with //IGNORE to remove invalid sequences.
+ *
+ * @psalm-api
+ */
+final class IconvCleaner implements CleanerInterface
+{
+    public function clean(string $data, string $encoding, array $options): ?string
+    {
+        $cleaned = @\iconv($encoding, $encoding . '//IGNORE', $data);
+
+        return false !== $cleaned ? $cleaned : null;
+    }
+
+    public function getPriority(): int
+    {
+        return 10;
+    }
+
+    public function isAvailable(): bool
+    {
+        return \function_exists('iconv');
+    }
+}
