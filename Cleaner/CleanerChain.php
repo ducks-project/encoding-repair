@@ -16,7 +16,7 @@ namespace Ducks\Component\EncodingRepair\Cleaner;
 use Ducks\Component\EncodingRepair\Traits\ChainOfResponsibilityTrait;
 
 /**
- * Chain of Responsibility for string cleaners.
+ * Pipeline for string cleaners with configurable execution strategy.
  *
  * @final
  *
@@ -32,17 +32,36 @@ final class CleanerChain
         ChainOfResponsibilityTrait::unregister as chainUnregister;
     }
 
+    private CleanerStrategyInterface $strategy;
+
+    /** @var array<string, array<string>> */
+    private array $cleanerTags = [];
+
+    public function __construct(?CleanerStrategyInterface $strategy = null)
+    {
+        $this->strategy = $strategy ?? new PipelineStrategy();
+    }
+
     /**
-     * Register a cleaner with optional priority override.
+     * Register a cleaner with optional priority and tags.
      *
      * @param CleanerInterface $cleaner Cleaner instance
      * @param int|null $priority Priority override (null = use cleaner's default)
+     * @param array<string> $tags Tags for selective execution
      *
      * @return void
      */
-    public function register(CleanerInterface $cleaner, ?int $priority = null): void
+    public function register(CleanerInterface $cleaner, ?int $priority = null, array $tags = []): void
     {
         $this->chainRegister($cleaner, $priority);
+
+        if (!empty($tags)) {
+            $this->cleanerTags[\spl_object_hash($cleaner)] = $tags;
+
+            if ($this->strategy instanceof TaggedStrategy) {
+                $this->strategy->registerTags($cleaner, $tags);
+            }
+        }
     }
 
     /**
@@ -58,7 +77,30 @@ final class CleanerChain
     }
 
     /**
-     * Cleans string using registered cleaners.
+     * Set execution strategy.
+     *
+     * @param CleanerStrategyInterface $strategy Execution strategy
+     *
+     * @return void
+     */
+    public function setStrategy(CleanerStrategyInterface $strategy): void
+    {
+        $this->strategy = $strategy;
+
+        // Re-register tags if using TaggedStrategy
+        if ($strategy instanceof TaggedStrategy) {
+            $queue = clone $this->getSplPriorityQueue();
+            foreach ($queue as $cleaner) {
+                $hash = \spl_object_hash($cleaner);
+                if (isset($this->cleanerTags[$hash])) {
+                    $strategy->registerTags($cleaner, $this->cleanerTags[$hash]);
+                }
+            }
+        }
+    }
+
+    /**
+     * Cleans string using registered cleaners and current strategy.
      *
      * @param string $data String to clean
      * @param string $encoding Target encoding
@@ -68,22 +110,8 @@ final class CleanerChain
      */
     public function clean(string $data, string $encoding, array $options): ?string
     {
-        // Clone the queue to avoid consuming it
         $queue = clone $this->getSplPriorityQueue();
 
-        foreach ($queue as $cleaner) {
-            if (!$cleaner->isAvailable()) {
-                // @codeCoverageIgnoreStart
-                continue;
-                // @codeCoverageIgnoreEnd
-            }
-
-            $result = $cleaner->clean($data, $encoding, $options);
-            if (null !== $result) {
-                return $result;
-            }
-        }
-
-        return null;
+        return $this->strategy->execute($queue, $data, $encoding, $options);
     }
 }

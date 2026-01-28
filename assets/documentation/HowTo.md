@@ -283,6 +283,80 @@ $convertedResource = $processor->toUtf8($resource);
 
 ## String Cleaners (New in v1.3)
 
+### Cleaner Execution Strategies
+
+#### Pipeline Strategy (Default - Middleware Pattern)
+
+```php
+use Ducks\Component\EncodingRepair\CharsetProcessor;
+use Ducks\Component\EncodingRepair\Cleaner\PipelineStrategy;
+use Ducks\Component\EncodingRepair\Cleaner\BomCleaner;
+use Ducks\Component\EncodingRepair\Cleaner\HtmlEntityCleaner;
+
+// Default: PipelineStrategy applies all cleaners successively
+$processor = new CharsetProcessor();
+$processor->registerCleaner(new BomCleaner());
+$processor->registerCleaner(new HtmlEntityCleaner());
+
+// Both cleaners are applied: BOM removed, then HTML entities decoded
+$result = $processor->toUtf8($data, 'ISO-8859-1', ['clean' => true]);
+```
+
+#### First Match Strategy (Chain of Responsibility)
+
+```php
+use Ducks\Component\EncodingRepair\Cleaner\CleanerChain;
+use Ducks\Component\EncodingRepair\Cleaner\FirstMatchStrategy;
+use Ducks\Component\EncodingRepair\Cleaner\MbScrubCleaner;
+use Ducks\Component\EncodingRepair\Cleaner\PregMatchCleaner;
+
+// Stops at first successful cleaner (performance optimization)
+$chain = new CleanerChain(new FirstMatchStrategy());
+$chain->register(new MbScrubCleaner());
+$chain->register(new PregMatchCleaner());
+
+// Only MbScrubCleaner is executed (stops at first success)
+$result = $chain->clean($data, 'UTF-8', []);
+```
+
+#### Tagged Strategy (Selective Execution)
+
+```php
+use Ducks\Component\EncodingRepair\Cleaner\CleanerChain;
+use Ducks\Component\EncodingRepair\Cleaner\TaggedStrategy;
+use Ducks\Component\EncodingRepair\Cleaner\BomCleaner;
+use Ducks\Component\EncodingRepair\Cleaner\HtmlEntityCleaner;
+use Ducks\Component\EncodingRepair\Cleaner\WhitespaceCleaner;
+
+// Only execute cleaners with specific tags
+$chain = new CleanerChain(new TaggedStrategy(['bom', 'html']));
+$chain->register(new BomCleaner(), null, ['bom']);
+$chain->register(new HtmlEntityCleaner(), null, ['html']);
+$chain->register(new WhitespaceCleaner(), null, ['whitespace']); // Ignored
+
+// Only BOM and HTML cleaners are executed
+$result = $chain->clean($data, 'UTF-8', []);
+```
+
+#### Dynamic Strategy Switching
+
+```php
+use Ducks\Component\EncodingRepair\Cleaner\CleanerChain;
+use Ducks\Component\EncodingRepair\Cleaner\PipelineStrategy;
+use Ducks\Component\EncodingRepair\Cleaner\FirstMatchStrategy;
+
+$chain = new CleanerChain(new PipelineStrategy());
+$chain->register(new BomCleaner());
+$chain->register(new HtmlEntityCleaner());
+
+// Apply all cleaners
+$result1 = $chain->clean($data, 'UTF-8', []);
+
+// Switch to first-match for performance
+$chain->setStrategy(new FirstMatchStrategy());
+$result2 = $chain->clean($data, 'UTF-8', []);
+```
+
 ### Using Built-in Cleaners
 
 ```php

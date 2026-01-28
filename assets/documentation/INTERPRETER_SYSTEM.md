@@ -2,7 +2,10 @@
 
 ## Overview
 
-The Type Interpreter System implements the **Strategy + Visitor Pattern** to provide optimized, type-specific transcoding strategies. This architecture allows fine-grained control over how different data types (strings, arrays, objects, resources) are processed during charset conversion.
+The Type Interpreter System implements the **Strategy + Visitor Pattern** to provide optimized,
+type-specific transcoding strategies.
+This architecture allows fine-grained control over how different data types (strings, arrays, objects, resources)
+are processed during charset conversion.
 
 ## Architecture
 
@@ -14,7 +17,7 @@ The Type Interpreter System implements the **Strategy + Visitor Pattern** to pro
 
 ### Components
 
-```
+```text
 InterpreterChain (Coordinator)
     ├── StringInterpreter (Priority: 100)
     ├── ArrayInterpreter (Priority: 50)
@@ -78,7 +81,8 @@ Processes objects with optional custom property mapping.
 
 **Default behavior**: Clones object and processes all public properties
 
-**Performance**: 
+**Performance**:
+
 - Without mapper: O(n) where n = number of properties
 - With mapper: O(m) where m = mapped properties only (40-60% faster for selective mapping)
 
@@ -196,6 +200,7 @@ public function registerInterpreter(
 ```
 
 **Parameters**:
+
 - `$interpreter`: Interpreter instance
 - `$priority`: Priority override (null = use interpreter's default)
 
@@ -223,6 +228,7 @@ public function registerPropertyMapper(
 ```
 
 **Parameters**:
+
 - `$className`: Fully qualified class name
 - `$mapper`: Property mapper instance
 
@@ -295,14 +301,14 @@ class MediaMapper implements PropertyMapperInterface
 ### Object Processing (50 properties, 2 need conversion)
 
 | Method | Time (1000 iterations) | Improvement |
-|--------|------------------------|-------------|
+| -------- | ------------------------ | ------------- |
 | Without mapper | 180ms | Baseline |
 | With mapper | 72ms | **60% faster** |
 
 ### Type Detection Overhead
 
 | Data Type | Overhead | Notes |
-|-----------|----------|-------|
+| ----------- | ---------- | ------- |
 | String | ~0.1μs | Minimal (is_string check) |
 | Array | ~0.2μs | Minimal (is_array check) |
 | Object | ~0.3μs | Minimal (is_object check) |
@@ -312,6 +318,7 @@ class MediaMapper implements PropertyMapperInterface
 ### From Manual Type Checking
 
 **Before**:
+
 ```php
 if (is_string($data)) {
     return $this->convertString($data);
@@ -327,6 +334,7 @@ if (is_string($data)) {
 ```
 
 **After**:
+
 ```php
 return $this->interpreterChain->interpret($data, $transcoder, $options);
 ```

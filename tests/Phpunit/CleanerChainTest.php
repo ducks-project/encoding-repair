@@ -79,13 +79,13 @@ final class CleanerChainTest extends TestCase
         $mock2 = $this->createMock(CleanerInterface::class);
         $mock2->method('getPriority')->willReturn(50);
         $mock2->method('isAvailable')->willReturn(true);
-        $mock2->expects($this->never())->method('clean');
+        $mock2->method('clean')->willReturn('cleaned2');
 
         $chain->register($mock1);
         $chain->register($mock2);
 
         $result = $chain->clean('test', 'UTF-8', []);
-        $this->assertSame('cleaned', $result);
+        $this->assertSame('cleaned2', $result);
     }
 
     public function testCleanReturnsNullWhenAllFail(): void

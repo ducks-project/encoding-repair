@@ -529,10 +529,12 @@ $convertedResource = $processor->toUtf8($resource);
 
 ### Custom Cleaners (New in v1.3)
 
-Register custom string cleaners to remove invalid sequences before transcoding:
+Register custom string cleaners with flexible execution strategies:
 
 ```php
 use Ducks\Component\EncodingRepair\Cleaner\CleanerInterface;
+use Ducks\Component\EncodingRepair\Cleaner\CleanerChain;
+use Ducks\Component\EncodingRepair\Cleaner\PipelineStrategy;
 
 class CustomCleaner implements CleanerInterface
 {
@@ -558,6 +560,34 @@ $processor->registerCleaner(new CustomCleaner());
 
 // Use clean option to enable cleaners
 $result = $processor->toUtf8($data, 'ISO-8859-1', ['clean' => true]);
+```
+
+**Cleaner Execution Strategies:**
+
+```php
+use Ducks\Component\EncodingRepair\Cleaner\CleanerChain;
+use Ducks\Component\EncodingRepair\Cleaner\PipelineStrategy;
+use Ducks\Component\EncodingRepair\Cleaner\FirstMatchStrategy;
+use Ducks\Component\EncodingRepair\Cleaner\TaggedStrategy;
+
+// Pipeline (default): Apply all cleaners successively
+$chain = new CleanerChain(new PipelineStrategy());
+$chain->register(new BomCleaner());
+$chain->register(new HtmlEntityCleaner());
+// Both cleaners are applied
+
+// First Match: Stop at first success (performance)
+$chain = new CleanerChain(new FirstMatchStrategy());
+$chain->register(new MbScrubCleaner());
+$chain->register(new PregMatchCleaner());
+// Only MbScrubCleaner is executed
+
+// Tagged: Selective execution
+$chain = new CleanerChain(new TaggedStrategy(['bom', 'html']));
+$chain->register(new BomCleaner(), null, ['bom']);
+$chain->register(new HtmlEntityCleaner(), null, ['html']);
+$chain->register(new WhitespaceCleaner(), null, ['whitespace']); // Ignored
+// Only BOM and HTML cleaners are executed
 ```
 
 ### Registering Additional Built-in Cleaners
@@ -913,6 +943,10 @@ composer phpcsfixer-check
 - [`ArrayCache`]
 - [`CleanerInterface`]
 - [`CleanerChain`]
+- [`CleanerStrategyInterface`]
+- [`PipelineStrategy`]
+- [`FirstMatchStrategy`]
+- [`TaggedStrategy`]
 - [`MbScrubCleaner`]
 - [`PregMatchCleaner`]
 - [`IconvCleaner`]
@@ -1024,6 +1058,10 @@ Made with ❤️ by the Duck Project Team
 [`HtmlEntityCleaner`]: /assets/documentation/classes/HtmlEntityCleaner.md
 [`WhitespaceCleaner`]: /assets/documentation/classes/WhitespaceCleaner.md
 [`TransliterationCleaner`]: /assets/documentation/classes/TransliterationCleaner.md
+[`CleanerStrategyInterface`]: /assets/documentation/classes/CleanerStrategyInterface.md
+[`PipelineStrategy`]: /assets/documentation/classes/PipelineStrategy.md
+[`FirstMatchStrategy`]: /assets/documentation/classes/FirstMatchStrategy.md
+[`TaggedStrategy`]: /assets/documentation/classes/TaggedStrategy.md
 [How To]: /assets/documentation/HowTo.md
 [About Middleware Pattern]: /assets/documentation/AboutMiddleware.md
 [Type Interpreter System]: /assets/documentation/INTERPRETER_SYSTEM.md

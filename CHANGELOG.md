@@ -9,7 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Cleaner system** - Chain of Responsibility pattern for string cleaning before transcoding
+- **Cleaner strategy system** - Flexible execution strategies for string cleaning
+- [`CleanerStrategyInterface`] - Contract for cleaner execution strategies
+- [`PipelineStrategy`] - Middleware pattern applying all cleaners successively (default)
+- [`FirstMatchStrategy`] - Chain of Responsibility pattern stopping at first success
+- [`TaggedStrategy`] - Selective execution based on cleaner tags
+- [`CompositeCleaner`] - Groups multiple cleaners with a strategy (Decorator pattern)
+- Tag-based cleaner registration for fine-grained control
+- `setStrategy()` method in `CleanerChain` for dynamic strategy switching
+- **Cleaner system** - Configurable pattern for string cleaning before transcoding
 - [`CleanerInterface`] - Contract for string cleaning strategies
 - [`CleanerChain`] - Chain of Responsibility coordinator for cleaners
 - [`MbScrubCleaner`] - Cleaner using mb_scrub() to remove invalid sequences (priority: 100)
@@ -262,6 +270,11 @@ safeJsonEncode & safeJsonDecode should return a JsonException.
 [`Utf8FixerCleaner`]: /assets/documentation/classes/Utf8FixerCleaner.md
 [`WhitespaceCleaner`]: /assets/documentation/classes/WhitespaceCleaner.md
 [`TransliterationCleaner`]: /assets/documentation/classes/TransliterationCleaner.md
+[`CleanerStrategyInterface`]: /assets/documentation/classes/CleanerStrategyInterface.md
+[`PipelineStrategy`]: /assets/documentation/classes/PipelineStrategy.md
+[`FirstMatchStrategy`]: /assets/documentation/classes/FirstMatchStrategy.md
+[`TaggedStrategy`]: /assets/documentation/classes/TaggedStrategy.md
+[`CompositeCleaner`]: /assets/documentation/classes/CompositeCleaner.md
 [unreleased]: https://github.com/ducks-project/encoding-repair/compare/v1.1.0...HEAD
 [1.2.0]: https://github.com/ducks-project/encoding-repair/compare/v1.2.0...v1.1.0
 [1.1.2]: https://github.com/ducks-project/encoding-repair/compare/v1.1.2...v1.1.1
