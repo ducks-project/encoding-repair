@@ -19,6 +19,8 @@ use Psr\SimpleCache\CacheInterface;
  * Interface for objects supporting detection result caching.
  *
  * Provides fluent API for cache management.
+ *
+ * @psalm-api
  */
 interface DetectionCacheableInterface
 {
@@ -49,21 +51,24 @@ interface DetectionCacheableInterface
      * @param CacheInterface|null $cache PSR-16 cache (default: InternalArrayCache)
      * @param int $ttl Cache TTL in seconds
      *
-     * @return $this
+     * @return DetectionCacheableInterface&static
      */
-    public function enableCache(?CacheInterface $cache = null, int $ttl = self::DEFAULT_CACHE_TTL);
+    public function enableCache(
+        ?CacheInterface $cache = null,
+        int $ttl = self::DEFAULT_CACHE_TTL
+    ): DetectionCacheableInterface;
 
     /**
      * Disable caching.
      *
-     * @return $this
+     * @return DetectionCacheableInterface&static
      */
-    public function disableCache();
+    public function disableCache(): DetectionCacheableInterface;
 
     /**
      * Clear cache.
      *
-     * @return $this
+     * @return DetectionCacheableInterface&static
      */
-    public function clearCache();
+    public function clearCache(): DetectionCacheableInterface;
 }

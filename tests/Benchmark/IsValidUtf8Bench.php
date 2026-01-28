@@ -73,19 +73,19 @@ final class IsValidUtf8Bench
     public function benchPregMatchDetectorEqualAscii(): void
     {
         $result = $this->detector->detect($this->asciiString, null);
-        $result === CharsetProcessorInterface::ENCODING_ASCII || $result === CharsetProcessorInterface::ENCODING_UTF8;
+        CharsetProcessorInterface::ENCODING_ASCII === $result || CharsetProcessorInterface::ENCODING_UTF8 === $result;
     }
 
     public function benchPregMatchDetectorEqualUtf8(): void
     {
         $result = $this->detector->detect($this->utf8String, null);
-        $result === CharsetProcessorInterface::ENCODING_ASCII || $result === CharsetProcessorInterface::ENCODING_UTF8;
+        CharsetProcessorInterface::ENCODING_ASCII === $result || CharsetProcessorInterface::ENCODING_UTF8 === $result;
     }
 
     public function benchPregMatchDetectorEqualInvalid(): void
     {
         $result = $this->detector->detect($this->invalidUtf8, null);
-        $result === CharsetProcessorInterface::ENCODING_ASCII || $result === CharsetProcessorInterface::ENCODING_UTF8;
+        CharsetProcessorInterface::ENCODING_ASCII === $result || CharsetProcessorInterface::ENCODING_UTF8 === $result;
     }
 
     public function benchPregMatchDetectorInArrayAscii(): void
@@ -109,19 +109,19 @@ final class IsValidUtf8Bench
     public function benchCachedDetectorEqualAscii(): void
     {
         $result = $this->cachedDetector->detect($this->asciiString, null);
-        $result === CharsetProcessorInterface::ENCODING_ASCII || $result === CharsetProcessorInterface::ENCODING_UTF8;
+        CharsetProcessorInterface::ENCODING_ASCII === $result || CharsetProcessorInterface::ENCODING_UTF8 === $result;
     }
 
     public function benchCachedDetectorEqualUtf8(): void
     {
         $result = $this->cachedDetector->detect($this->utf8String, null);
-        $result === CharsetProcessorInterface::ENCODING_ASCII || $result === CharsetProcessorInterface::ENCODING_UTF8;
+        CharsetProcessorInterface::ENCODING_ASCII === $result || CharsetProcessorInterface::ENCODING_UTF8 === $result;
     }
 
     public function benchCachedDetectorEqualInvalid(): void
     {
         $result = $this->cachedDetector->detect($this->invalidUtf8, null);
-        $result === CharsetProcessorInterface::ENCODING_ASCII || $result === CharsetProcessorInterface::ENCODING_UTF8;
+        CharsetProcessorInterface::ENCODING_ASCII === $result || CharsetProcessorInterface::ENCODING_UTF8 === $result;
     }
 
     public function benchCachedDetectorInArrayAscii(): void

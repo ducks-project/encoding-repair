@@ -98,7 +98,7 @@ final class CachedDetector implements DetectorInterface, DetectionCacheableInter
     /**
      * Get cache statistics.
      *
-     * @return array{size: int, maxSize: int, class: class-string|class-string<\Psr\SimpleCache\CacheInterface>|false}
+     * @return array{size: int, maxSize: int, class: class-string|class-string<CacheInterface>|false}
      *
      * @psalm-api
      */

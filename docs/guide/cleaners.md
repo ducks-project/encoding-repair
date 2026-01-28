@@ -4,7 +4,8 @@ String cleaners remove invalid byte sequences from data before encoding conversi
 
 ## Overview
 
-Cleaners are executed in priority order and stop at the first successful result. They are disabled by default but can be enabled with the `clean` option.
+Cleaners are executed in priority order and stop at the first successful result.
+They are disabled by default but can be enabled with the `clean` option.
 
 ## Built-in Cleaners
 
@@ -13,6 +14,7 @@ Cleaners are executed in priority order and stop at the first successful result.
 Removes BOM (Byte Order Mark) from strings.
 
 **Performance:**
+
 - With BOM: ~0.7μs
 - Without BOM: ~0.6μs (fast-path)
 - Stability: ±0.5%
@@ -32,6 +34,7 @@ $cleaned = $cleaner->clean("\xEF\xBB\xBFCafé", 'UTF-8', []);
 Uses PHP's `mb_scrub()` function for best cleaning quality.
 
 **Performance:**
+
 - Corrupted data: ~1.02μs
 - Valid data: ~1.05μs
 - Stability: ±0.92%
@@ -50,6 +53,7 @@ $cleaned = $cleaner->clean("Caf\xC3\xA9 \xC2\x88", 'UTF-8', []);
 Uses `preg_replace()` to remove control characters. Fastest cleaner but UTF-8 only.
 
 **Performance:**
+
 - Corrupted data: ~0.896μs (fastest)
 - Valid data: ~0.866μs (fastest)
 - Stability: ±0.74% (most stable)
@@ -68,6 +72,7 @@ $cleaned = $cleaner->clean("Text\x00\x1F", 'UTF-8', []);
 Normalizes Unicode characters using NFC (Canonical Composition).
 
 **Performance:**
+
 - Decomposed: ~1.1μs
 - Already normalized: ~1.0μs
 - Stability: ±1.2%
@@ -88,6 +93,7 @@ $cleaned = $cleaner->clean("Cafe\u{0301}", 'UTF-8', []);
 Decodes HTML entities to their character equivalents.
 
 **Performance:**
+
 - With entities: ~1.2μs
 - Without entities: ~0.8μs (fast-path)
 - Stability: ±1.5%
@@ -105,6 +111,7 @@ $cleaned = $cleaner->clean('Caf&eacute; &amp; R&eacute;sum&eacute;', 'UTF-8', []
 Uses `iconv()` with `//IGNORE` flag. Universal fallback for any encoding.
 
 **Performance:**
+
 - Corrupted data: ~1.589μs (slowest)
 - Valid data: ~1.634μs (slowest)
 - Stability: ±2.09%
@@ -225,7 +232,7 @@ $cleaned = $chain->clean($corruptedString, 'UTF-8', []);
 ## Performance Comparison
 
 | Cleaner | Corrupted Data | Valid Data | Stability |
-|---------|----------------|------------|-----------|
+| --------- | ---------------- | ------------ | ----------- |
 | **BomCleaner** | 0.7μs | 0.6μs | ±0.5% |
 | **PregMatchCleaner** | 0.896μs | 0.866μs | ±0.74% |
 | MbScrubCleaner | 1.020μs | 1.051μs | ±0.92% |
@@ -234,7 +241,8 @@ $cleaned = $chain->clean($corruptedString, 'UTF-8', []);
 | IconvCleaner | 1.589μs | 1.634μs | ±2.09% |
 | CleanerChain | 1.709μs | 1.906μs | ±2.50% |
 
-**Recommendation:** Default configuration (Bom → MbScrub → Normalizer → HtmlEntity → PregMatch → Iconv) prioritizes quality and versatility.
+**Recommendation:** Default configuration (Bom → MbScrub → Normalizer → HtmlEntity → PregMatch → Iconv)
+prioritizes quality and versatility.
 
 ## API Reference
 

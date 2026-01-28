@@ -572,14 +572,22 @@ final class CharsetHelperTest extends TestCase
 
     public function testIsReturnsFalseForNonMatchingEncoding(): void
     {
+        /** @var string|false */
         $iso = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+        if (false === $iso) {
+            $this->fail(__FUNCTION__ . ' convertion failed!');
+        }
 
         $this->assertFalse(CharsetHelper::is($iso, 'UTF-8'));
     }
 
     public function testIsHandlesEncodingAliases(): void
     {
+        /** @var string|false */
         $iso = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+        if (false === $iso) {
+            $this->fail(__FUNCTION__ . ' convertion failed!');
+        }
 
         $this->assertTrue(CharsetHelper::is($iso, 'CP1252'));
         $this->assertTrue(CharsetHelper::is($iso, 'ISO-8859-1'));

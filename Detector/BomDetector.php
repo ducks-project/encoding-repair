@@ -47,7 +47,8 @@ final class BomDetector implements DetectorInterface
         }
 
         // UTF-32 LE BOM: FF FE 00 00 (must check before UTF-16 LE)
-        if ($length >= 4
+        if (
+            $length >= 4
             && "\xFF" === $string[0]
             && "\xFE" === $string[1]
             && "\x00" === $string[2]
@@ -57,7 +58,8 @@ final class BomDetector implements DetectorInterface
         }
 
         // UTF-32 BE BOM: 00 00 FE FF
-        if ($length >= 4
+        if (
+            $length >= 4
             && "\x00" === $string[0]
             && "\x00" === $string[1]
             && "\xFE" === $string[2]
@@ -67,7 +69,8 @@ final class BomDetector implements DetectorInterface
         }
 
         // UTF-8 BOM: EF BB BF
-        if ($length >= 3
+        if (
+            $length >= 3
             && "\xEF" === $string[0]
             && "\xBB" === $string[1]
             && "\xBF" === $string[2]

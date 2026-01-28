@@ -79,7 +79,12 @@ final class PregMatchDetectorTest extends TestCase
 
     public function testDetectIso88591ReturnsNull(): void
     {
+        /** @var string|false $iso */
         $iso = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+        if (false === $iso) {
+            $this->fail(__FUNCTION__ . ' convertion failed!');
+        }
+
         $result = $this->detector->detect($iso, []);
 
         $this->assertNull($result);

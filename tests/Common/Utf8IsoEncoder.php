@@ -20,6 +20,7 @@ namespace Ducks\Component\EncodingRepair\Tests\Common;
  * Used in test fixtures to generate test data.
  *
  * @internal Test utility class
+ *
  * @psalm-immutable
  */
 final class Utf8IsoEncoder

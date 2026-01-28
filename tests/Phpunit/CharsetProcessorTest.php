@@ -584,7 +584,12 @@ final class CharsetProcessorTest extends TestCase
     public function testIsReturnsFalseForNonMatchingEncoding(): void
     {
         $processor = new CharsetProcessor();
+
+        /** @var string|false $iso */
         $iso = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+        if (false === $iso) {
+            $this->fail(__FUNCTION__ . ' convertion failed!');
+        }
 
         $this->assertFalse($processor->is($iso, 'UTF-8'));
     }
@@ -592,7 +597,12 @@ final class CharsetProcessorTest extends TestCase
     public function testIsHandlesEncodingAliases(): void
     {
         $processor = new CharsetProcessor();
+
+        /** @var string|false $iso */
         $iso = \mb_convert_encoding('Café', 'ISO-8859-1', 'UTF-8');
+        if (false === $iso) {
+            $this->fail(__FUNCTION__ . ' convertion failed!');
+        }
 
         $this->assertTrue($processor->is($iso, 'CP1252'));
         $this->assertTrue($processor->is($iso, 'ISO-8859-1'));

@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Ducks\Component\EncodingRepair\Tests\Benchmark;
 
-use PhpBench\Attributes\BeforeMethods;
 use PhpBench\Attributes\Iterations;
 use PhpBench\Attributes\Revs;
 

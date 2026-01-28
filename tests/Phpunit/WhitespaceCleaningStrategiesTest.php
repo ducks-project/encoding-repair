@@ -93,7 +93,12 @@ final class WhitespaceCleaningStrategiesTest extends TestCase
      */
     public function testSplitJoin(string $input, string $expected): void
     {
-        $result = \implode(' ', \preg_split('/\s+/', $input, -1, \PREG_SPLIT_NO_EMPTY));
+        $split = \preg_split('/\s+/', $input, -1, \PREG_SPLIT_NO_EMPTY);
+        if (false === $split) {
+            $this->fail('split failed');
+        }
+
+        $result = \implode(' ', $split);
         $this->assertIsString($result);
     }
 
