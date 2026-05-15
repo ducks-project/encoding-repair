@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## <a name="v121"></a>[1.2.1] - 2026-05-15
+
+### Fixed
+
+- Wrong double encoding when repairing string.
+
 ## <a name="v120"></a>[1.2.0] - 2026-01-23
 
 ### Added
@@ -204,6 +210,7 @@ safeJsonEncode & safeJsonDecode should return a JsonException.
 [`PrioritizedHandlerInterface`]: /assets/documentation/classes/PrioritizedHandlerInterface.md
 [`PropertyMapperInterface`]: /assets/documentation/classes/PropertyMapperInterface.md
 [unreleased]: https://github.com/ducks-project/encoding-repair/compare/v1.1.0...HEAD
+[1.2.1]: https://github.com/ducks-project/encoding-repair/compare/v1.2.1...v1.2.0
 [1.2.0]: https://github.com/ducks-project/encoding-repair/compare/v1.2.0...v1.1.0
 [1.1.2]: https://github.com/ducks-project/encoding-repair/compare/v1.1.2...v1.1.1
 [1.1.1]: https://github.com/ducks-project/encoding-repair/compare/v1.1.1...v1.1.0
