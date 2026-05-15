@@ -70,6 +70,12 @@ safeJsonEncode & safeJsonDecode should return a JsonException.
 - UTF-8 validation: ~34% faster (0.781μs vs 1.182μs)
 - Performance improvement: Detection ~5-10% faster, Repair ~8-12% faster, Conversion with AUTO ~3-5% faster
 
+## <a name="v113"></a>[1.1.3] - 2026-05-15
+
+### Fixed
+
+- Wrong double encoding when repairing string.
+
 ## <a name="v112"></a>[1.1.2] - 2026-01-23
 
 ### Fixed
@@ -116,6 +122,12 @@ safeJsonEncode & safeJsonDecode should return a JsonException.
 - All business logic moved from [`CharsetHelper`] to `CharsetProcessor`] service
 - [`CharsetHelper`] now uses lazy initialization for the processor instance
 - 100% backward compatible
+
+## <a name="v103"></a>[1.0.3] - 2026-05-15
+
+### Fixed
+
+- Wrong double encoding when repairing string.
 
 ## <a name="v102"></a>[1.0.2] - 2026-01-23
 
@@ -212,9 +224,11 @@ safeJsonEncode & safeJsonDecode should return a JsonException.
 [unreleased]: https://github.com/ducks-project/encoding-repair/compare/v1.1.0...HEAD
 [1.2.1]: https://github.com/ducks-project/encoding-repair/compare/v1.2.1...v1.2.0
 [1.2.0]: https://github.com/ducks-project/encoding-repair/compare/v1.2.0...v1.1.0
+[1.1.3]: https://github.com/ducks-project/encoding-repair/compare/v1.1.3...v1.1.2
 [1.1.2]: https://github.com/ducks-project/encoding-repair/compare/v1.1.2...v1.1.1
 [1.1.1]: https://github.com/ducks-project/encoding-repair/compare/v1.1.1...v1.1.0
 [1.1.0]: https://github.com/ducks-project/encoding-repair/compare/v1.1.0...v1.0.0
+[1.0.3]: https://github.com/ducks-project/encoding-repair/compare/v1.0.3...v1.0.2
 [1.0.2]: https://github.com/ducks-project/encoding-repair/compare/v1.0.2...v1.0.1
 [1.0.1]: https://github.com/ducks-project/encoding-repair/compare/v1.0.1...v1.0.0
 [1.0.0]: https://github.com/ducks-project/encoding-repair/compare/v1.0.0...v0.1.0
