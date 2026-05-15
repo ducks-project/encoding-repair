@@ -467,6 +467,11 @@ final class CharsetProcessor implements CharsetProcessorInterface
             $maxDepth = self::MAX_REPAIR_DEPTH;
         }
 
+        if (self::ENCODING_UTF8 !== $from && !$this->isValidUtf8($value)) {
+            /** @var string $value */
+            $value = $this->toCharset($value, self::ENCODING_UTF8, $from, $options);
+        }
+
         $fixed = $this->peelEncodingLayers($value, $from, $maxDepth);
         $detectedEncoding = $this->isValidUtf8($fixed) ? self::ENCODING_UTF8 : $from;
 
