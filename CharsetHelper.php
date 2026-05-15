@@ -579,6 +579,11 @@ final class CharsetHelper
             $maxDepth = self::MAX_REPAIR_DEPTH;
         }
 
+        if (self::ENCODING_UTF8 !== $from && self::isValidUtf8($value)) {
+            /** @var string $value */
+            $value = self::toCharset($value, self::ENCODING_UTF8, $from, $options);
+        }
+
         $fixed = self::peelEncodingLayers($value, $from, $maxDepth);
         $detectedEncoding = self::isValidUtf8($fixed) ? self::ENCODING_UTF8 : $from;
 

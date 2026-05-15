@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## <a name="v103"></a>[1.0.3] - 2026-05-15
+
+### Fixed
+
+- Wrong double encoding when repairing string.
+
 ## <a name="v102"></a>[1.0.2] - 2026-01-23
 
 ### Fixed
@@ -88,6 +94,7 @@ safeJsonEncode & safeJsonDecode should return a JsonException.
 [`CallableDetector`]: /assets/documentation/classes/CallableDetector.md
 [`DetectorChain`]: /assets/documentation/classes/DetectorChain.md
 [unreleased]: https://github.com/ducks-project/encoding-repair/compare/v1.0.2...HEAD
+[1.0.3]: https://github.com/ducks-project/encoding-repair/compare/v1.0.3...v1.0.2
 [1.0.2]: https://github.com/ducks-project/encoding-repair/compare/v1.0.2...v1.0.1
 [1.0.1]: https://github.com/ducks-project/encoding-repair/compare/v1.0.1...v1.0.0
 [1.0.0]: https://github.com/ducks-project/encoding-repair/compare/v1.0.0...v0.1.0
